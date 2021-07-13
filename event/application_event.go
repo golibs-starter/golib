@@ -14,7 +14,7 @@ type ApplicationEvent struct {
 	Event          string                 `json:"event"`
 	Source         string                 `json:"source"`
 	ServiceCode    string                 `json:"service_code"`
-	Payload        interface{}            `json:"payload"`
+	EventPayload   interface{}            `json:"payload"`
 	AdditionalData map[string]interface{} `json:"additional_data"`
 	Timestamp      int64                  `json:"timestamp"`
 }
@@ -27,12 +27,12 @@ func NewApplicationEvent(serviceCode string, eventName string, payload interface
 		id = genId.String()
 	}
 	return ApplicationEvent{
-		Id:          id,
-		Event:       eventName,
-		Source:      DefaultEventSource,
-		ServiceCode: serviceCode,
-		Payload:     payload,
-		Timestamp:   time.Now().UnixNano() / int64(time.Millisecond),
+		Id:           id,
+		Event:        eventName,
+		Source:       DefaultEventSource,
+		ServiceCode:  serviceCode,
+		EventPayload: payload,
+		Timestamp:    time.Now().UnixNano() / int64(time.Millisecond),
 	}
 }
 

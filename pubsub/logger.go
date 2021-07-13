@@ -1,5 +1,3 @@
 package pubsub
 
-type Logger interface {
-	Debugf(msgFormat string, args ...interface{})
-}
+type DebugLog func(msgFormat string, args ...interface{})

@@ -1,18 +1,27 @@
 package pubsub
 
+import (
+	"fmt"
+)
+
 type EventProducer interface {
 	ProduceEvent() chan Event
 }
 
 type EventBus struct {
-	logger        Logger
+	debugLog      DebugLog
 	producer      EventProducer
 	eventMappings map[string][]Subscriber
 }
 
-func NewEventBus(eventProducer EventProducer, logger Logger) *EventBus {
+func NewEventBus(eventProducer EventProducer, debugLog DebugLog) *EventBus {
+	if debugLog == nil {
+		debugLog = func(msgFormat string, args ...interface{}) {
+			_, _ = fmt.Printf(msgFormat+"\n", args...)
+		}
+	}
 	return &EventBus{
-		logger:        logger,
+		debugLog:      debugLog,
 		producer:      eventProducer,
 		eventMappings: make(map[string][]Subscriber),
 	}
@@ -28,8 +37,8 @@ func (b *EventBus) Subscribe(event Event, subscriber ...Subscriber) {
 func (b *EventBus) Run() {
 	for {
 		event := <-b.producer.ProduceEvent()
-		if b.logger != nil {
-			b.logger.Debugf("Event [%s] was fired with payload [%s]", event.Name(), event.String())
+		if b.debugLog != nil {
+			b.debugLog("Event [%s] was fired with payload [%s]", event.Name(), event.String())
 		}
 		for _, subscriber := range b.eventMappings[event.Name()] {
 			go subscriber.Handler(event)

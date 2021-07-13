@@ -7,35 +7,52 @@ import (
 	"strings"
 )
 
-type Loader struct {
-	option   Option
-	debugLog func(msgFormat string, args ...interface{})
+type Loader interface {
+	Bind(properties ...Properties)
 }
 
-func NewLoader(option Option, debugLog func(msgFormat string, args ...interface{})) *Loader {
+type ViperLoader struct {
+	option   Option
+	debugLog func(msgFormat string, args ...interface{})
+	viper    *viper.Viper
+}
+
+func NewLoader(option Option, debugLog func(msgFormat string, args ...interface{})) *ViperLoader {
 	setDefaultOption(&option)
 	if debugLog == nil {
 		debugLog = func(msgFormat string, args ...interface{}) {
 			_, _ = fmt.Printf(msgFormat+"\n", args...)
 		}
 	}
-	return &Loader{
+	return &ViperLoader{
 		option:   option,
 		debugLog: debugLog,
+		viper:    loadViper(option, debugLog),
 	}
 }
 
-func (l Loader) Load(bindingProperties []Properties) {
-	debugActiveProfiles := strings.Join(l.option.activeProfiles, ", ")
-	debugPaths := strings.Join(l.option.configPaths, ", ")
-	l.debugLog("[GoLib-debug] Loading active profiles [%s] in paths [%s] with format [%s]",
-		debugActiveProfiles, debugPaths, l.option.configFormat)
+func (l *ViperLoader) Bind(propertiesList ...Properties) {
+	for _, properties := range propertiesList {
+		propertiesName := reflect.TypeOf(properties).String()
+		if err := l.viper.UnmarshalKey(properties.Prefix(), properties); err != nil {
+			panic(fmt.Sprintf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
+				properties.Prefix(), propertiesName, err))
+		}
+		l.debugLog("[GoLib-debug] Properties [%s] loaded with prefix [%s]", propertiesName, properties.Prefix())
+	}
+}
+
+func loadViper(option Option, debugLog func(msgFormat string, args ...interface{})) *viper.Viper {
+	debugActiveProfiles := strings.Join(option.activeProfiles, ", ")
+	debugPaths := strings.Join(option.configPaths, ", ")
+	debugLog("[GoLib-debug] Loading active profiles [%s] in paths [%s] with format [%s]",
+		debugActiveProfiles, debugPaths, option.configFormat)
 
 	vi := viper.New()
-	for _, activeProfile := range l.option.activeProfiles {
+	for _, activeProfile := range option.activeProfiles {
 		vi.SetConfigName(activeProfile)
-		vi.SetConfigType(l.option.configFormat)
-		for _, path := range l.option.configPaths {
+		vi.SetConfigType(option.configFormat)
+		for _, path := range option.configPaths {
 			vi.AddConfigPath(path)
 		}
 		if err := vi.MergeInConfig(); err != nil {
@@ -43,22 +60,11 @@ func (l Loader) Load(bindingProperties []Properties) {
 				panic(fmt.Sprintf("[GoLib-error] Fatal error when read active profile [%s] in paths [%s]: %v",
 					activeProfile, debugPaths, err))
 			}
-			l.debugLog("[GoLib-debug] Config file not found when read active profile [%s] in paths [%s]",
+			debugLog("[GoLib-debug] Config file not found when read active profile [%s] in paths [%s]",
 				activeProfile, debugPaths)
 			continue
 		}
-		l.debugLog("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
+		debugLog("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
 	}
-	l.bindProperties(vi, bindingProperties)
-}
-
-func (l *Loader) bindProperties(vi *viper.Viper, bindingProperties []Properties) {
-	for _, properties := range bindingProperties {
-		propertiesName := reflect.TypeOf(properties).String()
-		if err := vi.UnmarshalKey(properties.Prefix(), properties); err != nil {
-			panic(fmt.Sprintf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
-				properties.Prefix(), propertiesName, err))
-		}
-		l.debugLog("[GoLib-debug] Properties [%s] loaded with prefix [%s]", propertiesName, properties.Prefix())
-	}
+	return vi
 }

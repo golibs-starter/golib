@@ -6,12 +6,21 @@ import (
 	"gitlab.id.vin/vincart/golib/web/listener"
 )
 
-func InitEventBus(eventMapping map[pubsub.Event][]pubsub.Subscriber, logger pubsub.Logger) {
-	publisher := pubsub.NewPublisher()
-	pubsub.RegisterGlobal(publisher)
-	bus := pubsub.NewEventBus(publisher, logger)
-	subscribeEvents(bus, eventMapping)
-	go bus.Run()
+func WithEventBus(eventMapping map[pubsub.Event][]pubsub.Subscriber) Module {
+	return func(app *App) {
+		var debugLog pubsub.DebugLog
+		if app.Logger != nil {
+			debugLog = app.Logger.Debugf
+		}
+
+		publisher := pubsub.NewPublisher()
+		pubsub.RegisterGlobal(publisher)
+		app.Publisher = publisher
+
+		bus := pubsub.NewEventBus(publisher, debugLog)
+		subscribeEvents(bus, eventMapping)
+		go bus.Run()
+	}
 }
 
 func subscribeEvents(bus *pubsub.EventBus, eventMapping map[pubsub.Event][]pubsub.Subscriber) {

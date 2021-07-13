@@ -2,11 +2,11 @@ package client
 
 import "time"
 
-type HttpClientConfig struct {
+type HttpClientProperties struct {
 	ConnectionRequestTimeout time.Duration `mapstructure:"connection_request_timeout"`
 	ConnectTimeout           time.Duration `mapstructure:"connect_timeout"`
 }
 
-func (h HttpClientConfig) Prefix() string {
+func (h HttpClientProperties) Prefix() string {
 	return "vinid.httpclient"
 }

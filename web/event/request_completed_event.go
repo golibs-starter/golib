@@ -39,5 +39,5 @@ func (r RequestCompletedEvent) Name() string {
 }
 
 func (r RequestCompletedEvent) Payload() interface{} {
-	return r.Payload
+	return r.EventPayload
 }
