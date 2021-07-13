@@ -2,11 +2,11 @@ package context
 
 import (
 	"context"
-	"gitlab.id.vin/vincart/golib/web/constants"
+	"gitlab.id.vin/vincart/golib/web/constant"
 )
 
 func GetRequestAttributes(ctx context.Context) *RequestAttributes {
-	reqAttrCtxValue := ctx.Value(constants.ContextReqAttribute)
+	reqAttrCtxValue := ctx.Value(constant.ContextReqAttribute)
 	if reqAttrCtxValue == nil {
 		return nil
 	}

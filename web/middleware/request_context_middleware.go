@@ -4,10 +4,10 @@ import (
 	mainContext "context"
 	"errors"
 	"gitlab.id.vin/vincart/golib/pubsub"
-	"gitlab.id.vin/vincart/golib/web/constants"
+	"gitlab.id.vin/vincart/golib/web/constant"
 	"gitlab.id.vin/vincart/golib/web/context"
 	"gitlab.id.vin/vincart/golib/web/event"
-	"gitlab.id.vin/vincart/golib/web/logging/logc"
+	"gitlab.id.vin/vincart/golib/web/log"
 	"net/http"
 	"time"
 )
@@ -19,7 +19,7 @@ func RequestContext() func(next http.Handler) http.Handler {
 			requestAttributes := getOrCreateRequestAttributes(r)
 			next.ServeHTTP(w, r)
 			if advancedResponseWriter, err := getAdvancedResponseWriter(w); err != nil {
-				logc.Warn(r.Context(), "Cannot detect AdvancedResponseWriter with error [%s]", err.Error())
+				log.Warn(r.Context(), "Cannot detect AdvancedResponseWriter with error [%s]", err.Error())
 			} else {
 				requestAttributes.StatusCode = advancedResponseWriter.Status()
 			}
@@ -43,13 +43,13 @@ func getAdvancedResponseWriter(w http.ResponseWriter) (*context.AdvancedResponse
 }
 
 func getOrCreateRequestAttributes(r *http.Request) *context.RequestAttributes {
-	reqAttrCtxValue := r.Context().Value(constants.ContextReqAttribute)
+	reqAttrCtxValue := r.Context().Value(constant.ContextReqAttribute)
 	if reqAttrCtxValue == nil {
 		return createNewRequestAttributes(r)
 	}
 	requestAttributes, ok := reqAttrCtxValue.(*context.RequestAttributes)
 	if !ok {
-		logc.Error(r.Context(), "Request attributes is not *RequestAttributes type")
+		log.Error(r.Context(), "Request attributes is not *RequestAttributes type")
 		return createNewRequestAttributes(r)
 	}
 	return requestAttributes
@@ -57,7 +57,7 @@ func getOrCreateRequestAttributes(r *http.Request) *context.RequestAttributes {
 
 func createNewRequestAttributes(r *http.Request) *context.RequestAttributes {
 	requestAttributes := makeRequestAttributes(r)
-	*r = *r.WithContext(mainContext.WithValue(r.Context(), constants.ContextReqAttribute, requestAttributes))
+	*r = *r.WithContext(mainContext.WithValue(r.Context(), constant.ContextReqAttribute, requestAttributes))
 	return requestAttributes
 }
 
@@ -67,31 +67,31 @@ func makeRequestAttributes(r *http.Request) *context.RequestAttributes {
 		Uri:                r.RequestURI,
 		Query:              r.URL.RawQuery,
 		Url:                r.URL.String(),
-		UserAgent:          r.Header.Get(constants.HeaderUserAgent),
+		UserAgent:          r.Header.Get(constant.HeaderUserAgent),
 		ClientIpAddress:    getClientIpAddress(r),
-		DeviceId:           r.Header.Get(constants.HeaderDeviceId),
-		DeviceSessionId:    r.Header.Get(constants.HeaderDeviceSessionId),
+		DeviceId:           r.Header.Get(constant.HeaderDeviceId),
+		DeviceSessionId:    r.Header.Get(constant.HeaderDeviceSessionId),
 		CallerId:           getServiceClientName(r),
 		SecurityAttributes: context.SecurityAttributes{},
 	}
 }
 
 func getClientIpAddress(r *http.Request) string {
-	if clientIpAddress := r.Header.Get(constants.HeaderClientIpAddress); len(clientIpAddress) > 0 {
+	if clientIpAddress := r.Header.Get(constant.HeaderClientIpAddress); len(clientIpAddress) > 0 {
 		return clientIpAddress
 	}
-	if clientIpAddress := r.Header.Get(constants.HeaderOldClientIpAddress); len(clientIpAddress) > 0 {
+	if clientIpAddress := r.Header.Get(constant.HeaderOldClientIpAddress); len(clientIpAddress) > 0 {
 		return clientIpAddress
 	}
 	return r.RemoteAddr
 }
 
 func getServiceClientName(r *http.Request) string {
-	serviceName := r.Header.Get(constants.HeaderServiceClientName)
+	serviceName := r.Header.Get(constant.HeaderServiceClientName)
 	if len(serviceName) > 0 {
 		return serviceName
 	}
-	return r.Header.Get(constants.HeaderOldServiceClientName)
+	return r.Header.Get(constant.HeaderOldServiceClientName)
 }
 
 func publishEvent(ctx mainContext.Context, requestAttributes *context.RequestAttributes) {

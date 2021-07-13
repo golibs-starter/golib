@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"gitlab.id.vin/vincart/golib/event"
-	"gitlab.id.vin/vincart/golib/web/constants"
+	"gitlab.id.vin/vincart/golib/web/constant"
 	webContext "gitlab.id.vin/vincart/golib/web/context"
 )
 
@@ -26,11 +26,11 @@ func NewAbstractEvent(ctx context.Context, eventName string, payload interface{}
 	absEvent.RequestId = requestAttributes.CorrelationId
 	absEvent.UserId = requestAttributes.SecurityAttributes.UserId
 	absEvent.AdditionalData = map[string]interface{}{
-		constants.HeaderDeviceId:           requestAttributes.DeviceId,
-		constants.HeaderOldDeviceId:        requestAttributes.DeviceId,
-		constants.HeaderDeviceSessionId:    requestAttributes.DeviceSessionId,
-		constants.HeaderOldDeviceSessionId: requestAttributes.DeviceSessionId,
-		constants.HeaderClientIpAddress:    requestAttributes.ClientIpAddress,
+		constant.HeaderDeviceId:           requestAttributes.DeviceId,
+		constant.HeaderOldDeviceId:        requestAttributes.DeviceId,
+		constant.HeaderDeviceSessionId:    requestAttributes.DeviceSessionId,
+		constant.HeaderOldDeviceSessionId: requestAttributes.DeviceSessionId,
+		constant.HeaderClientIpAddress:    requestAttributes.ClientIpAddress,
 	}
 	return absEvent
 }

@@ -1,9 +1,9 @@
-package logging
+package log
 
 import "time"
 
 type HttpRequestLog struct {
-	LogContext
+	LoggingContext
 	Status         int           `json:"status"`
 	ExecutionTime  time.Duration `json:"execution_time"`
 	RequestPattern string        `json:"request_pattern"`
