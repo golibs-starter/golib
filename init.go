@@ -11,14 +11,18 @@ type Options struct {
 }
 
 type App struct {
-	Middleware []func(next http.Handler) http.Handler
+	middleware []func(next http.Handler) http.Handler
+}
+
+func (a App) Middleware() []func(next http.Handler) http.Handler {
+	return a.middleware
 }
 
 func Init(options Options) *App {
 	logger := InitLogger()
 	InitEventBus(options.EventMapping, logger)
 	return &App{
-		Middleware: defaultMiddleware(),
+		middleware: defaultMiddleware(),
 	}
 }
 

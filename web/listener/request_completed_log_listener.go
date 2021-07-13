@@ -12,10 +12,10 @@ type RequestCompletedLogListener struct {
 }
 
 func (r RequestCompletedLogListener) Handler(e pubsub.Event) {
-	if e.GetName() != (event.RequestCompletedEvent{}).GetName() {
+	if e.Name() != (event.RequestCompletedEvent{}).Name() {
 		return
 	}
-	payload, ok := e.GetPayload().(event.RequestCompletedPayload)
+	payload, ok := e.Payload().(event.RequestCompletedPayload)
 	if !ok {
 		return
 	}

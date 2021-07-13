@@ -2,11 +2,11 @@ package pubsub
 
 type Event interface {
 
-	// GetName returns event name of current event
-	GetName() string
+	// Name returns event name of current event
+	Name() string
 
-	// GetPayload returns event payload of current event
-	GetPayload() interface{}
+	// Payload returns event payload of current event
+	Payload() interface{}
 
 	// String convert event data to string
 	String() string

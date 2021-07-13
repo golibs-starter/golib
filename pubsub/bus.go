@@ -19,19 +19,19 @@ func NewEventBus(eventProducer EventProducer, logger Logger) *EventBus {
 }
 
 func (b *EventBus) Subscribe(event Event, subscriber ...Subscriber) {
-	if _, exist := b.eventMappings[event.GetName()]; exist == false {
-		b.eventMappings[event.GetName()] = make([]Subscriber, 0)
+	if _, exist := b.eventMappings[event.Name()]; exist == false {
+		b.eventMappings[event.Name()] = make([]Subscriber, 0)
 	}
-	b.eventMappings[event.GetName()] = append(b.eventMappings[event.GetName()], subscriber...)
+	b.eventMappings[event.Name()] = append(b.eventMappings[event.Name()], subscriber...)
 }
 
 func (b *EventBus) Run() {
 	for {
 		event := <-b.producer.ProduceEvent()
 		if b.logger != nil {
-			b.logger.Debugf("Event [%s] was fired with payload [%s]", event.GetName(), event.String())
+			b.logger.Debugf("Event [%s] was fired with payload [%s]", event.Name(), event.String())
 		}
-		for _, subscriber := range b.eventMappings[event.GetName()] {
+		for _, subscriber := range b.eventMappings[event.Name()] {
 			go subscriber.Handler(event)
 		}
 	}

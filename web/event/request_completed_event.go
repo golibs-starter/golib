@@ -30,14 +30,14 @@ type RequestCompletedPayload struct {
 
 func NewRequestCompletedEvent(ctx context.Context, payload RequestCompletedPayload) *RequestCompletedEvent {
 	event := RequestCompletedEvent{}
-	event.AbstractEvent = NewAbstractEvent(ctx, event.GetName(), payload)
+	event.AbstractEvent = NewAbstractEvent(ctx, event.Name(), payload)
 	return &event
 }
 
-func (r RequestCompletedEvent) GetName() string {
+func (r RequestCompletedEvent) Name() string {
 	return "RequestCompletedEvent"
 }
 
-func (r RequestCompletedEvent) GetPayload() interface{} {
+func (r RequestCompletedEvent) Payload() interface{} {
 	return r.Payload
 }
