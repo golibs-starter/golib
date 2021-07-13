@@ -1,7 +1,9 @@
 package golib
 
 import (
+	"gitlab.id.vin/vincart/golib/config"
 	"gitlab.id.vin/vincart/golib/pubsub"
+	"gitlab.id.vin/vincart/golib/web/client"
 	"gitlab.id.vin/vincart/golib/web/middleware"
 	"net/http"
 )
@@ -19,6 +21,9 @@ func (a App) Middleware() []func(next http.Handler) http.Handler {
 }
 
 func Init(options Options) *App {
+	httpClientProperties := new(client.HttpClientConfig)
+	InitConfig(config.Option{}, []config.Properties{httpClientProperties})
+
 	logger := InitLogger()
 	InitEventBus(options.EventMapping, logger)
 	return &App{
