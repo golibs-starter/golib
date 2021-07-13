@@ -39,16 +39,15 @@ func (l Loader) Load(bindingProperties []Properties) {
 			vi.AddConfigPath(path)
 		}
 		if err := vi.MergeInConfig(); err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-				l.debugLog("[GoLib-debug] Config file not found when read active profile [%s] in paths [%s]",
-					activeProfile, debugPaths)
-			} else {
+			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 				panic(fmt.Sprintf("[GoLib-error] Fatal error when read active profile [%s] in paths [%s]: %v",
 					activeProfile, debugPaths, err))
 			}
-		} else {
-			l.debugLog("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
+			l.debugLog("[GoLib-debug] Config file not found when read active profile [%s] in paths [%s]",
+				activeProfile, debugPaths)
+			continue
 		}
+		l.debugLog("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
 	}
 	l.bindProperties(vi, bindingProperties)
 }
@@ -59,9 +58,7 @@ func (l *Loader) bindProperties(vi *viper.Viper, bindingProperties []Properties)
 		if err := vi.UnmarshalKey(properties.Prefix(), properties); err != nil {
 			panic(fmt.Sprintf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
 				properties.Prefix(), propertiesName, err))
-		} else {
-			l.debugLog("[GoLib-debug] Properties [%s] loaded with prefix [%s]",
-				propertiesName, properties.Prefix())
 		}
+		l.debugLog("[GoLib-debug] Properties [%s] loaded with prefix [%s]", propertiesName, properties.Prefix())
 	}
 }
