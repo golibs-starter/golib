@@ -25,15 +25,10 @@ func Fatal(ctx context.Context, msgFormat string, args ...interface{}) {
 }
 
 func keysAndValuesFromContext(ctx context.Context) []interface{} {
-	reqAttrCtxValue := ctx.Value(constants.ContextReqAttribute)
-	if reqAttrCtxValue == nil {
-		return []interface{}{}
+	if requestAttributes := webContext.GetRequestAttributes(ctx); requestAttributes != nil {
+		return []interface{}{constants.ContextReqMeta, buildLogContext(requestAttributes)}
 	}
-	requestAttributes, ok := reqAttrCtxValue.(*webContext.RequestAttributes)
-	if !ok {
-		return []interface{}{}
-	}
-	return []interface{}{constants.ContextReqMeta, buildLogContext(requestAttributes)}
+	return nil
 }
 
 func buildLogContext(requestAttributes *webContext.RequestAttributes) *logging.LogContext {

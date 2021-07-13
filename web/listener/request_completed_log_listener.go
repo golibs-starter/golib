@@ -1,4 +1,4 @@
-package listeners
+package listener
 
 import (
 	"gitlab.id.vin/vincart/golib/log"
@@ -15,14 +15,14 @@ func (r RequestCompletedLogListener) Handler(e pubsub.Event) {
 	if e.GetName() != (event.RequestCompletedEvent{}).GetName() {
 		return
 	}
-	message, ok := e.GetMessage().(event.RequestCompletedMessage)
+	payload, ok := e.GetPayload().(event.RequestCompletedPayload)
 	if !ok {
 		return
 	}
-	log.Infow([]interface{}{constants.ContextReqMeta, r.makeHttpRequestLog(&message)}, "finish router")
+	log.Infow([]interface{}{constants.ContextReqMeta, r.makeHttpRequestLog(&payload)}, "finish router")
 }
 
-func (r RequestCompletedLogListener) makeHttpRequestLog(message *event.RequestCompletedMessage) *logging.HttpRequestLog {
+func (r RequestCompletedLogListener) makeHttpRequestLog(message *event.RequestCompletedPayload) *logging.HttpRequestLog {
 	return &logging.HttpRequestLog{
 		LogContext: logging.LogContext{
 			UserId:            message.UserId,

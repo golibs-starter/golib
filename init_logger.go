@@ -5,7 +5,7 @@ import (
 	"gitlab.id.vin/vincart/golib/log"
 )
 
-func InitLogger() {
+func InitLogger() log.Logger {
 	logger, err := log.NewLogger(&log.Options{
 		Development:    true,
 		JsonOutputMode: true,
@@ -15,4 +15,5 @@ func InitLogger() {
 		panic(fmt.Sprintf("Error when init logger: [%v]", err))
 	}
 	log.RegisterGlobal(logger)
+	return logger
 }

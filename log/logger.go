@@ -1,153 +1,48 @@
 package log
 
-import (
-	"fmt"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-)
+type Logger interface {
+	// Info uses fmt.Sprint to construct and log a message.
+	Info(args ...interface{})
 
-type Options struct {
-	// Development puts the logger in development mode, which changes the
-	// behavior of DPanicLevel and takes stack traces more liberally.
-	Development bool
+	// Infof uses fmt.Sprintf to log a template message.
+	Infof(msgFormat string, args ...interface{})
 
-	// Enable json output mode
-	JsonOutputMode bool
+	// Infow uses fmt.Sprintf to log a template message with extra context value.
+	Infow(keysAndValues []interface{}, msgFormat string, args ...interface{})
 
-	// Skip number of callers before show caller
-	CallerSkip int
-}
+	// Debug uses fmt.Sprint to construct and log a message.
+	Debug(args ...interface{})
 
-const (
-	OutputModeJson    = "json"
-	OutputModeConsole = "console"
-)
+	// Debugf uses fmt.Sprintf to log a template message.
+	Debugf(msgFormat string, args ...interface{})
 
-type logger struct {
-	options *Options
-}
+	// Debugw uses fmt.Sprintf to log a template message with extra context value.
+	Debugw(keysAndValues []interface{}, msgFormat string, args ...interface{})
 
-func NewLogger(options *Options) (*logger, error) {
-	var sampling = zap.SamplingConfig{
-		Initial:    100,
-		Thereafter: 100,
-	}
+	// Warn uses fmt.Sprint to construct and log a message.
+	Warn(args ...interface{})
 
-	// Default behavior for the logger
-	var level zapcore.Level
-	var encoderConfig zapcore.EncoderConfig
-	if options.Development == true {
-		encoderConfig = zap.NewDevelopmentEncoderConfig()
-		level = zap.DebugLevel
-	} else {
-		encoderConfig = zap.NewProductionEncoderConfig()
-		level = zap.InfoLevel
-	}
+	// Warnf uses fmt.Sprintf to log a template message.
+	Warnf(msgFormat string, args ...interface{})
 
-	encoding := OutputModeConsole
-	if options.JsonOutputMode {
-		encoding = OutputModeJson
-	}
+	// Warnw uses fmt.Sprintf to log a template message with extra context value.
+	Warnw(keysAndValues []interface{}, msgFormat string, args ...interface{})
 
-	// Build the zap logger
-	zapLogger, err := zap.Config{
-		Level:            zap.NewAtomicLevelAt(level),
-		Development:      options.Development,
-		Sampling:         &sampling,
-		Encoding:         encoding,
-		EncoderConfig:    encoderConfig,
-		OutputPaths:      []string{"stderr"},
-		ErrorOutputPaths: []string{"stderr"},
-	}.Build()
-	if err != nil {
-		return nil, err
-	}
+	// Error uses fmt.Sprint to construct and log a message.
+	Error(args ...interface{})
 
-	zapOptions := append(make([]zap.Option, 0), zap.AddCallerSkip(options.CallerSkip))
-	zap.ReplaceGlobals(zapLogger.WithOptions(zapOptions...))
-	return &logger{options: options}, nil
-}
+	// Errorf uses fmt.Sprintf to log a template message.
+	Errorf(msgFormat string, args ...interface{})
 
-func (l *logger) logw(level zapcore.Level, keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	msg := msgFormat
-	if msg != "" && len(args) > 0 {
-		msg = fmt.Sprintf(msgFormat, args...)
-	}
-	switch level {
-	case zapcore.DebugLevel:
-		zap.S().Debugw(msg, keysAndValues...)
-		break
-	case zapcore.InfoLevel:
-		zap.S().Infow(msg, keysAndValues...)
-		break
-	case zapcore.WarnLevel:
-		zap.S().Warnw(msg, keysAndValues...)
-		break
-	case zapcore.ErrorLevel:
-		zap.S().Errorw(msg, keysAndValues...)
-		break
-	case zapcore.FatalLevel:
-		zap.S().Fatalw(msg, keysAndValues...)
-		break
-	}
-}
+	// Errorw uses fmt.Sprintf to log a template message with extra context value.
+	Errorw(keysAndValues []interface{}, msgFormat string, args ...interface{})
 
-func (l *logger) Info(args ...interface{}) {
-	zap.S().Info(args...)
-}
+	// Fatal uses fmt.Sprint to construct and log a message, then calls os.Exit.
+	Fatal(args ...interface{})
 
-func (l *logger) Infof(msgFormat string, args ...interface{}) {
-	zap.S().Infof(msgFormat, args...)
-}
+	// Fatalf uses fmt.Sprintf to log a template message, then calls os.Exit.
+	Fatalf(msgFormat string, args ...interface{})
 
-func (l *logger) Infow(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	l.logw(zapcore.InfoLevel, keysAndValues, msgFormat, args...)
-}
-
-func (l *logger) Debug(args ...interface{}) {
-	zap.S().Debug(args...)
-}
-
-func (l *logger) Debugf(msgFormat string, args ...interface{}) {
-	zap.S().Debugf(msgFormat, args...)
-}
-
-func (l *logger) Debugw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	l.logw(zapcore.DebugLevel, keysAndValues, msgFormat, args...)
-}
-
-func (l *logger) Warn(args ...interface{}) {
-	zap.S().Warn(args...)
-}
-
-func (l *logger) Warnf(msgFormat string, args ...interface{}) {
-	zap.S().Warnf(msgFormat, args...)
-}
-
-func (l *logger) Warnw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	l.logw(zapcore.WarnLevel, keysAndValues, msgFormat, args...)
-}
-
-func (l *logger) Error(args ...interface{}) {
-	zap.S().Error(args...)
-}
-
-func (l *logger) Errorf(msgFormat string, args ...interface{}) {
-	zap.S().Errorf(msgFormat, args...)
-}
-
-func (l *logger) Errorw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	l.logw(zapcore.ErrorLevel, keysAndValues, msgFormat, args...)
-}
-
-func (l *logger) Fatal(args ...interface{}) {
-	zap.S().Fatal(args...)
-}
-
-func (l *logger) Fatalf(msgFormat string, args ...interface{}) {
-	zap.S().Fatalf(msgFormat, args...)
-}
-
-func (l *logger) Fatalw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	l.logw(zapcore.FatalLevel, keysAndValues, msgFormat, args...)
+	// Fatalw uses fmt.Sprintf to log a template message with extra context value, then calls os.Exit.
+	Fatalw(keysAndValues []interface{}, msgFormat string, args ...interface{})
 }

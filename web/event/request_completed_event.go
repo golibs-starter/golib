@@ -1,12 +1,15 @@
 package event
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type RequestCompletedEvent struct {
-	Message RequestCompletedMessage
+	AbstractEvent
 }
 
-type RequestCompletedMessage struct {
+type RequestCompletedPayload struct {
 	Status            int           `json:"status"`
 	ExecutionTime     time.Duration `json:"duration_ms"`
 	Uri               string        `json:"uri"`
@@ -25,10 +28,16 @@ type RequestCompletedMessage struct {
 	TechnicalUsername string        `json:"technical_username"`
 }
 
+func NewRequestCompletedEvent(ctx context.Context, payload RequestCompletedPayload) *RequestCompletedEvent {
+	event := RequestCompletedEvent{}
+	event.AbstractEvent = NewAbstractEvent(ctx, event.GetName(), payload)
+	return &event
+}
+
 func (r RequestCompletedEvent) GetName() string {
 	return "RequestCompletedEvent"
 }
 
-func (r RequestCompletedEvent) GetMessage() interface{} {
-	return r.Message
+func (r RequestCompletedEvent) GetPayload() interface{} {
+	return r.Payload
 }

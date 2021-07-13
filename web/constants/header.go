@@ -13,4 +13,10 @@ const (
 
 	// Deprecated: Don't use this header any more, keep it for backward compatible
 	HeaderOldServiceClientName = "service_client_name"
+
+	// Deprecated: Don't use this header any more, keep it for backward compatible
+	HeaderOldDeviceId = "device_id"
+
+	// Deprecated: Don't use this header any more, keep it for backward compatible
+	HeaderOldDeviceSessionId = "device_session_id"
 )

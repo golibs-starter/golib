@@ -15,8 +15,8 @@ type App struct {
 }
 
 func Init(options Options) *App {
-	InitLogger()
-	InitEventBus(options.EventMapping)
+	logger := InitLogger()
+	InitEventBus(options.EventMapping, logger)
 	return &App{
 		Middleware: defaultMiddleware(),
 	}

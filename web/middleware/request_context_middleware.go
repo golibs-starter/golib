@@ -15,7 +15,7 @@ import (
 func RequestContext() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			start := time.Now().UTC()
+			start := time.Now()
 			requestAttributes := getOrCreateRequestAttributes(r)
 			next.ServeHTTP(w, r)
 			if advancedResponseWriter, err := getAdvancedResponseWriter(w); err != nil {
@@ -23,8 +23,8 @@ func RequestContext() func(next http.Handler) http.Handler {
 			} else {
 				requestAttributes.StatusCode = advancedResponseWriter.Status()
 			}
-			requestAttributes.ExecutionTime = time.Now().UTC().Sub(start)
-			publishEvent(requestAttributes)
+			requestAttributes.ExecutionTime = time.Now().Sub(start)
+			publishEvent(r.Context(), requestAttributes)
 		})
 	}
 }
@@ -94,8 +94,8 @@ func getServiceClientName(r *http.Request) string {
 	return r.Header.Get(constants.HeaderOldServiceClientName)
 }
 
-func publishEvent(requestAttributes *context.RequestAttributes) {
-	message := event.RequestCompletedMessage{
+func publishEvent(ctx mainContext.Context, requestAttributes *context.RequestAttributes) {
+	pubsub.Publish(event.NewRequestCompletedEvent(ctx, event.RequestCompletedPayload{
 		Status:            requestAttributes.StatusCode,
 		ExecutionTime:     requestAttributes.ExecutionTime,
 		Uri:               requestAttributes.Uri,
@@ -111,6 +111,5 @@ func publishEvent(requestAttributes *context.RequestAttributes) {
 		UserAgent:         requestAttributes.UserAgent,
 		UserId:            requestAttributes.SecurityAttributes.UserId,
 		TechnicalUsername: requestAttributes.SecurityAttributes.TechnicalUsername,
-	}
-	pubsub.Publish(&event.RequestCompletedEvent{Message: message})
+	}))
 }

@@ -5,12 +5,14 @@ type EventProducer interface {
 }
 
 type EventBus struct {
+	logger        Logger
 	producer      EventProducer
 	eventMappings map[string][]Subscriber
 }
 
-func NewEventBus(eventProducer EventProducer) *EventBus {
+func NewEventBus(eventProducer EventProducer, logger Logger) *EventBus {
 	return &EventBus{
+		logger:        logger,
 		producer:      eventProducer,
 		eventMappings: make(map[string][]Subscriber),
 	}
@@ -26,7 +28,9 @@ func (b *EventBus) Subscribe(event Event, subscriber ...Subscriber) {
 func (b *EventBus) Run() {
 	for {
 		event := <-b.producer.ProduceEvent()
-		//log.Info("Event ", event.GetName(), " was fired")
+		if b.logger != nil {
+			b.logger.Debugf("Event [%s] was fired with payload [%s]", event.GetName(), event.String())
+		}
 		for _, subscriber := range b.eventMappings[event.GetName()] {
 			go subscriber.Handler(event)
 		}
