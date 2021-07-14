@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/creasty/defaults"
 	"github.com/spf13/viper"
 	"reflect"
 	"strings"
@@ -38,7 +39,14 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) {
 			panic(fmt.Sprintf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
 				properties.Prefix(), propertiesName, err))
 		}
+		l.setDefaults(propertiesName, properties)
 		l.debugLog("[GoLib-debug] Properties [%s] loaded with prefix [%s]", propertiesName, properties.Prefix())
+	}
+}
+
+func (l *ViperLoader) setDefaults(propertiesName string, properties Properties) {
+	if err := defaults.Set(properties); err != nil {
+		panic(fmt.Sprintf("[GoLib-error] Fatal error when set default values for [%s]: %v", propertiesName, err))
 	}
 }
 
