@@ -4,6 +4,7 @@ import (
 	"gitlab.id.vin/vincart/golib/config"
 	"gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/pubsub"
+	"gitlab.id.vin/vincart/golib/web/client"
 	"gitlab.id.vin/vincart/golib/web/middleware"
 	"net/http"
 )
@@ -11,10 +12,11 @@ import (
 type Module func(app *App)
 
 type App struct {
+	Properties *Properties
 	Loader     config.Loader
 	Logger     log.Logger
 	Publisher  pubsub.Publisher
-	Properties *Properties
+	HttpClient client.HttpClient
 }
 
 func New(modules ...Module) *App {
