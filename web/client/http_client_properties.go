@@ -22,8 +22,15 @@ type HttpClientProperties struct {
 	// active, and idle states. On limit violation, dials will block.
 	// Zero means no limit.
 	MaxConnsPerHost int `mapstructure:"max_conns_per_host" default:"100"`
+
+	Proxy ProxyProperties `mapstructure:"proxy"`
 }
 
 func (h HttpClientProperties) Prefix() string {
 	return "vinid.httpclient"
+}
+
+type ProxyProperties struct {
+	Url         string   `mapstructure:"url"`
+	AppliedUris []string `mapstructure:"applied_uris"`
 }
