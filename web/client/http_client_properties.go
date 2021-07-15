@@ -23,6 +23,8 @@ type HttpClientProperties struct {
 	// Zero means no limit.
 	MaxConnsPerHost int `mapstructure:"max_conns_per_host" default:"100"`
 
+	// Proxy specify proxy url and urls will apply proxy and
+	// the requests with these urls will be requested under proxy
 	Proxy ProxyProperties `mapstructure:"proxy"`
 }
 
@@ -31,6 +33,12 @@ func (h HttpClientProperties) Prefix() string {
 }
 
 type ProxyProperties struct {
-	Url         string   `mapstructure:"url"`
+	// Url is proxy url. Example: http://localhost:8080
+	Url string `mapstructure:"url"`
+
+	// AppliedUris is the list of URIs, which will be requested under above proxy
+	// Example:
+	// 		https://example.com/path/
+	//		All URL starts with https://example.com/path/ will be request under proxy
 	AppliedUris []string `mapstructure:"applied_uris"`
 }
