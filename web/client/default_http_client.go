@@ -12,13 +12,11 @@ import (
 	"strings"
 )
 
-// DefaultHttpClient ...
 type DefaultHttpClient struct {
 	client     *http.Client
 	properties *HttpClientProperties
 }
 
-// NewDefaultHttpClient create new http client
 func NewDefaultHttpClient(properties *HttpClientProperties) (*DefaultHttpClient, error) {
 	transport, err := setupHttpTransport(properties)
 	if err != nil {
@@ -92,7 +90,6 @@ func (d *DefaultHttpClient) Request(method string, url string, body interface{},
 	return res, nil
 }
 
-// makeRequest make http request with extra options
 func (d *DefaultHttpClient) makeRequest(method string, url string, body interface{}, options ...RequestOption) (*http.Request, error) {
 	buf := new(bytes.Buffer)
 	if body != nil {
