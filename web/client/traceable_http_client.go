@@ -20,27 +20,33 @@ func NewTraceableHttpClient(client HttpClient, appProps *config.ApplicationPrope
 	}
 }
 
-func (t *TraceableHttpClient) Get(ctx context.Context, url string, result interface{}, options ...RequestOption) (*HttpResponse, error) {
+func (t *TraceableHttpClient) Get(ctx context.Context, url string, result interface{},
+	options ...RequestOption) (*HttpResponse, error) {
 	return t.Request(ctx, http.MethodGet, url, nil, result, options...)
 }
 
-func (t *TraceableHttpClient) Post(ctx context.Context, url string, body interface{}, result interface{}, options ...RequestOption) (*HttpResponse, error) {
+func (t *TraceableHttpClient) Post(ctx context.Context, url string, body interface{}, result interface{},
+	options ...RequestOption) (*HttpResponse, error) {
 	return t.Request(ctx, http.MethodPost, url, body, result, options...)
 }
 
-func (t *TraceableHttpClient) Put(ctx context.Context, url string, body interface{}, result interface{}, options ...RequestOption) (*HttpResponse, error) {
+func (t *TraceableHttpClient) Put(ctx context.Context, url string, body interface{}, result interface{},
+	options ...RequestOption) (*HttpResponse, error) {
 	return t.Request(ctx, http.MethodPut, url, body, result, options...)
 }
 
-func (t *TraceableHttpClient) Patch(ctx context.Context, url string, body interface{}, result interface{}, options ...RequestOption) (*HttpResponse, error) {
+func (t *TraceableHttpClient) Patch(ctx context.Context, url string, body interface{}, result interface{},
+	options ...RequestOption) (*HttpResponse, error) {
 	return t.Request(ctx, http.MethodPatch, url, body, result, options...)
 }
 
-func (t *TraceableHttpClient) Delete(ctx context.Context, url string, body interface{}, result interface{}, options ...RequestOption) (*HttpResponse, error) {
+func (t *TraceableHttpClient) Delete(ctx context.Context, url string, body interface{}, result interface{},
+	options ...RequestOption) (*HttpResponse, error) {
 	return t.Request(ctx, http.MethodDelete, url, body, result, options...)
 }
 
-func (t *TraceableHttpClient) Request(ctx context.Context, method string, url string, body interface{}, result interface{}, options ...RequestOption) (*HttpResponse, error) {
+func (t *TraceableHttpClient) Request(ctx context.Context, method string, url string, body interface{},
+	result interface{}, options ...RequestOption) (*HttpResponse, error) {
 	httpOpts := []RequestOption{
 		WithHeader(constant.HeaderServiceClientName, t.appProps.Name),
 
