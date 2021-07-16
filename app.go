@@ -20,11 +20,11 @@ type App struct {
 }
 
 func New(modules ...Module) *App {
-	app := App{}
+	app := new(App)
 	for _, module := range modules {
-		module(&app)
+		module(app)
 	}
-	return &app
+	return app
 }
 
 func (a App) Middleware() []func(next http.Handler) http.Handler {
