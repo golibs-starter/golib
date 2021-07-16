@@ -35,11 +35,19 @@ func NewLoader(option Option, debugLog func(msgFormat string, args ...interface{
 func (l *ViperLoader) Bind(propertiesList ...Properties) {
 	for _, properties := range propertiesList {
 		propertiesName := reflect.TypeOf(properties).String()
+		// Run pre-binding life cycle
+		if propsPreBind, ok := properties.(PropertiesPreBinding); ok {
+			propsPreBind.PreBinding()
+		}
 		if err := l.viper.UnmarshalKey(properties.Prefix(), properties); err != nil {
 			panic(fmt.Sprintf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
 				properties.Prefix(), propertiesName, err))
 		}
 		l.setDefaults(propertiesName, properties)
+		// Run post-binding life cycle
+		if propsPostBind, ok := properties.(PropertiesPostBinding); ok {
+			propsPostBind.PostBinding()
+		}
 		l.debugLog("[GoLib-debug] Properties [%s] loaded with prefix [%s]", propertiesName, properties.Prefix())
 	}
 }
