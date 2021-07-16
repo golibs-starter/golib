@@ -3,10 +3,9 @@ package config
 import "gitlab.id.vin/vincart/golib/utils"
 
 const (
-	DefaultProfile       = "default"
-	DefaultActiveProfile = "local"
-	DefaultConfigFormat  = "yaml"
-	DefaultConfigPath    = "./config"
+	DefaultProfile      = "default"
+	DefaultConfigFormat = "yaml"
+	DefaultConfigPath   = "./config"
 )
 
 type Option struct {
@@ -21,10 +20,6 @@ func setDefaultOption(option *Option) {
 	}
 	if !utils.ContainsString(option.ActiveProfiles, DefaultProfile) {
 		option.ActiveProfiles = utils.PrependString(option.ActiveProfiles, DefaultProfile)
-	}
-
-	if !utils.ContainsString(option.ActiveProfiles, DefaultActiveProfile) {
-		option.ActiveProfiles = append(option.ActiveProfiles, DefaultActiveProfile)
 	}
 
 	if len(option.ConfigFormat) == 0 {

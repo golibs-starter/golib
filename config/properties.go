@@ -17,5 +17,5 @@ type ApplicationProperties struct {
 }
 
 func (a ApplicationProperties) Prefix() string {
-	return "vinid.application"
+	return "application"
 }

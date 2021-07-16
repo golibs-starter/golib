@@ -2,8 +2,10 @@ package golib
 
 import (
 	"gitlab.id.vin/vincart/golib/config"
+	"gitlab.id.vin/vincart/golib/utils"
 	"gitlab.id.vin/vincart/golib/web/client"
 	"gitlab.id.vin/vincart/golib/web/log"
+	"os"
 )
 
 type Properties struct {
@@ -14,26 +16,37 @@ type Properties struct {
 
 type ConfigOption func(option *config.Option)
 
-func SetActiveProfiles(activeProfiles []string) ConfigOption {
+func OptActiveProfiles(activeProfiles []string) ConfigOption {
 	return func(option *config.Option) {
 		option.ActiveProfiles = activeProfiles
 	}
 }
 
-func SetConfigPaths(configPaths []string) ConfigOption {
+func OptConfigPaths(configPaths []string) ConfigOption {
 	return func(option *config.Option) {
 		option.ConfigPaths = configPaths
 	}
 }
 
-// SetConfigFormat accept yaml, json values
-func SetConfigFormat(configFormat string) ConfigOption {
+// OptConfigFormat accept yaml, json values
+func OptConfigFormat(configFormat string) ConfigOption {
 	return func(option *config.Option) {
 		option.ConfigFormat = configFormat
 	}
 }
 
+func OptConfigFromEnv() ConfigOption {
+	return func(option *config.Option) {
+		option.ActiveProfiles = utils.SliceFromCommaString(os.Getenv("ENV"))
+		option.ConfigPaths = utils.SliceFromCommaString(os.Getenv("CONFIG_PATHS"))
+		option.ConfigFormat = os.Getenv("CONFIG_FORMAT")
+	}
+}
+
 func WithConfigProperties(options ...ConfigOption) Module {
+	if len(options) == 0 {
+		options = append(options, OptConfigFromEnv())
+	}
 	return func(app *App) {
 		option := new(config.Option)
 		for _, optFunc := range options {
