@@ -3,10 +3,12 @@ package golib
 import (
 	"gitlab.id.vin/vincart/golib/config"
 	"gitlab.id.vin/vincart/golib/web/client"
+	"gitlab.id.vin/vincart/golib/web/log"
 )
 
 type Properties struct {
 	Application *config.ApplicationProperties
+	Logging     *log.LoggingProperties
 	HttpClient  *client.HttpClientProperties
 }
 
