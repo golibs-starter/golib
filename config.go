@@ -6,12 +6,17 @@ import (
 )
 
 type Properties struct {
-	HttpClientProperties client.HttpClientProperties
+	Application *config.ApplicationProperties
+	HttpClient  *client.HttpClientProperties
 }
 
 func WithConfigLoader(option config.Option) Module {
 	return func(app *App) {
-		app.Loader = config.NewLoader(option, nil)
+		app.ConfigLoader = config.NewLoader(option, nil)
 		app.Properties = &Properties{}
+
+		// Bind application properties
+		app.Properties.Application = &config.ApplicationProperties{}
+		app.ConfigLoader.Bind(app.Properties.Application)
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"gitlab.id.vin/vincart/golib/log"
 )
 
-func WithLogger() Module {
+func WithLoggerAutoConfig() Module {
 	return func(app *App) {
 		logger, err := log.NewLogger(&log.Options{
 			Development:    true,

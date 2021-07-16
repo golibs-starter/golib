@@ -2,17 +2,22 @@ package client
 
 import (
 	"context"
+	"gitlab.id.vin/vincart/golib/config"
 	"gitlab.id.vin/vincart/golib/web/constant"
 	webContext "gitlab.id.vin/vincart/golib/web/context"
 	"net/http"
 )
 
 type TraceableHttpClient struct {
-	client HttpClient
+	client   HttpClient
+	appProps *config.ApplicationProperties
 }
 
-func NewTraceableHttpClient(client HttpClient) *TraceableHttpClient {
-	return &TraceableHttpClient{client: client}
+func NewTraceableHttpClient(client HttpClient, appProps *config.ApplicationProperties) *TraceableHttpClient {
+	return &TraceableHttpClient{
+		client:   client,
+		appProps: appProps,
+	}
 }
 
 func (t *TraceableHttpClient) Get(ctx context.Context, url string, result interface{}, options ...RequestOption) (*HttpResponse, error) {
@@ -36,12 +41,23 @@ func (t *TraceableHttpClient) Delete(ctx context.Context, url string, body inter
 }
 
 func (t *TraceableHttpClient) Request(ctx context.Context, method string, url string, body interface{}, result interface{}, options ...RequestOption) (*HttpResponse, error) {
-	httpOpts := make([]RequestOption, 0)
+	httpOpts := []RequestOption{
+		WithHeader(constant.HeaderServiceClientName, t.appProps.Name),
+
+		// Set header with old format for backward compatible
+		WithHeader(constant.HeaderOldServiceClientName, t.appProps.Name),
+	}
 	if reqAttrs := webContext.GetRequestAttributes(ctx); reqAttrs != nil {
 		httpOpts = append(httpOpts,
 			WithHeader(constant.HeaderCorrelationId, reqAttrs.CorrelationId),
 			WithHeader(constant.HeaderDeviceId, reqAttrs.DeviceId),
-			// TODO add more header
+			WithHeader(constant.HeaderDeviceSessionId, reqAttrs.DeviceSessionId),
+			WithHeader(constant.HeaderClientIpAddress, reqAttrs.ClientIpAddress),
+
+			// Set header with old format for backward compatible
+			WithHeader(constant.HeaderOldDeviceId, reqAttrs.DeviceId),
+			WithHeader(constant.HeaderOldDeviceSessionId, reqAttrs.DeviceSessionId),
+			WithHeader(constant.HeaderOldClientIpAddress, reqAttrs.ClientIpAddress),
 		)
 	}
 	httpOpts = append(httpOpts, options...)

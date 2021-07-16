@@ -12,11 +12,11 @@ import (
 type Module func(app *App)
 
 type App struct {
-	Properties *Properties
-	Loader     config.Loader
-	Logger     log.Logger
-	Publisher  pubsub.Publisher
-	HttpClient client.HttpClient
+	Properties   *Properties
+	ConfigLoader config.Loader
+	Logger       log.Logger
+	Publisher    pubsub.Publisher
+	HttpClient   client.ContextualHttpClient
 }
 
 func New(modules ...Module) *App {
