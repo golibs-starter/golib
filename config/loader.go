@@ -51,16 +51,16 @@ func (l *ViperLoader) setDefaults(propertiesName string, properties Properties) 
 }
 
 func loadViper(option Option, debugLog func(msgFormat string, args ...interface{})) *viper.Viper {
-	debugActiveProfiles := strings.Join(option.activeProfiles, ", ")
-	debugPaths := strings.Join(option.configPaths, ", ")
+	debugActiveProfiles := strings.Join(option.ActiveProfiles, ", ")
+	debugPaths := strings.Join(option.ConfigPaths, ", ")
 	debugLog("[GoLib-debug] Loading active profiles [%s] in paths [%s] with format [%s]",
-		debugActiveProfiles, debugPaths, option.configFormat)
+		debugActiveProfiles, debugPaths, option.ConfigFormat)
 
 	vi := viper.New()
-	for _, activeProfile := range option.activeProfiles {
+	for _, activeProfile := range option.ActiveProfiles {
 		vi.SetConfigName(activeProfile)
-		vi.SetConfigType(option.configFormat)
-		for _, path := range option.configPaths {
+		vi.SetConfigType(option.ConfigFormat)
+		for _, path := range option.ConfigPaths {
 			vi.AddConfigPath(path)
 		}
 		if err := vi.MergeInConfig(); err != nil {

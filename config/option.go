@@ -10,28 +10,28 @@ const (
 )
 
 type Option struct {
-	activeProfiles []string
-	configPaths    []string
-	configFormat   string // yaml, json
+	ActiveProfiles []string
+	ConfigPaths    []string
+	ConfigFormat   string // yaml, json
 }
 
 func setDefaultOption(option *Option) {
-	if option.activeProfiles == nil {
-		option.activeProfiles = make([]string, 0)
+	if option.ActiveProfiles == nil {
+		option.ActiveProfiles = make([]string, 0)
 	}
-	if !utils.ContainsString(option.activeProfiles, DefaultProfile) {
-		option.activeProfiles = utils.PrependString(option.activeProfiles, DefaultProfile)
-	}
-
-	if !utils.ContainsString(option.activeProfiles, DefaultActiveProfile) {
-		option.activeProfiles = append(option.activeProfiles, DefaultActiveProfile)
+	if !utils.ContainsString(option.ActiveProfiles, DefaultProfile) {
+		option.ActiveProfiles = utils.PrependString(option.ActiveProfiles, DefaultProfile)
 	}
 
-	if len(option.configFormat) == 0 {
-		option.configFormat = DefaultConfigFormat
+	if !utils.ContainsString(option.ActiveProfiles, DefaultActiveProfile) {
+		option.ActiveProfiles = append(option.ActiveProfiles, DefaultActiveProfile)
 	}
 
-	if len(option.configPaths) == 0 {
-		option.configPaths = []string{DefaultConfigPath}
+	if len(option.ConfigFormat) == 0 {
+		option.ConfigFormat = DefaultConfigFormat
+	}
+
+	if len(option.ConfigPaths) == 0 {
+		option.ConfigPaths = []string{DefaultConfigPath}
 	}
 }
