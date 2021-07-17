@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/creasty/defaults"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/viper"
 	"reflect"
 	"strings"
@@ -39,11 +39,19 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) {
 		if propsPreBind, ok := properties.(PropertiesPreBinding); ok {
 			propsPreBind.PreBinding()
 		}
+
+		// Unmarshal from config file
 		if err := l.viper.UnmarshalKey(properties.Prefix(), properties); err != nil {
 			panic(fmt.Sprintf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
 				properties.Prefix(), propertiesName, err))
 		}
-		l.setDefaults(propertiesName, properties)
+
+		// Unmarshal from environment
+		if err := envconfig.Process(l.prettyEnvKey(properties.Prefix()), properties); err != nil {
+			panic(fmt.Sprintf("[GoLib-error] Fatal error when binding env prefix key [%s] to [%s]: %v",
+				properties.Prefix(), propertiesName, err))
+		}
+
 		// Run post-binding life cycle
 		if propsPostBind, ok := properties.(PropertiesPostBinding); ok {
 			propsPostBind.PostBinding()
@@ -52,10 +60,8 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) {
 	}
 }
 
-func (l *ViperLoader) setDefaults(propertiesName string, properties Properties) {
-	if err := defaults.Set(properties); err != nil {
-		panic(fmt.Sprintf("[GoLib-error] Fatal error when set default values for [%s]: %v", propertiesName, err))
-	}
+func (l *ViperLoader) prettyEnvKey(key string) string {
+	return strings.ReplaceAll(key, ".", "_")
 }
 
 func loadViper(option Option, debugLog func(msgFormat string, args ...interface{})) *viper.Viper {
