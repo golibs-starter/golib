@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/kelseyhightower/envconfig"
+	"github.com/creasty/defaults"
 	"github.com/spf13/viper"
 	"reflect"
 	"strings"
@@ -46,11 +46,8 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) {
 				properties.Prefix(), propertiesName, err))
 		}
 
-		// Unmarshal from environment
-		if err := envconfig.Process(l.prettyEnvKey(properties.Prefix()), properties); err != nil {
-			panic(fmt.Sprintf("[GoLib-error] Fatal error when binding env prefix key [%s] to [%s]: %v",
-				properties.Prefix(), propertiesName, err))
-		}
+		// Set default value if its missing
+		l.setDefaults(propertiesName, properties)
 
 		// Run post-binding life cycle
 		if propsPostBind, ok := properties.(PropertiesPostBinding); ok {
@@ -60,8 +57,10 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) {
 	}
 }
 
-func (l *ViperLoader) prettyEnvKey(key string) string {
-	return strings.ReplaceAll(key, ".", "_")
+func (l *ViperLoader) setDefaults(propertiesName string, properties Properties) {
+	if err := defaults.Set(properties); err != nil {
+		panic(fmt.Sprintf("[GoLib-error] Fatal error when set default values for [%s]: %v", propertiesName, err))
+	}
 }
 
 func loadViper(option Option, debugLog func(msgFormat string, args ...interface{})) *viper.Viper {
@@ -71,6 +70,9 @@ func loadViper(option Option, debugLog func(msgFormat string, args ...interface{
 		debugActiveProfiles, debugPaths, option.ConfigFormat)
 
 	vi := viper.New()
+	vi.AutomaticEnv()
+	vi.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
 	for _, activeProfile := range option.ActiveProfiles {
 		vi.SetConfigName(activeProfile)
 		vi.SetConfigType(option.ConfigFormat)
@@ -87,6 +89,14 @@ func loadViper(option Option, debugLog func(msgFormat string, args ...interface{
 			continue
 		}
 		debugLog("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
+	}
+
+	// Workaround solution because viper does not
+	// treat env vars the same as other config
+	// See https://github.com/spf13/viper/issues/188#issuecomment-399518663
+	for _, key := range vi.AllKeys() {
+		val := vi.Get(key)
+		vi.Set(key, val)
 	}
 	return vi
 }
