@@ -12,6 +12,7 @@ import (
 type Module func(app *App)
 
 type App struct {
+	middleware   []func(next http.Handler) http.Handler
 	Properties   *Properties
 	ConfigLoader config.Loader
 	Logger       log.Logger
@@ -21,16 +22,21 @@ type App struct {
 
 func New(modules ...Module) *App {
 	app := new(App)
+	app.AddMiddleware(
+		middleware.AdvancedResponseWriter(),
+		middleware.RequestContext(),
+		middleware.CorrelationId(),
+	)
 	for _, module := range modules {
 		module(app)
 	}
 	return app
 }
 
+func (a *App) AddMiddleware(middleware ...func(next http.Handler) http.Handler) {
+	a.middleware = append(a.middleware, middleware...)
+}
+
 func (a App) Middleware() []func(next http.Handler) http.Handler {
-	return []func(next http.Handler) http.Handler{
-		middleware.AdvancedResponseWriter(),
-		middleware.RequestContext(),
-		middleware.CorrelationId(),
-	}
+	return a.middleware
 }
