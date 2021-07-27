@@ -6,7 +6,7 @@ import (
 	"gitlab.id.vin/vincart/golib/web/listener"
 )
 
-func WithEventBusAutoConfig(eventMapping map[pubsub.Event][]pubsub.Subscriber) Module {
+func WithEventAutoConfig(eventMapping map[pubsub.Event][]pubsub.Subscriber) Module {
 	return func(app *App) {
 		var debugLog pubsub.DebugLog
 		if app.Logger != nil {
