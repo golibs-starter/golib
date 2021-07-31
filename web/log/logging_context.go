@@ -32,6 +32,10 @@ func keysAndValuesFromContext(ctx context.Context) []interface{} {
 	return nil
 }
 
+func Debug(ctx context.Context, msgFormat string, args ...interface{}) {
+	mainLog.Debugw(keysAndValuesFromContext(ctx), msgFormat, args...)
+}
+
 func Info(ctx context.Context, msgFormat string, args ...interface{}) {
 	mainLog.Infow(keysAndValuesFromContext(ctx), msgFormat, args...)
 }
