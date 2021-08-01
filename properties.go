@@ -43,7 +43,7 @@ func OptConfigFromEnv() ConfigOption {
 	}
 }
 
-func WithConfigProperties(options ...ConfigOption) Module {
+func WithProperties(options ...ConfigOption) Module {
 	if len(options) == 0 {
 		options = append(options, OptConfigFromEnv())
 	}
