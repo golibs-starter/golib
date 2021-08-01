@@ -6,54 +6,54 @@ import (
 	"testing"
 )
 
-func Test_replacePlaceholderValue_WhenValidPlaceholderAndEnvIsPresent_ShouldReturnCorrect(t *testing.T) {
+func Test_ReplacePlaceholderValue_WhenValidPlaceholderAndEnvIsPresent_ShouldReturnCorrect(t *testing.T) {
 	_ = os.Setenv("ENV_EXAMPLE", "test")
 	defer func() {
 		_ = os.Unsetenv("ENV_EXAMPLE")
 	}()
-	val, err := replacePlaceholderValue("${ENV_EXAMPLE}")
+	val, err := ReplacePlaceholderValue("${ENV_EXAMPLE}")
 	assert.Nil(t, err)
 	assert.Equal(t, "test", val)
 }
 
-func Test_replacePlaceholderValue_WhenValueIsNotString_ShouldReturnCurrentValue(t *testing.T) {
-	val, err := replacePlaceholderValue(10)
+func Test_ReplacePlaceholderValue_WhenValueIsNotString_ShouldReturnCurrentValue(t *testing.T) {
+	val, err := ReplacePlaceholderValue(10)
 	assert.Nil(t, err)
 	assert.Equal(t, 10, val)
 }
 
-func Test_replacePlaceholderValue_WhenItIsNotPlaceholder_ShouldReturnCurrentValue(t *testing.T) {
-	val1, err := replacePlaceholderValue("TEST}")
+func Test_ReplacePlaceholderValue_WhenItIsNotPlaceholder_ShouldReturnCurrentValue(t *testing.T) {
+	val1, err := ReplacePlaceholderValue("TEST}")
 	assert.Nil(t, err)
 	assert.Equal(t, "TEST}", val1)
 
-	val2, err := replacePlaceholderValue("${TEST")
+	val2, err := ReplacePlaceholderValue("${TEST")
 	assert.Nil(t, err)
 	assert.Equal(t, "${TEST", val2)
 
-	val3, err := replacePlaceholderValue(" ${TEST}") //starts with space
+	val3, err := ReplacePlaceholderValue(" ${TEST}") //starts with space
 	assert.Nil(t, err)
 	assert.Equal(t, " ${TEST}", val3)
 }
 
-func Test_replacePlaceholderValue_WhenEmptyPlaceholderKey_ShouldReturnError(t *testing.T) {
-	val, err := replacePlaceholderValue("${}")
+func Test_ReplacePlaceholderValue_WhenEmptyPlaceholderKey_ShouldReturnError(t *testing.T) {
+	val, err := ReplacePlaceholderValue("${}")
 	assert.NotNil(t, err)
 	assert.Nil(t, val)
 }
 
-func Test_replacePlaceholderValue_WhenValidPlaceholderAndEnvNotPresent_ShouldReturnError(t *testing.T) {
-	val, err := replacePlaceholderValue("${ENV_EXAMPLE}")
+func Test_ReplacePlaceholderValue_WhenValidPlaceholderAndEnvNotPresent_ShouldReturnError(t *testing.T) {
+	val, err := ReplacePlaceholderValue("${ENV_EXAMPLE}")
 	assert.NotNil(t, err)
 	assert.Nil(t, val)
 }
 
-func Test_replacePlaceholderValue_WhenValidPlaceholderAndEnvIsPresentAndEmpty_ShouldReturnEmptyValue(t *testing.T) {
+func Test_ReplacePlaceholderValue_WhenValidPlaceholderAndEnvIsPresentAndEmpty_ShouldReturnEmptyValue(t *testing.T) {
 	_ = os.Setenv("ENV_EXAMPLE", "")
 	defer func() {
 		_ = os.Unsetenv("ENV_EXAMPLE")
 	}()
-	val, err := replacePlaceholderValue("${ENV_EXAMPLE}")
+	val, err := ReplacePlaceholderValue("${ENV_EXAMPLE}")
 	assert.Nil(t, err)
 	assert.Equal(t, "", val)
 }

@@ -98,7 +98,7 @@ func loadViper(option Option, debugLog func(msgFormat string, args ...interface{
 	// See https://github.com/spf13/viper/issues/188#issuecomment-399518663
 	for _, key := range vi.AllKeys() {
 		val := vi.Get(key)
-		if newVal, err := replacePlaceholderValue(val); err != nil {
+		if newVal, err := ReplacePlaceholderValue(val); err != nil {
 			panic(err)
 		} else {
 			val = newVal
@@ -108,11 +108,11 @@ func loadViper(option Option, debugLog func(msgFormat string, args ...interface{
 	return vi
 }
 
-// replacePlaceholderValue Replaces a value in placeholder format
+// ReplacePlaceholderValue Replaces a value in placeholder format
 // by new value configured in environment variable.
 //
 // Placeholder format: ${EXAMPLE_VAR}
-func replacePlaceholderValue(val interface{}) (interface{}, error) {
+func ReplacePlaceholderValue(val interface{}) (interface{}, error) {
 	strVal, ok := val.(string)
 	if !ok {
 		return val, nil
