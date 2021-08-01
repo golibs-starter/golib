@@ -24,7 +24,7 @@ func RequestContext() func(next http.Handler) http.Handler {
 				requestAttributes.StatusCode = advancedResponseWriter.Status()
 			}
 			requestAttributes.ExecutionTime = time.Now().Sub(start)
-			publishEvent(r.Context(), requestAttributes)
+			publishRequestCompletedEvent(r.Context(), requestAttributes)
 		})
 	}
 }
@@ -94,7 +94,7 @@ func getServiceClientName(r *http.Request) string {
 	return r.Header.Get(constant.HeaderOldServiceClientName)
 }
 
-func publishEvent(ctx mainContext.Context, requestAttributes *context.RequestAttributes) {
+func publishRequestCompletedEvent(ctx mainContext.Context, requestAttributes *context.RequestAttributes) {
 	pubsub.Publish(event.NewRequestCompletedEvent(ctx, event.RequestCompletedPayload{
 		Status:            requestAttributes.StatusCode,
 		ExecutionTime:     requestAttributes.ExecutionTime,
