@@ -11,15 +11,17 @@ import (
 type RequestCompletedLogListener struct {
 }
 
+func (r RequestCompletedLogListener) Events() []pubsub.Event {
+	return []pubsub.Event{new(event.RequestCompletedEvent)}
+}
+
 func (r RequestCompletedLogListener) Handler(e pubsub.Event) {
-	if e.Name() != (event.RequestCompletedEvent{}).Name() {
+	if _, ok := e.(*event.RequestCompletedEvent); !ok {
 		return
 	}
-	payload, ok := e.Payload().(event.RequestCompletedPayload)
-	if !ok {
-		return
+	if payload, ok := e.Payload().(event.RequestCompletedPayload); ok {
+		mainLog.Infow([]interface{}{constant.ContextReqMeta, r.makeHttpRequestLog(&payload)}, "finish router")
 	}
-	mainLog.Infow([]interface{}{constant.ContextReqMeta, r.makeHttpRequestLog(&payload)}, "finish router")
 }
 
 func (r RequestCompletedLogListener) makeHttpRequestLog(message *event.RequestCompletedPayload) *log.HttpRequestLog {

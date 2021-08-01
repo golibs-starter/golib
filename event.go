@@ -2,11 +2,18 @@ package golib
 
 import (
 	"gitlab.id.vin/vincart/golib/pubsub"
-	"gitlab.id.vin/vincart/golib/web/event"
 	"gitlab.id.vin/vincart/golib/web/listener"
 )
 
-func WithEventAutoConfig(eventMapping map[pubsub.Event][]pubsub.Subscriber) Module {
+type EventListener interface {
+	pubsub.Subscriber
+
+	// Events List of events that
+	// this listener will be subscribed on
+	Events() []pubsub.Event
+}
+
+func WithEventAutoConfig(listeners ...EventListener) Module {
 	return func(app *App) {
 		var debugLog pubsub.DebugLog
 		if app.Logger != nil {
@@ -18,16 +25,25 @@ func WithEventAutoConfig(eventMapping map[pubsub.Event][]pubsub.Subscriber) Modu
 		app.Publisher = publisher
 
 		bus := pubsub.NewEventBus(publisher, debugLog)
-		subscribeEvents(bus, eventMapping)
+		registerListeners(bus, listeners)
 		go bus.Run()
 	}
 }
 
-func subscribeEvents(bus *pubsub.EventBus, eventMapping map[pubsub.Event][]pubsub.Subscriber) {
-	if eventMapping != nil {
-		for e, subscribers := range eventMapping {
-			bus.Subscribe(e, subscribers...)
+func registerListeners(bus *pubsub.EventBus, listeners []EventListener) {
+	if listeners == nil {
+		listeners = make([]EventListener, 0)
+	}
+	listeners = appendPredefinedListeners(listeners)
+	for _, eventListener := range listeners {
+		if subscribedEvents := eventListener.Events(); subscribedEvents != nil {
+			for _, e := range subscribedEvents {
+				bus.Subscribe(e, eventListener)
+			}
 		}
 	}
-	bus.Subscribe(new(event.RequestCompletedEvent), new(listener.RequestCompletedLogListener))
+}
+
+func appendPredefinedListeners(listeners []EventListener) []EventListener {
+	return append(listeners, new(listener.RequestCompletedLogListener))
 }
