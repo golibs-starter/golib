@@ -96,6 +96,11 @@ func loadViper(option Option, debugLog func(msgFormat string, args ...interface{
 	// This is workaround solution because viper does not
 	// treat env vars the same as other config
 	// See https://github.com/spf13/viper/issues/188#issuecomment-399518663
+	//
+	// Notes: Currently vi.AllKeys() doesn't support key for array item, such as: foo.bar.0.username,
+	// so environment variable cannot overwrite these values, replace placeholder also not working
+	// (using PropertiesPostBinding to replace placeholder as a workaround solution).
+	// TODO Improve it or wait for viper in next version
 	for _, key := range vi.AllKeys() {
 		val := vi.Get(key)
 		if newVal, err := ReplacePlaceholderValue(val); err != nil {
