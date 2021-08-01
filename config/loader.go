@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/creasty/defaults"
 	"github.com/spf13/viper"
+	"os"
 	"reflect"
 	"strings"
 )
@@ -91,12 +92,42 @@ func loadViper(option Option, debugLog func(msgFormat string, args ...interface{
 		debugLog("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
 	}
 
-	// Workaround solution because viper does not
+	// High priority for environment variable.
+	// This is workaround solution because viper does not
 	// treat env vars the same as other config
 	// See https://github.com/spf13/viper/issues/188#issuecomment-399518663
 	for _, key := range vi.AllKeys() {
 		val := vi.Get(key)
+		if newVal, err := replacePlaceholderValue(val); err != nil {
+			panic(err)
+		} else {
+			val = newVal
+		}
 		vi.Set(key, val)
 	}
 	return vi
+}
+
+// replacePlaceholderValue Replaces a value in placeholder format
+// by new value configured in environment variable.
+//
+// Placeholder format: ${EXAMPLE_VAR}
+func replacePlaceholderValue(val interface{}) (interface{}, error) {
+	strVal, ok := val.(string)
+	if !ok {
+		return val, nil
+	}
+	// Make sure the value starts with ${ and end with }
+	if !strings.HasPrefix(strVal, "${") || !strings.HasSuffix(strVal, "}") {
+		return val, nil
+	}
+	key := strings.TrimSuffix(strings.TrimPrefix(strVal, "${"), "}")
+	if len(key) == 0 {
+		return nil, fmt.Errorf("invalid config placeholder format. Expected ${EX_ENV}, got [%s]", strVal)
+	}
+	res, present := os.LookupEnv(key)
+	if !present {
+		return nil, fmt.Errorf("mandatory env variable not found [%s]", key)
+	}
+	return res, nil
 }
