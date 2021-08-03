@@ -53,7 +53,6 @@ func WithProperties(options ...ConfigOption) Module {
 			optFunc(option)
 		}
 		app.ConfigLoader = config.NewLoader(*option, nil)
-		app.Properties = &Properties{}
 
 		// Bind application properties
 		app.Properties.Application = &config.ApplicationProperties{}
