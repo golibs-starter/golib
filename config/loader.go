@@ -19,7 +19,7 @@ type ViperLoader struct {
 	viper    *viper.Viper
 }
 
-func NewLoader(option Option, debugLog func(msgFormat string, args ...interface{})) *ViperLoader {
+func NewLoader(option Option, debugLog func(msgFormat string, args ...interface{})) Loader {
 	setDefaultOption(&option)
 	if debugLog == nil {
 		debugLog = func(msgFormat string, args ...interface{}) {
