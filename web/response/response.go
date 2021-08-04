@@ -1,17 +1,17 @@
-package resource
+package response
 
 import (
 	"gitlab.id.vin/vincart/golib/exception"
 	"net/http"
 )
 
-type Resource struct {
+type Response struct {
 	Meta Meta        `json:"meta,omitempty"`
 	Data interface{} `json:"data,omitempty"`
 }
 
-func New(code int, message string, data interface{}) Resource {
-	return Resource{
+func New(code int, message string, data interface{}) Response {
+	return Response{
 		Meta: Meta{
 			Code:    code,
 			Message: message,
@@ -20,22 +20,22 @@ func New(code int, message string, data interface{}) Resource {
 	}
 }
 
-func Ok(data interface{}) Resource {
+func Ok(data interface{}) Response {
 	return New(http.StatusOK, "Successful", data)
 }
 
-func Created(data interface{}) Resource {
+func Created(data interface{}) Response {
 	return New(http.StatusCreated, "Resource created", data)
 }
 
-func Error(err error) Resource {
+func Error(err error) Response {
 	code := http.StatusInternalServerError
 	message := "Internal Server Error"
 	if e, ok := err.(exception.Exception); ok {
 		code = int(e.Code())
 		message = err.Error()
 	}
-	return Resource{
+	return Response{
 		Meta: Meta{
 			Code:    code,
 			Message: message,

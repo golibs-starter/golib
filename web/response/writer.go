@@ -1,11 +1,11 @@
-package resource
+package response
 
 import (
 	"gitlab.id.vin/vincart/golib/web/render"
 	"net/http"
 )
 
-func Write(w http.ResponseWriter, res Resource) {
+func Write(w http.ResponseWriter, res Response) {
 	render.Render(w, res.Meta.HttpStatus(), render.JSON{Data: res})
 }
 
