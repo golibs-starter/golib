@@ -30,13 +30,15 @@ func Created(data interface{}) Resource {
 
 func Error(err error) Resource {
 	code := http.StatusInternalServerError
+	message := "Internal Server Error"
 	if e, ok := err.(exception.Exception); ok {
 		code = int(e.Code())
+		message = err.Error()
 	}
 	return Resource{
 		Meta: Meta{
 			Code:    code,
-			Message: "Internal Server Error",
+			Message: message,
 		},
 	}
 }
