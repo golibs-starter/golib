@@ -36,7 +36,7 @@ func Error(err error) Resource {
 	return Resource{
 		Meta: Meta{
 			Code:    code,
-			Message: err.Error(),
+			Message: "Internal Server Error",
 		},
 	}
 }

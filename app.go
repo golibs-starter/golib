@@ -42,10 +42,14 @@ func (a App) Middleware() []func(next http.Handler) http.Handler {
 	return a.middleware
 }
 
+func (a App) Name() string {
+	return a.Properties.Application.Name
+}
+
 func (a App) Port() int {
 	return a.Properties.Application.Port
 }
 
-func (a App) Name() string {
-	return a.Properties.Application.Name
+func (a App) Path() string {
+	return a.Properties.Application.Path
 }

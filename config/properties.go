@@ -15,6 +15,7 @@ type PropertiesPostBinding interface {
 type ApplicationProperties struct {
 	Name string `mapstructure:"name" default:"unspecified"`
 	Port int    `mapstructure:"port" default:"8080"`
+	Path string `mapstructure:"path" default:"/"`
 }
 
 func (a ApplicationProperties) Prefix() string {
