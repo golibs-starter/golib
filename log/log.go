@@ -27,7 +27,7 @@ type logger struct {
 	options *Options
 }
 
-func NewLogger(options *Options) (*logger, error) {
+func NewLogger(options *Options) (Logger, error) {
 	var sampling = zap.SamplingConfig{
 		Initial:    100,
 		Thereafter: 100,

@@ -2,60 +2,48 @@ package golib
 
 import (
 	"gitlab.id.vin/vincart/golib/config"
+	"gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/utils"
-	"gitlab.id.vin/vincart/golib/web/client"
-	"gitlab.id.vin/vincart/golib/web/log"
 	"os"
 )
 
-type Properties struct {
-	Application *config.ApplicationProperties
-	Logging     *log.LoggingProperties
-	HttpClient  *client.HttpClientProperties
-}
+type Option func(option *config.Option)
 
-type ConfigOption func(option *config.Option)
-
-func OptActiveProfiles(activeProfiles []string) ConfigOption {
+func WithActiveProfiles(activeProfiles []string) Option {
 	return func(option *config.Option) {
 		option.ActiveProfiles = activeProfiles
 	}
 }
 
-func OptConfigPaths(configPaths []string) ConfigOption {
+func WithPaths(configPaths []string) Option {
 	return func(option *config.Option) {
 		option.ConfigPaths = configPaths
 	}
 }
 
-// OptConfigFormat accept yaml, json values
-func OptConfigFormat(configFormat string) ConfigOption {
+// WithFormat accept yaml, json values
+func WithFormat(configFormat string) Option {
 	return func(option *config.Option) {
 		option.ConfigFormat = configFormat
 	}
 }
 
-func OptConfigFromEnv() ConfigOption {
+func WithEnvironmentOption() Option {
 	return func(option *config.Option) {
-		option.ActiveProfiles = utils.SliceFromCommaString(os.Getenv("ENV"))
-		option.ConfigPaths = utils.SliceFromCommaString(os.Getenv("CONFIG_PATHS"))
-		option.ConfigFormat = os.Getenv("CONFIG_FORMAT")
+		option.ActiveProfiles = utils.SliceFromCommaString(os.Getenv("APPLICATION_ENV"))
+		option.ConfigPaths = utils.SliceFromCommaString(os.Getenv("APPLICATION_CONFIG_PATHS"))
+		option.ConfigFormat = os.Getenv("APPLICATION_CONFIG_FORMAT")
 	}
 }
 
-func WithProperties(options ...ConfigOption) Module {
-	if len(options) == 0 {
-		options = append(options, OptConfigFromEnv())
+func NewPropertiesAutoLoad(options ...Option) (config.Loader, *config.AppProperties) {
+	opts := []Option{WithEnvironmentOption()}
+	opts = append(opts, options...)
+	option := new(config.Option)
+	for _, optFunc := range opts {
+		optFunc(option)
 	}
-	return func(app *App) {
-		option := new(config.Option)
-		for _, optFunc := range options {
-			optFunc(option)
-		}
-		app.ConfigLoader = config.NewLoader(*option, nil)
-
-		// Bind application properties
-		app.Properties.Application = &config.ApplicationProperties{}
-		app.ConfigLoader.Bind(app.Properties.Application)
-	}
+	configLoader := config.NewLoader(*option, log.Debugf)
+	props := config.NewApplicationProperties(configLoader)
+	return configLoader, props
 }

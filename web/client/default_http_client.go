@@ -17,7 +17,7 @@ type DefaultHttpClient struct {
 	properties *HttpClientProperties
 }
 
-func NewDefaultHttpClient(properties *HttpClientProperties) (*DefaultHttpClient, error) {
+func NewDefaultHttpClient(properties *HttpClientProperties) (HttpClient, error) {
 	transport, err := setupHttpTransport(properties)
 	if err != nil {
 		return nil, err

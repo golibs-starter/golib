@@ -1,6 +1,7 @@
 package golib
 
 import (
+	"gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/pubsub"
 	"gitlab.id.vin/vincart/golib/web/listener"
 )
@@ -13,21 +14,17 @@ type EventListener interface {
 	Events() []pubsub.Event
 }
 
-func WithEventAutoConfig(listeners ...EventListener) Module {
-	return func(app *App) {
-		var debugLog pubsub.DebugLog
-		if app.Logger != nil {
-			debugLog = app.Logger.Debugf
-		}
+func NewEventAutoConfig(logger log.Logger, listeners ...EventListener) (*pubsub.EventBus, pubsub.Publisher) {
+	var debugLog pubsub.DebugLog = logger.Debugf
+	publisher := pubsub.NewPublisher()
+	bus := pubsub.NewEventBus(publisher, debugLog)
+	registerListeners(bus, listeners)
+	return bus, publisher
+}
 
-		publisher := pubsub.NewPublisher()
-		pubsub.RegisterGlobal(publisher)
-		app.Publisher = publisher
-
-		bus := pubsub.NewEventBus(publisher, debugLog)
-		registerListeners(bus, listeners)
-		go bus.Run()
-	}
+func RegisterEventAutoConfig(bus *pubsub.EventBus, publisher pubsub.Publisher) {
+	pubsub.ReplaceGlobal(publisher)
+	go bus.Run()
 }
 
 func registerListeners(bus *pubsub.EventBus, listeners []EventListener) {

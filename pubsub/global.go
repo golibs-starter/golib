@@ -1,8 +1,8 @@
 package pubsub
 
-var _publisher Publisher
+var _publisher Publisher = NewPublisher()
 
-func RegisterGlobal(publisher Publisher) {
+func ReplaceGlobal(publisher Publisher) {
 	_publisher = publisher
 }
 

@@ -10,10 +10,10 @@ import (
 
 type TraceableHttpClient struct {
 	client   HttpClient
-	appProps *config.ApplicationProperties
+	appProps *config.AppProperties
 }
 
-func NewTraceableHttpClient(client HttpClient, appProps *config.ApplicationProperties) *TraceableHttpClient {
+func NewTraceableHttpClient(client HttpClient, appProps *config.AppProperties) ContextualHttpClient {
 	return &TraceableHttpClient{
 		client:   client,
 		appProps: appProps,

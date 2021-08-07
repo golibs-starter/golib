@@ -1,6 +1,9 @@
 package client
 
-import "time"
+import (
+	"gitlab.id.vin/vincart/golib/config"
+	"time"
+)
 
 type HttpClientProperties struct {
 	// Timeout specifies a time limit for requests made by this client.
@@ -26,6 +29,12 @@ type HttpClientProperties struct {
 	// Proxy specify proxy url and urls will apply proxy and
 	// the requests with these urls will be requested under proxy
 	Proxy ProxyProperties
+}
+
+func NewHttpClientProperties(loader config.Loader) *HttpClientProperties {
+	props := HttpClientProperties{}
+	loader.Bind(&props)
+	return &props
 }
 
 func (h HttpClientProperties) Prefix() string {
