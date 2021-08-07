@@ -5,11 +5,11 @@ type Properties interface {
 }
 
 type PropertiesPreBinding interface {
-	PreBinding()
+	PreBinding() error
 }
 
 type PropertiesPostBinding interface {
-	PostBinding()
+	PostBinding() error
 }
 
 type AppProperties struct {
@@ -18,10 +18,12 @@ type AppProperties struct {
 	Path string `mapstructure:"path" default:"/"`
 }
 
-func NewApplicationProperties(loader Loader) *AppProperties {
+func NewApplicationProperties(loader Loader) (*AppProperties, error) {
 	props := AppProperties{}
-	loader.Bind(&props)
-	return &props
+	if err := loader.Bind(&props); err != nil {
+		return nil, err
+	}
+	return &props, nil
 }
 
 func (a AppProperties) Prefix() string {

@@ -8,7 +8,10 @@ import (
 )
 
 func NewLoggerAutoConfig(loader config.Loader) (log.Logger, *webLog.LoggingProperties, error) {
-	props := webLog.NewLoggingProperties(loader)
+	props, err := webLog.NewLoggingProperties(loader)
+	if err != nil {
+		return nil, nil, err
+	}
 	logger, err := NewLogger(props)
 	if err != nil {
 		return nil, nil, err

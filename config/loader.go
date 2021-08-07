@@ -10,7 +10,7 @@ import (
 )
 
 type Loader interface {
-	Bind(properties ...Properties)
+	Bind(properties ...Properties) error
 }
 
 type ViperLoader struct {
@@ -19,52 +19,64 @@ type ViperLoader struct {
 	viper    *viper.Viper
 }
 
-func NewLoader(option Option, debugLog func(msgFormat string, args ...interface{})) Loader {
+func NewLoader(option Option, debugLog func(msgFormat string, args ...interface{})) (Loader, error) {
 	setDefaultOption(&option)
 	if debugLog == nil {
 		debugLog = func(msgFormat string, args ...interface{}) {
 			_, _ = fmt.Printf(msgFormat+"\n", args...)
 		}
 	}
+	vi, err := loadViper(option, debugLog)
+	if err != nil {
+		return nil, err
+	}
 	return &ViperLoader{
 		option:   option,
 		debugLog: debugLog,
-		viper:    loadViper(option, debugLog),
-	}
+		viper:    vi,
+	}, nil
 }
 
-func (l *ViperLoader) Bind(propertiesList ...Properties) {
+func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 	for _, properties := range propertiesList {
 		propertiesName := reflect.TypeOf(properties).String()
 		// Run pre-binding life cycle
 		if propsPreBind, ok := properties.(PropertiesPreBinding); ok {
-			propsPreBind.PreBinding()
+			if err := propsPreBind.PreBinding(); err != nil {
+				return err
+			}
 		}
 
 		// Unmarshal from config file
 		if err := l.viper.UnmarshalKey(properties.Prefix(), properties); err != nil {
-			panic(fmt.Sprintf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
-				properties.Prefix(), propertiesName, err))
+			return fmt.Errorf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
+				properties.Prefix(), propertiesName, err)
 		}
 
 		// Set default value if its missing
-		l.setDefaults(propertiesName, properties)
+		if err := l.setDefaults(propertiesName, properties); err != nil {
+			return err
+		}
 
 		// Run post-binding life cycle
 		if propsPostBind, ok := properties.(PropertiesPostBinding); ok {
-			propsPostBind.PostBinding()
+			if err := propsPostBind.PostBinding(); err != nil {
+				return err
+			}
 		}
 		l.debugLog("[GoLib-debug] Properties [%s] loaded with prefix [%s]", propertiesName, properties.Prefix())
 	}
+	return nil
 }
 
-func (l *ViperLoader) setDefaults(propertiesName string, properties Properties) {
+func (l *ViperLoader) setDefaults(propertiesName string, properties Properties) error {
 	if err := defaults.Set(properties); err != nil {
-		panic(fmt.Sprintf("[GoLib-error] Fatal error when set default values for [%s]: %v", propertiesName, err))
+		return fmt.Errorf("[GoLib-error] Fatal error when set default values for [%s]: %v", propertiesName, err)
 	}
+	return nil
 }
 
-func loadViper(option Option, debugLog func(msgFormat string, args ...interface{})) *viper.Viper {
+func loadViper(option Option, debugLog func(msgFormat string, args ...interface{})) (*viper.Viper, error) {
 	debugActiveProfiles := strings.Join(option.ActiveProfiles, ", ")
 	debugPaths := strings.Join(option.ConfigPaths, ", ")
 	debugLog("[GoLib-debug] Loading active profiles [%s] in paths [%s] with format [%s]",
@@ -82,8 +94,8 @@ func loadViper(option Option, debugLog func(msgFormat string, args ...interface{
 		}
 		if err := vi.MergeInConfig(); err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-				panic(fmt.Sprintf("[GoLib-error] Fatal error when read active profile [%s] in paths [%s]: %v",
-					activeProfile, debugPaths, err))
+				return nil, fmt.Errorf("[GoLib-error] Fatal error when read active profile [%s] in paths [%s]: %v",
+					activeProfile, debugPaths, err)
 			}
 			debugLog("[GoLib-debug] Config file not found when read active profile [%s] in paths [%s]",
 				activeProfile, debugPaths)
@@ -104,13 +116,13 @@ func loadViper(option Option, debugLog func(msgFormat string, args ...interface{
 	for _, key := range vi.AllKeys() {
 		val := vi.Get(key)
 		if newVal, err := ReplacePlaceholderValue(val); err != nil {
-			panic(err)
+			return nil, err
 		} else {
 			val = newVal
 		}
 		vi.Set(key, val)
 	}
-	return vi
+	return vi, nil
 }
 
 // ReplacePlaceholderValue Replaces a value in placeholder format

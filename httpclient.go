@@ -6,7 +6,7 @@ import (
 	"gitlab.id.vin/vincart/golib/web/client"
 )
 
-type ContextualHttpClientWrapper func(client.ContextualHttpClient) client.ContextualHttpClient
+type ContextualHttpClientWrapper func(client.ContextualHttpClient) (client.ContextualHttpClient, error)
 type ContextualHttpClientWrappers []ContextualHttpClientWrapper
 
 func NewHttpClientAutoConfig(
@@ -14,7 +14,10 @@ func NewHttpClientAutoConfig(
 	appProps *config.AppProperties,
 	wrappers ContextualHttpClientWrappers,
 ) (client.ContextualHttpClient, *client.HttpClientProperties, error) {
-	props := client.NewHttpClientProperties(loader)
+	props, err := client.NewHttpClientProperties(loader)
+	if err != nil {
+		return nil, nil, err
+	}
 	httpClient, err := NewContextualHttpClient(appProps, props, wrappers)
 	if err != nil {
 		return nil, nil, err
@@ -40,7 +43,10 @@ func NewContextualHttpClient(
 
 	// Wrap around by other wrappers
 	for _, wrapper := range wrappers {
-		httpClient = wrapper(httpClient)
+		httpClient, err = wrapper(httpClient)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return httpClient, nil
 }

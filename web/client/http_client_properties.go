@@ -31,10 +31,12 @@ type HttpClientProperties struct {
 	Proxy ProxyProperties
 }
 
-func NewHttpClientProperties(loader config.Loader) *HttpClientProperties {
+func NewHttpClientProperties(loader config.Loader) (*HttpClientProperties, error) {
 	props := HttpClientProperties{}
-	loader.Bind(&props)
-	return &props
+	if err := loader.Bind(&props); err != nil {
+		return nil, err
+	}
+	return &props, nil
 }
 
 func (h HttpClientProperties) Prefix() string {

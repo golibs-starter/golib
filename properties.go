@@ -36,14 +36,20 @@ func WithEnvironmentOption() Option {
 	}
 }
 
-func NewPropertiesAutoLoad(options ...Option) (config.Loader, *config.AppProperties) {
+func NewPropertiesAutoLoad(options ...Option) (config.Loader, *config.AppProperties, error) {
 	opts := []Option{WithEnvironmentOption()}
 	opts = append(opts, options...)
 	option := new(config.Option)
 	for _, optFunc := range opts {
 		optFunc(option)
 	}
-	configLoader := config.NewLoader(*option, log.Debugf)
-	props := config.NewApplicationProperties(configLoader)
-	return configLoader, props
+	configLoader, err := config.NewLoader(*option, log.Debugf)
+	if err != nil {
+		return nil, nil, err
+	}
+	props, err := config.NewApplicationProperties(configLoader)
+	if err != nil {
+		return nil, nil, err
+	}
+	return configLoader, props, nil
 }

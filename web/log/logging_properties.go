@@ -8,10 +8,12 @@ type LoggingProperties struct {
 	CallerSkip     int  `default:"2"`
 }
 
-func NewLoggingProperties(loader config.Loader) *LoggingProperties {
+func NewLoggingProperties(loader config.Loader) (*LoggingProperties, error) {
 	props := LoggingProperties{}
-	loader.Bind(&props)
-	return &props
+	if err := loader.Bind(&props); err != nil {
+		return nil, err
+	}
+	return &props, nil
 }
 
 func (l LoggingProperties) Prefix() string {
