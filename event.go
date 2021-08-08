@@ -3,44 +3,59 @@ package golib
 import (
 	"gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/pubsub"
+	"gitlab.id.vin/vincart/golib/utils"
 	"gitlab.id.vin/vincart/golib/web/listener"
+	"go.uber.org/fx"
 )
 
 type EventListener interface {
 	pubsub.Subscriber
 
 	// Events List of events that
-	// this listener will be subscribed on
+	// this listener will subscribe
 	Events() []pubsub.Event
 }
 
-func NewEventAutoConfig(logger log.Logger, listeners ...EventListener) (*pubsub.EventBus, pubsub.Publisher) {
+type EventAutoConfigOut struct {
+	fx.Out
+	Bus              *pubsub.EventBus
+	Publisher        pubsub.Publisher
+	DefaultListeners []EventListener `group:"event_listener,flatten"`
+}
+
+func NewEventAutoConfig(logger log.Logger) EventAutoConfigOut {
 	var debugLog pubsub.DebugLog = logger.Debugf
 	publisher := pubsub.NewPublisher()
 	bus := pubsub.NewEventBus(publisher, debugLog)
-	registerListeners(bus, listeners)
-	return bus, publisher
-}
-
-func RegisterEventAutoConfig(bus *pubsub.EventBus, publisher pubsub.Publisher) {
-	pubsub.ReplaceGlobal(publisher)
-	go bus.Run()
-}
-
-func registerListeners(bus *pubsub.EventBus, listeners []EventListener) {
-	if listeners == nil {
-		listeners = make([]EventListener, 0)
+	return EventAutoConfigOut{
+		Bus:       bus,
+		Publisher: publisher,
+		DefaultListeners: []EventListener{
+			new(listener.RequestCompletedLogListener),
+		},
 	}
-	listeners = appendPredefinedListeners(listeners)
-	for _, eventListener := range listeners {
+}
+
+type RegisterEventAutoConfigIn struct {
+	fx.In
+	Logger    log.Logger
+	Bus       *pubsub.EventBus
+	Publisher pubsub.Publisher
+	Listeners []EventListener `group:"event_listener"`
+}
+
+func RegisterEventAutoConfig(in RegisterEventAutoConfigIn) {
+	pubsub.ReplaceGlobal(in.Publisher)
+
+	// Subscribe events
+	for _, eventListener := range in.Listeners {
 		if subscribedEvents := eventListener.Events(); subscribedEvents != nil {
 			for _, e := range subscribedEvents {
-				bus.Subscribe(e, eventListener)
+				in.Logger.Infof("[%s] is subscribed event [%s]", utils.GetTypeName(eventListener), e.Name())
+				in.Bus.Subscribe(e, eventListener)
 			}
 		}
 	}
-}
 
-func appendPredefinedListeners(listeners []EventListener) []EventListener {
-	return append(listeners, new(listener.RequestCompletedLogListener))
+	go in.Bus.Run()
 }
