@@ -4,49 +4,55 @@ import (
 	"fmt"
 	"gitlab.id.vin/vincart/golib/config"
 	"gitlab.id.vin/vincart/golib/web/client"
+	"go.uber.org/fx"
 )
 
 type ContextualHttpClientWrapper func(client.ContextualHttpClient) (client.ContextualHttpClient, error)
-type ContextualHttpClientWrappers []ContextualHttpClientWrapper
 
-func NewHttpClientAutoConfig(
-	loader config.Loader,
-	appProps *config.AppProperties,
-	wrappers ContextualHttpClientWrappers,
-) (client.ContextualHttpClient, *client.HttpClientProperties, error) {
-	props, err := client.NewHttpClientProperties(loader)
-	if err != nil {
-		return nil, nil, err
-	}
-	httpClient, err := NewContextualHttpClient(appProps, props, wrappers)
-	if err != nil {
-		return nil, nil, err
-	}
-	return httpClient, props, nil
+type HttpClientAutoConfigIn struct {
+	fx.In
+	ConfigLoader  config.Loader
+	AppProperties *config.AppProperties
+	Wrappers      []ContextualHttpClientWrapper `group:"contextual_http_client_wrapper"`
 }
 
-func NewContextualHttpClient(
-	appProps *config.AppProperties,
-	httpClientProps *client.HttpClientProperties,
-	wrappers ContextualHttpClientWrappers,
-) (client.ContextualHttpClient, error) {
-	// Create default http client
-	defaultHttpClient, err := client.NewDefaultHttpClient(httpClientProps)
+type HttpClientAutoConfigOut struct {
+	fx.Out
+	Properties *client.HttpClientProperties
+	HttpClient client.ContextualHttpClient
+}
+
+// NewHttpClientAutoConfig Initiate a client.ContextualHttpClient with
+// configs are loaded automatically.
+// Alternatively you can wrap the default client.ContextualHttpClient with
+// one or more other client.ContextualHttpClient to customize the behavior.
+// To do that, your provider have to return ContextualHttpClientWrapper.
+// For example https://gitlab.id.vin/vincart/golib-security/-/blob/develop/httpclient.go
+func NewHttpClientAutoConfig(in HttpClientAutoConfigIn) (HttpClientAutoConfigOut, error) {
+	out := HttpClientAutoConfigOut{}
+	properties, err := client.NewHttpClientProperties(in.ConfigLoader)
 	if err != nil {
-		return nil, fmt.Errorf("error when init default http client: [%v]", err)
+		return out, err
+	}
+
+	// Create default http client
+	defaultHttpClient, err := client.NewDefaultHttpClient(properties)
+	if err != nil {
+		return out, fmt.Errorf("error when init default http client: [%v]", err)
 	}
 
 	// Wrap around by TraceableHttpClient by default
-	var httpClient = client.NewTraceableHttpClient(
-		defaultHttpClient, appProps,
-	)
+	var httpClient = client.NewTraceableHttpClient(defaultHttpClient, in.AppProperties)
 
 	// Wrap around by other wrappers
-	for _, wrapper := range wrappers {
+	for _, wrapper := range in.Wrappers {
 		httpClient, err = wrapper(httpClient)
 		if err != nil {
-			return nil, err
+			return out, err
 		}
 	}
-	return httpClient, nil
+
+	out.Properties = properties
+	out.HttpClient = httpClient
+	return out, nil
 }
