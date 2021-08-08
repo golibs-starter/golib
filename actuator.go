@@ -20,6 +20,27 @@ type ActuatorOut struct {
 	InformerService actuator.InfoService
 }
 
+// NewActuatorEndpointAutoConfig Initiate actuator endpoint with
+// health checker and informer automatically.
+//
+// To register a Health Checker, your component have to
+// produce an actuator.HealthChecker with group `actuator_health_checker`
+// in the result of provider function.
+// For example, a redis provider produce the following result:
+//   type RedisOut struct {
+//      fx.Out
+//      Client        *redis.Client
+//      HealthChecker actuator.HealthChecker `group:"actuator_health_checker"`
+//   }
+//   func NewRedis() (RedisOut, error) {}
+//
+// Similar to Health Checker, an Informer also registered by produce an actuator.Informer.
+// For example, a GitRevision provider produce the following result:
+//   type GitRevisionOut struct {
+//      fx.Out
+//      Informer actuator.Informer `group:"actuator_informer"`
+//   }
+//   func NewGitRevision() (GitRevisionOut, error) {}
 func NewActuatorEndpointAutoConfig(in ActuatorIn) ActuatorOut {
 	healthService := actuator.NewDefaultHealthService(in.Checkers)
 	infoService := actuator.NewDefaultInfoService(in.Props, in.Informers)
