@@ -33,16 +33,12 @@ func NewLogger(options *Options) (Logger, error) {
 		Thereafter: 100,
 	}
 
-	// Default behavior for the logger
-	var level zapcore.Level
-	var encoderConfig zapcore.EncoderConfig
+	var level = zap.InfoLevel
 	if options.Development == true {
-		encoderConfig = zap.NewDevelopmentEncoderConfig()
 		level = zap.DebugLevel
-	} else {
-		encoderConfig = zap.NewProductionEncoderConfig()
-		level = zap.InfoLevel
 	}
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 
 	encoding := OutputModeConsole
 	if options.JsonOutputMode {
@@ -62,9 +58,9 @@ func NewLogger(options *Options) (Logger, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	zapOptions := append(make([]zap.Option, 0), zap.AddCallerSkip(options.CallerSkip))
-	zap.ReplaceGlobals(zapLogger.WithOptions(zapOptions...))
+	zap.ReplaceGlobals(
+		zapLogger.WithOptions(zap.AddCallerSkip(options.CallerSkip)),
+	)
 	return &logger{options: options}, nil
 }
 
