@@ -1,6 +1,7 @@
 package golib
 
 import (
+	"gitlab.id.vin/vincart/golib/event"
 	"gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/pubsub"
 	"gitlab.id.vin/vincart/golib/utils"
@@ -8,43 +9,42 @@ import (
 	"go.uber.org/fx"
 )
 
-type EventListener interface {
-	pubsub.Subscriber
-
-	// Events List of events that
-	// this listener will subscribe
-	Events() []pubsub.Event
+func EventAutoConfig() fx.Option {
+	return fx.Options(
+		ProvideEventListener(listener.NewRequestCompletedLogListener),
+		fx.Provide(NewEventPublisher),
+		fx.Invoke(RegisterEventPublisher),
+	)
 }
 
-type EventAutoConfigOut struct {
+func ProvideEventListener(listener interface{}) fx.Option {
+	return fx.Provide(fx.Annotated{Group: "event_listener", Target: listener})
+}
+
+type EventPublisherOut struct {
 	fx.Out
-	Bus              *pubsub.EventBus
-	Publisher        pubsub.Publisher
-	DefaultListeners []EventListener `group:"event_listener,flatten"`
+	Publisher pubsub.Publisher
+	EventBus  *pubsub.EventBus
 }
 
-func NewEventAutoConfig(logger log.Logger) EventAutoConfigOut {
-	var debugLog pubsub.DebugLog = logger.Debugf
+func NewEventPublisher(logger log.Logger) EventPublisherOut {
 	publisher := pubsub.NewPublisher()
-	bus := pubsub.NewEventBus(publisher, debugLog)
-	return EventAutoConfigOut{
-		Bus:       bus,
+	eventBus := pubsub.NewEventBus(publisher, logger.Debugf)
+	return EventPublisherOut{
+		EventBus:  eventBus,
 		Publisher: publisher,
-		DefaultListeners: []EventListener{
-			new(listener.RequestCompletedLogListener),
-		},
 	}
 }
 
 type RegisterEventAutoConfigIn struct {
 	fx.In
 	Logger    log.Logger
-	Bus       *pubsub.EventBus
+	EventBus  *pubsub.EventBus
 	Publisher pubsub.Publisher
-	Listeners []EventListener `group:"event_listener"`
+	Listeners []event.Listener `group:"event_listener"`
 }
 
-func RegisterEventAutoConfig(in RegisterEventAutoConfigIn) {
+func RegisterEventPublisher(in RegisterEventAutoConfigIn) {
 	pubsub.ReplaceGlobal(in.Publisher)
 
 	// Subscribe events
@@ -52,10 +52,10 @@ func RegisterEventAutoConfig(in RegisterEventAutoConfigIn) {
 		if subscribedEvents := eventListener.Events(); subscribedEvents != nil {
 			for _, e := range subscribedEvents {
 				in.Logger.Infof("[%s] is subscribed event [%s]", utils.GetTypeName(eventListener), e.Name())
-				in.Bus.Subscribe(e, eventListener)
+				in.EventBus.Subscribe(e, eventListener)
 			}
 		}
 	}
 
-	go in.Bus.Run()
+	go in.EventBus.Run()
 }

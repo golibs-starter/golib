@@ -1,6 +1,9 @@
 package config
 
-import "gitlab.id.vin/vincart/golib/utils"
+import (
+	"fmt"
+	"gitlab.id.vin/vincart/golib/utils"
+)
 
 const (
 	DefaultProfile      = "default"
@@ -8,10 +11,13 @@ const (
 	DefaultConfigPath   = "./config"
 )
 
+type DebugFunc func(msgFormat string, args ...interface{})
+
 type Option struct {
 	ActiveProfiles []string
 	ConfigPaths    []string
 	ConfigFormat   string // yaml, json
+	DebugFunc      DebugFunc
 }
 
 func setDefaultOption(option *Option) {
@@ -28,5 +34,11 @@ func setDefaultOption(option *Option) {
 
 	if len(option.ConfigPaths) == 0 {
 		option.ConfigPaths = []string{DefaultConfigPath}
+	}
+
+	if option.DebugFunc == nil {
+		option.DebugFunc = func(msgFormat string, args ...interface{}) {
+			_, _ = fmt.Printf(msgFormat+"\n", args...)
+		}
 	}
 }

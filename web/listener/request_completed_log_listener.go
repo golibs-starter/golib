@@ -1,6 +1,7 @@
 package listener
 
 import (
+	coreEvent "gitlab.id.vin/vincart/golib/event"
 	mainLog "gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/pubsub"
 	"gitlab.id.vin/vincart/golib/web/constant"
@@ -9,6 +10,10 @@ import (
 )
 
 type RequestCompletedLogListener struct {
+}
+
+func NewRequestCompletedLogListener() coreEvent.Listener {
+	return &RequestCompletedLogListener{}
 }
 
 func (r RequestCompletedLogListener) Events() []pubsub.Event {

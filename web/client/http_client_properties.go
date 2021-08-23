@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+func NewHttpClientProperties(loader config.Loader) (*HttpClientProperties, error) {
+	props := HttpClientProperties{}
+	err := loader.Bind(&props)
+	return &props, err
+}
+
 type HttpClientProperties struct {
 	// Timeout specifies a time limit for requests made by this client.
 	// The timeout includes connection time, any redirects, and reading the response body.
@@ -29,14 +35,6 @@ type HttpClientProperties struct {
 	// Proxy specify proxy url and urls will apply proxy and
 	// the requests with these urls will be requested under proxy
 	Proxy ProxyProperties
-}
-
-func NewHttpClientProperties(loader config.Loader) (*HttpClientProperties, error) {
-	props := HttpClientProperties{}
-	if err := loader.Bind(&props); err != nil {
-		return nil, err
-	}
-	return &props, nil
 }
 
 func (h HttpClientProperties) Prefix() string {

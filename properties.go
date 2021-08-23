@@ -4,8 +4,47 @@ import (
 	"gitlab.id.vin/vincart/golib/config"
 	"gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/utils"
+	"go.uber.org/fx"
 	"os"
 )
+
+func PropertiesAutoConfig() fx.Option {
+	return fx.Provide(NewPropertiesLoader)
+}
+
+type EnablePropsAutoloadOut struct {
+	fx.Out
+	Properties config.Properties `group:"properties"`
+}
+
+func EnablePropsAutoload(props config.Properties) fx.Option {
+	return fx.Provide(func() EnablePropsAutoloadOut {
+		return EnablePropsAutoloadOut{
+			Properties: props,
+		}
+	})
+}
+
+type PropertiesLoaderIn struct {
+	fx.In
+	Properties []config.Properties `group:"properties"`
+}
+
+func NewPropertiesLoader(in PropertiesLoaderIn, options ...Option) (config.Loader, error) {
+	option := new(config.Option)
+	option.ActiveProfiles = utils.SliceFromCommaString(os.Getenv("APPLICATION_ENV"))
+	option.ConfigPaths = utils.SliceFromCommaString(os.Getenv("APPLICATION_CONFIG_PATHS"))
+	option.ConfigFormat = os.Getenv("APPLICATION_CONFIG_FORMAT")
+	option.DebugFunc = log.Debugf
+	for _, optFunc := range options {
+		optFunc(option)
+	}
+	loader, err := config.NewLoader(*option, in.Properties)
+	if err != nil {
+		return nil, err
+	}
+	return loader, nil
+}
 
 type Option func(option *config.Option)
 
@@ -28,28 +67,8 @@ func WithFormat(configFormat string) Option {
 	}
 }
 
-func WithEnvironmentOption() Option {
+func WithDebugLog(debugFunc config.DebugFunc) Option {
 	return func(option *config.Option) {
-		option.ActiveProfiles = utils.SliceFromCommaString(os.Getenv("APPLICATION_ENV"))
-		option.ConfigPaths = utils.SliceFromCommaString(os.Getenv("APPLICATION_CONFIG_PATHS"))
-		option.ConfigFormat = os.Getenv("APPLICATION_CONFIG_FORMAT")
+		option.DebugFunc = debugFunc
 	}
-}
-
-func NewPropertiesAutoLoad(options ...Option) (config.Loader, *config.AppProperties, error) {
-	opts := []Option{WithEnvironmentOption()}
-	opts = append(opts, options...)
-	option := new(config.Option)
-	for _, optFunc := range opts {
-		optFunc(option)
-	}
-	configLoader, err := config.NewLoader(*option, log.Debugf)
-	if err != nil {
-		return nil, nil, err
-	}
-	props, err := config.NewApplicationProperties(configLoader)
-	if err != nil {
-		return nil, nil, err
-	}
-	return configLoader, props, nil
 }

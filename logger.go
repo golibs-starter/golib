@@ -2,25 +2,18 @@ package golib
 
 import (
 	"fmt"
-	"gitlab.id.vin/vincart/golib/config"
 	"gitlab.id.vin/vincart/golib/log"
 	webLog "gitlab.id.vin/vincart/golib/web/log"
+	"go.uber.org/fx"
 )
 
-func NewLoggerAutoConfig(loader config.Loader) (log.Logger, *webLog.LoggingProperties, error) {
-	props, err := webLog.NewLoggingProperties(loader)
-	if err != nil {
-		return nil, nil, err
-	}
-	logger, err := NewLogger(props)
-	if err != nil {
-		return nil, nil, err
-	}
-	return logger, props, nil
-}
-
-func RegisterLoggerAutoConfig(logger log.Logger) {
-	log.ReplaceGlobal(logger)
+func LoggingAutoConfig() fx.Option {
+	return fx.Options(
+		EnablePropsAutoload(new(webLog.LoggingProperties)),
+		fx.Provide(webLog.NewLoggingProperties),
+		fx.Provide(NewLogger),
+		fx.Invoke(RegisterLogger),
+	)
 }
 
 func NewLogger(props *webLog.LoggingProperties) (log.Logger, error) {
@@ -34,4 +27,8 @@ func NewLogger(props *webLog.LoggingProperties) (log.Logger, error) {
 		return nil, fmt.Errorf("error when init logger: [%v]", err)
 	}
 	return logger, nil
+}
+
+func RegisterLogger(logger log.Logger) {
+	log.ReplaceGlobal(logger)
 }

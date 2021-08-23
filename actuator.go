@@ -6,6 +6,10 @@ import (
 	"go.uber.org/fx"
 )
 
+func ActuatorEndpointAutoConfig() fx.Option {
+	return fx.Provide(NewActuatorEndpoint)
+}
+
 type ActuatorIn struct {
 	fx.In
 	Props     *config.AppProperties
@@ -20,7 +24,7 @@ type ActuatorOut struct {
 	InformerService actuator.InfoService
 }
 
-// NewActuatorEndpointAutoConfig Initiate actuator endpoint with
+// NewActuatorEndpoint Initiate actuator endpoint with
 // health checker and informer automatically.
 //
 // To register a Health Checker, your component have to
@@ -41,7 +45,7 @@ type ActuatorOut struct {
 //      Informer actuator.Informer `group:"actuator_informer"`
 //   }
 //   func NewGitRevision() (GitRevisionOut, error) {}
-func NewActuatorEndpointAutoConfig(in ActuatorIn) ActuatorOut {
+func NewActuatorEndpoint(in ActuatorIn) ActuatorOut {
 	healthService := actuator.NewDefaultHealthService(in.Checkers)
 	infoService := actuator.NewDefaultInfoService(in.Props, in.Informers)
 	return ActuatorOut{

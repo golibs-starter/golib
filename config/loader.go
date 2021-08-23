@@ -1,70 +1,69 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/creasty/defaults"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 	"os"
 	"reflect"
 	"strings"
 )
+
+var keyDelimiter = "."
 
 type Loader interface {
 	Bind(properties ...Properties) error
 }
 
 type ViperLoader struct {
-	option   Option
-	debugLog func(msgFormat string, args ...interface{})
-	viper    *viper.Viper
+	viper      *viper.Viper
+	option     Option
+	properties []Properties
 }
 
-func NewLoader(option Option, debugLog func(msgFormat string, args ...interface{})) (Loader, error) {
+func NewLoader(option Option, properties []Properties) (Loader, error) {
 	setDefaultOption(&option)
-	if debugLog == nil {
-		debugLog = func(msgFormat string, args ...interface{}) {
-			_, _ = fmt.Printf(msgFormat+"\n", args...)
-		}
-	}
-	vi, err := loadViper(option, debugLog)
+	vi, err := loadViper(option, properties)
 	if err != nil {
 		return nil, err
 	}
 	return &ViperLoader{
-		option:   option,
-		debugLog: debugLog,
-		viper:    vi,
+		viper:      vi,
+		option:     option,
+		properties: properties,
 	}, nil
 }
 
 func (l *ViperLoader) Bind(propertiesList ...Properties) error {
-	for _, properties := range propertiesList {
-		propertiesName := reflect.TypeOf(properties).String()
+	for _, props := range propertiesList {
+		propsName := reflect.TypeOf(props).String()
 		// Run pre-binding life cycle
-		if propsPreBind, ok := properties.(PropertiesPreBinding); ok {
+		if propsPreBind, ok := props.(PropertiesPreBinding); ok {
 			if err := propsPreBind.PreBinding(); err != nil {
 				return err
 			}
 		}
 
 		// Unmarshal from config file
-		if err := l.viper.UnmarshalKey(properties.Prefix(), properties); err != nil {
+		if err := l.viper.UnmarshalKey(props.Prefix(), props); err != nil {
 			return fmt.Errorf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
-				properties.Prefix(), propertiesName, err)
+				props.Prefix(), propsName, err)
 		}
 
 		// Set default value if its missing
-		if err := l.setDefaults(propertiesName, properties); err != nil {
+		if err := l.setDefaults(propsName, props); err != nil {
 			return err
 		}
 
 		// Run post-binding life cycle
-		if propsPostBind, ok := properties.(PropertiesPostBinding); ok {
+		if propsPostBind, ok := props.(PropertiesPostBinding); ok {
 			if err := propsPostBind.PostBinding(); err != nil {
 				return err
 			}
 		}
-		l.debugLog("[GoLib-debug] Properties [%s] loaded with prefix [%s]", propertiesName, properties.Prefix())
+		l.option.DebugFunc("[GoLib-debug] LoggingProperties [%s] loaded with prefix [%s]", propsName, props.Prefix())
 	}
 	return nil
 }
@@ -76,32 +75,20 @@ func (l *ViperLoader) setDefaults(propertiesName string, properties Properties) 
 	return nil
 }
 
-func loadViper(option Option, debugLog func(msgFormat string, args ...interface{})) (*viper.Viper, error) {
-	debugActiveProfiles := strings.Join(option.ActiveProfiles, ", ")
-	debugPaths := strings.Join(option.ConfigPaths, ", ")
-	debugLog("[GoLib-debug] Loading active profiles [%s] in paths [%s] with format [%s]",
-		debugActiveProfiles, debugPaths, option.ConfigFormat)
+func loadViper(option Option, propertiesList []Properties) (*viper.Viper, error) {
+	option.DebugFunc("[GoLib-debug] Loading active profiles [%s] in paths [%s] with format [%s]",
+		strings.Join(option.ActiveProfiles, ", "), strings.Join(option.ConfigPaths, ", "), option.ConfigFormat)
 
-	vi := viper.New()
+	vi := viper.NewWithOptions(viper.KeyDelimiter(keyDelimiter))
+	vi.SetEnvKeyReplacer(strings.NewReplacer(keyDelimiter, "_"))
 	vi.AutomaticEnv()
-	vi.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	for _, activeProfile := range option.ActiveProfiles {
-		vi.SetConfigName(activeProfile)
-		vi.SetConfigType(option.ConfigFormat)
-		for _, path := range option.ConfigPaths {
-			vi.AddConfigPath(path)
-		}
-		if err := vi.MergeInConfig(); err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-				return nil, fmt.Errorf("[GoLib-error] Fatal error when read active profile [%s] in paths [%s]: %v",
-					activeProfile, debugPaths, err)
-			}
-			debugLog("[GoLib-debug] Config file not found when read active profile [%s] in paths [%s]",
-				activeProfile, debugPaths)
-			continue
-		}
-		debugLog("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
+	if err := discoverDefaultValue(vi, propertiesList, option.DebugFunc); err != nil {
+		return nil, err
+	}
+
+	if err := discoverActiveProfiles(vi, option); err != nil {
+		return nil, err
 	}
 
 	// High priority for environment variable.
@@ -123,6 +110,64 @@ func loadViper(option Option, debugLog func(msgFormat string, args ...interface{
 		vi.Set(key, val)
 	}
 	return vi, nil
+}
+
+// discoverDefaultValue Discover default values for multiple properties at once
+func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFunc DebugFunc) error {
+	for _, props := range propertiesList {
+		propsName := reflect.TypeOf(props).String()
+
+		// set default values in viper.
+		// Viper needs to know if a key exists in order to override it.
+		// https://github.com/spf13/viper/issues/188
+		b, err := yaml.Marshal(convertSliceToNestedMap(strings.Split(props.Prefix(), keyDelimiter), props, nil))
+		if err != nil {
+			return err
+		}
+		vi.SetConfigType("yaml")
+		if err := vi.MergeConfig(bytes.NewReader(b)); err != nil {
+			return fmt.Errorf("[GoLib-error] Error when discover default value for properties [%s]: %v", propsName, err)
+		}
+		debugFunc("[GoLib-debug] Default value was discovered for properties [%s]", propsName)
+	}
+	return nil
+}
+
+// discoverActiveProfiles Discover values for multiple active profiles at once
+func discoverActiveProfiles(vi *viper.Viper, option Option) error {
+	debugPaths := strings.Join(option.ConfigPaths, ", ")
+	for _, activeProfile := range option.ActiveProfiles {
+		vi.SetConfigName(activeProfile)
+		vi.SetConfigType(option.ConfigFormat)
+		for _, path := range option.ConfigPaths {
+			vi.AddConfigPath(path)
+		}
+		if err := vi.MergeInConfig(); err != nil {
+			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+				return fmt.Errorf("[GoLib-error] Error when read active profile [%s] in paths [%s]: %v",
+					activeProfile, debugPaths, err)
+			}
+			return fmt.Errorf("[GoLib-debug] Config file not found when read active profile [%s] in paths [%s]",
+				activeProfile, debugPaths)
+		}
+		option.DebugFunc("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
+	}
+	return nil
+}
+
+func convertSliceToNestedMap(paths []string, endVal interface{}, inMap map[interface{}]interface{}) map[interface{}]interface{} {
+	if inMap == nil {
+		inMap = map[interface{}]interface{}{}
+	}
+	if len(paths) == 0 {
+		return inMap
+	}
+	if len(paths) == 1 {
+		inMap[paths[0]] = endVal
+		return inMap
+	}
+	inMap[paths[0]] = convertSliceToNestedMap(paths[1:], endVal, map[interface{}]interface{}{})
+	return inMap
 }
 
 // ReplacePlaceholderValue Replaces a value in placeholder format

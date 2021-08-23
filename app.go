@@ -3,12 +3,16 @@ package golib
 import (
 	"gitlab.id.vin/vincart/golib/config"
 	"gitlab.id.vin/vincart/golib/web/middleware"
+	"go.uber.org/fx"
 	"net/http"
 )
 
-type App struct {
-	Properties *config.AppProperties
-	handlers   []func(next http.Handler) http.Handler
+func AppAutoConfig() fx.Option {
+	return fx.Options(
+		EnablePropsAutoload(new(config.AppProperties)),
+		fx.Provide(config.NewAppProperties),
+		fx.Provide(New),
+	)
 }
 
 func New(props *config.AppProperties) *App {
@@ -19,6 +23,11 @@ func New(props *config.AppProperties) *App {
 		middleware.CorrelationId(),
 	)
 	return &app
+}
+
+type App struct {
+	Properties *config.AppProperties
+	handlers   []func(next http.Handler) http.Handler
 }
 
 func (a App) Name() string {
