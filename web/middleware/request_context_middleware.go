@@ -4,7 +4,6 @@ import (
 	mainContext "context"
 	"errors"
 	"gitlab.id.vin/vincart/golib/pubsub"
-	"gitlab.id.vin/vincart/golib/web/constant"
 	"gitlab.id.vin/vincart/golib/web/context"
 	"gitlab.id.vin/vincart/golib/web/event"
 	"gitlab.id.vin/vincart/golib/web/log"
@@ -12,11 +11,14 @@ import (
 	"time"
 )
 
+// RequestContext middleware responsible to inject attributes to the request's context.
+// This middleware should be run as soon as possible to
+// create a uniform context for the request.
 func RequestContext() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
-			requestAttributes := getOrCreateRequestAttributes(r)
+			requestAttributes := context.GetOrCreateRequestAttributes(r)
 			next.ServeHTTP(w, r)
 			if advancedResponseWriter, err := getAdvancedResponseWriter(w); err != nil {
 				log.Warn(r.Context(), "Cannot detect AdvancedResponseWriter with error [%s]", err.Error())
@@ -40,58 +42,6 @@ func getAdvancedResponseWriter(w http.ResponseWriter) (*context.AdvancedResponse
 		return nil, errors.New("ResponseWriter is wrapped by more than two level")
 	}
 	return nil, errors.New("your ResponseWriter is not implement context.WrappingResponseWriter")
-}
-
-func getOrCreateRequestAttributes(r *http.Request) *context.RequestAttributes {
-	reqAttrCtxValue := r.Context().Value(constant.ContextReqAttribute)
-	if reqAttrCtxValue == nil {
-		return createNewRequestAttributes(r)
-	}
-	requestAttributes, ok := reqAttrCtxValue.(*context.RequestAttributes)
-	if !ok {
-		log.Error(r.Context(), "Request attributes is not *RequestAttributes type")
-		return createNewRequestAttributes(r)
-	}
-	return requestAttributes
-}
-
-func createNewRequestAttributes(r *http.Request) *context.RequestAttributes {
-	requestAttributes := makeRequestAttributes(r)
-	*r = *r.WithContext(mainContext.WithValue(r.Context(), constant.ContextReqAttribute, requestAttributes))
-	return requestAttributes
-}
-
-func makeRequestAttributes(r *http.Request) *context.RequestAttributes {
-	return &context.RequestAttributes{
-		Method:             r.Method,
-		Uri:                r.RequestURI,
-		Query:              r.URL.RawQuery,
-		Url:                r.URL.String(),
-		UserAgent:          r.Header.Get(constant.HeaderUserAgent),
-		ClientIpAddress:    getClientIpAddress(r),
-		DeviceId:           r.Header.Get(constant.HeaderDeviceId),
-		DeviceSessionId:    r.Header.Get(constant.HeaderDeviceSessionId),
-		CallerId:           getServiceClientName(r),
-		SecurityAttributes: context.SecurityAttributes{},
-	}
-}
-
-func getClientIpAddress(r *http.Request) string {
-	if clientIpAddress := r.Header.Get(constant.HeaderClientIpAddress); len(clientIpAddress) > 0 {
-		return clientIpAddress
-	}
-	if clientIpAddress := r.Header.Get(constant.HeaderOldClientIpAddress); len(clientIpAddress) > 0 {
-		return clientIpAddress
-	}
-	return r.RemoteAddr
-}
-
-func getServiceClientName(r *http.Request) string {
-	serviceName := r.Header.Get(constant.HeaderServiceClientName)
-	if len(serviceName) > 0 {
-		return serviceName
-	}
-	return r.Header.Get(constant.HeaderOldServiceClientName)
 }
 
 func publishRequestCompletedEvent(ctx mainContext.Context, requestAttributes *context.RequestAttributes) {
