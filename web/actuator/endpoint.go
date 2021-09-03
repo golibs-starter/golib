@@ -1,34 +1,35 @@
 package actuator
 
 import (
+	"gitlab.id.vin/vincart/golib/actuator"
 	"gitlab.id.vin/vincart/golib/web/response"
 	"net/http"
 )
 
 type Endpoint struct {
-	healthService HealthService
-	infoService   InfoService
+	healthService actuator.HealthService
+	infoService   actuator.InfoService
 }
 
-func NewEndpoint(healthService HealthService, infoService InfoService) *Endpoint {
+func NewEndpoint(healthService actuator.HealthService, infoService actuator.InfoService) *Endpoint {
 	return &Endpoint{
 		healthService: healthService,
 		infoService:   infoService,
 	}
 }
 
-func (c Endpoint) HealthService() HealthService {
+func (c Endpoint) HealthService() actuator.HealthService {
 	return c.healthService
 }
 
-func (c Endpoint) InfoService() InfoService {
+func (c Endpoint) InfoService() actuator.InfoService {
 	return c.infoService
 }
 
 func (c Endpoint) Health(w http.ResponseWriter, r *http.Request) {
 	health := c.healthService.Check()
 	var res response.Response
-	if health.Status == StatusDown {
+	if health.Status == actuator.StatusDown {
 		res = response.New(http.StatusServiceUnavailable, "Server is down", health)
 	} else {
 		res = response.New(http.StatusOK, "Server is up", health)

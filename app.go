@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func AppAutoConfig() fx.Option {
+func AppOpt() fx.Option {
 	return fx.Options(
 		EnablePropsAutoload(new(config.AppProperties)),
 		fx.Provide(config.NewAppProperties),

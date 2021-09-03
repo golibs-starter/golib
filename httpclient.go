@@ -7,7 +7,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func HttpClientAutoConfig() fx.Option {
+func HttpClientOpt() fx.Option {
 	return fx.Options(
 		EnablePropsAutoload(new(client.HttpClientProperties)),
 		fx.Provide(client.NewHttpClientProperties),

@@ -9,7 +9,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func EventAutoConfig() fx.Option {
+func EventOpt() fx.Option {
 	return fx.Options(
 		ProvideEventListener(listener.NewRequestCompletedLogListener),
 		fx.Provide(NewEventPublisher),

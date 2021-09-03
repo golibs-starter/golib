@@ -1,5 +1,10 @@
 package actuator
 
+const (
+	StatusUp   = "UP"
+	StatusDown = "DOWN"
+)
+
 // Health is a model represents for service health status.
 // Includes Status UP or DOWN (see StatusUp, StatusDown),
 // and a map of Components under test (with key is component name, value is StatusDetails)

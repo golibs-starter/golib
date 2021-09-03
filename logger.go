@@ -7,7 +7,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func LoggingAutoConfig() fx.Option {
+func LoggingOpt() fx.Option {
 	return fx.Options(
 		EnablePropsAutoload(new(webLog.LoggingProperties)),
 		fx.Provide(webLog.NewLoggingProperties),

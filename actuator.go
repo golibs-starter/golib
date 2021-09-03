@@ -1,12 +1,13 @@
 package golib
 
 import (
+	"gitlab.id.vin/vincart/golib/actuator"
 	"gitlab.id.vin/vincart/golib/config"
-	"gitlab.id.vin/vincart/golib/web/actuator"
+	webActuator "gitlab.id.vin/vincart/golib/web/actuator"
 	"go.uber.org/fx"
 )
 
-func ActuatorEndpointAutoConfig() fx.Option {
+func ActuatorEndpointOpt() fx.Option {
 	return fx.Provide(NewActuatorEndpoint)
 }
 
@@ -19,7 +20,7 @@ type ActuatorIn struct {
 
 type ActuatorOut struct {
 	fx.Out
-	Endpoint        *actuator.Endpoint
+	Endpoint        *webActuator.Endpoint
 	HealthService   actuator.HealthService
 	InformerService actuator.InfoService
 }
@@ -49,7 +50,7 @@ func NewActuatorEndpoint(in ActuatorIn) ActuatorOut {
 	healthService := actuator.NewDefaultHealthService(in.Checkers)
 	infoService := actuator.NewDefaultInfoService(in.Props, in.Informers)
 	return ActuatorOut{
-		Endpoint:        actuator.NewEndpoint(healthService, infoService),
+		Endpoint:        webActuator.NewEndpoint(healthService, infoService),
 		HealthService:   healthService,
 		InformerService: infoService,
 	}

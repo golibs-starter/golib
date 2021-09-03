@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func PropertiesAutoConfig() fx.Option {
+func PropertiesOpt() fx.Option {
 	return fx.Provide(NewPropertiesLoader)
 }
 
