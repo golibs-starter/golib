@@ -9,8 +9,7 @@ import (
 
 func LoggingOpt() fx.Option {
 	return fx.Options(
-		EnablePropsAutoload(new(webLog.LoggingProperties)),
-		fx.Provide(webLog.NewLoggingProperties),
+		ProvideProps(webLog.NewLoggingProperties),
 		fx.Provide(NewLogger),
 		fx.Invoke(RegisterLogger),
 	)

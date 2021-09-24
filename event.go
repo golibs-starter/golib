@@ -4,7 +4,6 @@ import (
 	"gitlab.id.vin/vincart/golib/event"
 	"gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/pubsub"
-	"gitlab.id.vin/vincart/golib/utils"
 	"gitlab.id.vin/vincart/golib/web/listener"
 	"go.uber.org/fx"
 )
@@ -12,8 +11,10 @@ import (
 func EventOpt() fx.Option {
 	return fx.Options(
 		ProvideEventListener(listener.NewRequestCompletedLogListener),
+		ProvideProps(event.NewProperties),
 		fx.Provide(NewEventPublisher),
 		fx.Invoke(RegisterEventPublisher),
+		fx.Invoke(RunEventBus),
 	)
 }
 
@@ -27,9 +28,12 @@ type EventPublisherOut struct {
 	EventBus  *pubsub.EventBus
 }
 
-func NewEventPublisher(logger log.Logger) EventPublisherOut {
-	publisher := pubsub.NewPublisher()
-	eventBus := pubsub.NewEventBus(publisher, logger.Debugf)
+func NewEventPublisher(logger log.Logger, props *event.Properties) EventPublisherOut {
+	publisher := pubsub.NewPublisher(
+		pubsub.WithPublisherDebugLog(logger.Debugf),
+		pubsub.WithPublisherNotLogPayload(props.Log.NotLogPayloadForEvents),
+	)
+	eventBus := pubsub.NewEventBus(publisher, pubsub.WithEventBusDebugLog(logger.Debugf))
 	return EventPublisherOut{
 		EventBus:  eventBus,
 		Publisher: publisher,
@@ -38,24 +42,16 @@ func NewEventPublisher(logger log.Logger) EventPublisherOut {
 
 type RegisterEventAutoConfigIn struct {
 	fx.In
-	Logger    log.Logger
-	EventBus  *pubsub.EventBus
-	Publisher pubsub.Publisher
-	Listeners []event.Listener `group:"event_listener"`
+	EventBus    *pubsub.EventBus
+	Publisher   pubsub.Publisher
+	Subscribers []pubsub.Subscriber `group:"event_listener"`
 }
 
 func RegisterEventPublisher(in RegisterEventAutoConfigIn) {
 	pubsub.ReplaceGlobal(in.Publisher)
+	in.EventBus.Register(in.Subscribers...)
+}
 
-	// Subscribe events
-	for _, eventListener := range in.Listeners {
-		if subscribedEvents := eventListener.Events(); subscribedEvents != nil {
-			for _, e := range subscribedEvents {
-				in.Logger.Infof("[%s] is subscribed event [%s]", utils.GetTypeName(eventListener), e.Name())
-				in.EventBus.Subscribe(e, eventListener)
-			}
-		}
-	}
-
-	go in.EventBus.Run()
+func RunEventBus(eventBus *pubsub.EventBus) {
+	go eventBus.Run()
 }

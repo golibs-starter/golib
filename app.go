@@ -9,8 +9,7 @@ import (
 
 func AppOpt() fx.Option {
 	return fx.Options(
-		EnablePropsAutoload(new(config.AppProperties)),
-		fx.Provide(config.NewAppProperties),
+		ProvideProps(config.NewAppProperties),
 		fx.Provide(New),
 	)
 }

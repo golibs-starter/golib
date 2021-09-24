@@ -6,7 +6,7 @@ import (
 )
 
 type RequestCompletedEvent struct {
-	AbstractEvent
+	*AbstractEvent
 }
 
 type RequestCompletedPayload struct {
@@ -29,15 +29,9 @@ type RequestCompletedPayload struct {
 }
 
 func NewRequestCompletedEvent(ctx context.Context, payload RequestCompletedPayload) *RequestCompletedEvent {
-	event := RequestCompletedEvent{}
-	event.AbstractEvent = NewAbstractEvent(ctx, event.Name(), payload)
-	return &event
+	return &RequestCompletedEvent{NewAbstractEvent(ctx, "RequestCompletedEvent", payload)}
 }
 
-func (r RequestCompletedEvent) Name() string {
-	return "RequestCompletedEvent"
-}
-
-func (r RequestCompletedEvent) Payload() interface{} {
-	return r.EventPayload
+func (a RequestCompletedEvent) String() string {
+	return a.ToString(a)
 }

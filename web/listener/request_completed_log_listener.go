@@ -1,7 +1,6 @@
 package listener
 
 import (
-	coreEvent "gitlab.id.vin/vincart/golib/event"
 	mainLog "gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/pubsub"
 	"gitlab.id.vin/vincart/golib/web/constant"
@@ -12,19 +11,18 @@ import (
 type RequestCompletedLogListener struct {
 }
 
-func NewRequestCompletedLogListener() coreEvent.Listener {
+func NewRequestCompletedLogListener() pubsub.Subscriber {
 	return &RequestCompletedLogListener{}
 }
 
-func (r RequestCompletedLogListener) Events() []pubsub.Event {
-	return []pubsub.Event{new(event.RequestCompletedEvent)}
+func (r RequestCompletedLogListener) Supports(e pubsub.Event) bool {
+	_, ok := e.(*event.RequestCompletedEvent)
+	return ok
 }
 
-func (r RequestCompletedLogListener) Handler(e pubsub.Event) {
-	if _, ok := e.(*event.RequestCompletedEvent); !ok {
-		return
-	}
-	if payload, ok := e.Payload().(event.RequestCompletedPayload); ok {
+func (r RequestCompletedLogListener) Handle(e pubsub.Event) {
+	ev := e.(*event.RequestCompletedEvent)
+	if payload, ok := ev.Payload().(event.RequestCompletedPayload); ok {
 		mainLog.Infow([]interface{}{constant.ContextReqMeta, r.makeHttpRequestLog(&payload)}, "finish router")
 	}
 }

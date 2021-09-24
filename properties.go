@@ -1,28 +1,34 @@
 package golib
 
 import (
+	"fmt"
 	"gitlab.id.vin/vincart/golib/config"
 	"gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/utils"
 	"go.uber.org/fx"
 	"os"
+	"reflect"
+	"runtime"
 )
+
+func ProvideProps(propConstructor interface{}) fx.Option {
+	sampleProps, err := makeSampleProperties(propConstructor)
+	if err != nil {
+		return fx.Error(err)
+	}
+	return fx.Options(
+		fx.Provide(fx.Annotated{
+			Group: "properties",
+			Target: func() config.Properties {
+				return sampleProps
+			},
+		}),
+		fx.Provide(propConstructor),
+	)
+}
 
 func PropertiesOpt() fx.Option {
 	return fx.Provide(NewPropertiesLoader)
-}
-
-type EnablePropsAutoloadOut struct {
-	fx.Out
-	Properties config.Properties `group:"properties"`
-}
-
-func EnablePropsAutoload(props config.Properties) fx.Option {
-	return fx.Provide(func() EnablePropsAutoloadOut {
-		return EnablePropsAutoloadOut{
-			Properties: props,
-		}
-	})
 }
 
 type PropertiesLoaderIn struct {
@@ -71,4 +77,25 @@ func WithDebugLog(debugFunc config.DebugFunc) Option {
 	return func(option *config.Option) {
 		option.DebugFunc = debugFunc
 	}
+}
+
+func makeSampleProperties(f interface{}) (config.Properties, error) {
+	t := reflect.TypeOf(f)
+	if t.Kind() != reflect.Func {
+		return nil, fmt.Errorf("properties constructor must be a function. %s is provided", t.Name())
+	}
+	for i := 0; i < t.NumOut(); i++ {
+		ele := t.Out(i)
+		var val reflect.Value
+		if ele.Kind() == reflect.Ptr {
+			val = reflect.Zero(ele.Elem())
+		} else {
+			val = reflect.Zero(ele)
+		}
+		if props, ok := val.Interface().(config.Properties); ok {
+			return props, nil
+		}
+	}
+	return nil, fmt.Errorf("no properties found in output of constructor [%s]",
+		runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name())
 }

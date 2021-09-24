@@ -9,8 +9,7 @@ import (
 
 func HttpClientOpt() fx.Option {
 	return fx.Options(
-		EnablePropsAutoload(new(client.HttpClientProperties)),
-		fx.Provide(client.NewHttpClientProperties),
+		ProvideProps(client.NewHttpClientProperties),
 		fx.Provide(NewContextualHttpClient),
 	)
 }
