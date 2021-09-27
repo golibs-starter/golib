@@ -1,0 +1,10 @@
+parent1.parent2:
+  key1: key1_val
+  key2:
+    - key2_val1
+    - key2_val2
+  key3:
+    SubKey1: new_sub_val1
+  key4:
+    SubKey1: ""
+    SubKey2: 3

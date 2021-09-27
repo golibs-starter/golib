@@ -52,11 +52,6 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 				props.Prefix(), propsName, err)
 		}
 
-		// Set default value if its missing
-		if err := l.setDefaults(propsName, props); err != nil {
-			return err
-		}
-
 		// Run post-binding life cycle
 		if propsPostBind, ok := props.(PropertiesPostBinding); ok {
 			if err := propsPostBind.PostBinding(); err != nil {
@@ -68,7 +63,7 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 	return nil
 }
 
-func (l *ViperLoader) setDefaults(propertiesName string, properties Properties) error {
+func setDefaults(propertiesName string, properties Properties) error {
 	if err := defaults.Set(properties); err != nil {
 		return fmt.Errorf("[GoLib-error] Fatal error when set default values for [%s]: %v", propertiesName, err)
 	}
@@ -116,6 +111,11 @@ func loadViper(option Option, propertiesList []Properties) (*viper.Viper, error)
 func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFunc DebugFunc) error {
 	for _, props := range propertiesList {
 		propsName := reflect.TypeOf(props).String()
+
+		// Set default value if its missing
+		if err := setDefaults(propsName, props); err != nil {
+			return err
+		}
 
 		// set default values in viper.
 		// Viper needs to know if a key exists in order to override it.

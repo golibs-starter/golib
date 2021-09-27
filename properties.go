@@ -92,7 +92,9 @@ func makeSampleProperties(f interface{}) (config.Properties, error) {
 		} else {
 			val = reflect.Zero(ele)
 		}
-		if props, ok := val.Interface().(config.Properties); ok {
+		p := reflect.New(val.Type())
+		p.Elem().Set(val)
+		if props, ok := p.Interface().(config.Properties); ok {
 			return props, nil
 		}
 	}
