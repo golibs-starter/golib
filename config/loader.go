@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/creasty/defaults"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 	"os"
@@ -18,9 +19,10 @@ type Loader interface {
 }
 
 type ViperLoader struct {
-	viper      *viper.Viper
-	option     Option
-	properties []Properties
+	viper            *viper.Viper
+	option           Option
+	properties       []Properties
+	groupPropsConfig map[string]interface{}
 }
 
 func NewLoader(option Option, properties []Properties) (Loader, error) {
@@ -30,9 +32,10 @@ func NewLoader(option Option, properties []Properties) (Loader, error) {
 		return nil, err
 	}
 	return &ViperLoader{
-		viper:      vi,
-		option:     option,
-		properties: properties,
+		viper:            vi,
+		option:           option,
+		properties:       properties,
+		groupPropsConfig: groupProps(vi, properties),
 	}, nil
 }
 
@@ -46,8 +49,20 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 			}
 		}
 
-		// Unmarshal from config file
-		if err := l.viper.UnmarshalKey(props.Prefix(), props); err != nil {
+		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+			Metadata:         nil,
+			Result:           props,
+			WeaklyTypedInput: true,
+			DecodeHook: mapstructure.ComposeDecodeHookFunc(
+				mapstructure.StringToTimeDurationHookFunc(),
+				mapstructure.StringToSliceHookFunc(","),
+			),
+		})
+		if err != nil {
+			return fmt.Errorf("[GoLib-error] Fatal error when init decoder for key [%s] to [%s]: %v",
+				props.Prefix(), propsName, err)
+		}
+		if err := decoder.Decode(l.groupPropsConfig[props.Prefix()]); err != nil {
 			return fmt.Errorf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
 				props.Prefix(), propsName, err)
 		}
@@ -95,16 +110,69 @@ func loadViper(option Option, propertiesList []Properties) (*viper.Viper, error)
 	// so environment variable cannot overwrite these values, replace placeholder also not working
 	// (using PropertiesPostBinding to replace placeholder as a workaround solution).
 	// TODO Improve it or wait for viper in next version
-	for _, key := range vi.AllKeys() {
-		val := vi.Get(key)
-		if newVal, err := ReplacePlaceholderValue(val); err != nil {
-			return nil, err
-		} else {
-			val = newVal
-		}
-		vi.Set(key, val)
-	}
+	//for _, key := range vi.AllKeys() {
+	//	val := vi.Get(key)
+	//	if newVal, err := ReplacePlaceholderValue(val); err != nil {
+	//		return nil, err
+	//	} else {
+	//		val = newVal
+	//	}
+	//	err := vi.BindEnv(key)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//}
 	return vi, nil
+}
+
+func groupProps(vi *viper.Viper, propertiesList []Properties) map[string]interface{} {
+	group := make(map[string]interface{})
+	for _, props := range propertiesList {
+		group[props.Prefix()] = deepSearchInMap(vi.AllSettings(), props.Prefix())
+	}
+	return group
+}
+
+func deepSearchInMap(m map[string]interface{}, key string) map[string]interface{} {
+	parts := strings.Split(key, keyDelimiter)
+	for _, part := range parts {
+		val, ok := m[part]
+		if !ok {
+			return make(map[string]interface{})
+		}
+		m, ok = val.(map[string]interface{})
+		if !ok {
+			return make(map[string]interface{})
+		}
+	}
+	return m
+}
+
+func BindEnvs(vi *viper.Viper, iface interface{}, parts ...string) error {
+	ifv := reflect.ValueOf(iface)
+	ift := reflect.TypeOf(iface)
+	if ift.Kind() == reflect.Ptr {
+		ift = ift.Elem()
+		ifv = ifv.Elem()
+	}
+	for i := 0; i < ift.NumField(); i++ {
+		v := ifv.Field(i)
+		t := ift.Field(i)
+		tv, ok := t.Tag.Lookup("mapstructure")
+		if !ok {
+			tv = t.Name
+		}
+		switch v.Kind() {
+		case reflect.Struct:
+			return BindEnvs(vi, v.Interface(), append(parts, tv)...)
+		default:
+			err := vi.BindEnv(strings.Join(append(parts, tv), "."))
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // discoverDefaultValue Discover default values for multiple properties at once
@@ -128,6 +196,10 @@ func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFun
 		if err := vi.MergeConfig(bytes.NewReader(b)); err != nil {
 			return fmt.Errorf("[GoLib-error] Error when discover default value for properties [%s]: %v", propsName, err)
 		}
+		//err = BindEnvs(vi, props, props.Prefix())
+		//if err != nil {
+		//	return fmt.Errorf("[GoLib-error] Error when bind env for properties [%s]: %v", propsName, err)
+		//}
 		debugFunc("[GoLib-debug] Default value was discovered for properties [%s]", propsName)
 	}
 	return nil

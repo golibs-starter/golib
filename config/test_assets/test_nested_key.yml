@@ -9,3 +9,8 @@ parent1:
     key4:
       SubKey1: ""
       SubKey2: 3
+    key5:
+      - S1: sv1
+        S2: 4
+      - S1: sv2
+        S2: 5

@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/creasty/defaults v1.5.1
 	github.com/google/uuid v1.2.0
+	github.com/mitchellh/mapstructure v1.4.1
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
