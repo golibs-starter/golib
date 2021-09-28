@@ -1,0 +1,13 @@
+org:
+  store:
+    Location: Hanoi
+    Tags:
+      - Iphone
+      - Ipad
+    NumberProducts: 1
+    products:
+      - title: Iphone 6
+        price: 600
+        variants:
+          - color: red
+            storage: 64gb

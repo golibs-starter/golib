@@ -35,7 +35,7 @@ func NewLoader(option Option, properties []Properties) (Loader, error) {
 		viper:            vi,
 		option:           option,
 		properties:       properties,
-		groupPropsConfig: groupProps(vi, properties),
+		groupPropsConfig: groupPropertiesValues(vi, properties),
 	}, nil
 }
 
@@ -125,12 +125,49 @@ func loadViper(option Option, propertiesList []Properties) (*viper.Viper, error)
 	return vi, nil
 }
 
-func groupProps(vi *viper.Viper, propertiesList []Properties) map[string]interface{} {
+func groupPropertiesValues(vi *viper.Viper, propertiesList []Properties) map[string]interface{} {
+	allSettings := vi.AllSettings()
 	group := make(map[string]interface{})
 	for _, props := range propertiesList {
-		group[props.Prefix()] = deepSearchInMap(vi.AllSettings(), props.Prefix())
+		m := deepSearchInMap(allSettings, props.Prefix())
+		correctedVal, exists := correctSliceValues(vi, props.Prefix(), m)
+		if exists {
+			group[props.Prefix()] = correctedVal
+		} else {
+			group[props.Prefix()] = m
+		}
 	}
 	return group
+}
+
+func correctSliceValues(vi *viper.Viper, prefix string, val interface{}) (interface{}, bool) {
+	if slice, ok := val.([]interface{}); ok {
+		for k, v := range slice {
+			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%d", prefix, keyDelimiter, k), v)
+			if exists {
+				slice[k] = correctedVal
+			}
+		}
+	} else if m, ok := val.(map[interface{}]interface{}); ok {
+		for k, v := range m {
+			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%s", prefix, keyDelimiter, k), v)
+			if exists {
+				m[k] = correctedVal
+			}
+		}
+	} else if m, ok := val.(map[string]interface{}); ok {
+		for k, v := range m {
+			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%s", prefix, keyDelimiter, k), v)
+			if exists {
+				m[k] = correctedVal
+			}
+		}
+	} else {
+		if correctedVal := vi.Get(prefix); correctedVal != nil {
+			return correctedVal, true
+		}
+	}
+	return nil, false
 }
 
 func deepSearchInMap(m map[string]interface{}, key string) map[string]interface{} {
@@ -146,33 +183,6 @@ func deepSearchInMap(m map[string]interface{}, key string) map[string]interface{
 		}
 	}
 	return m
-}
-
-func BindEnvs(vi *viper.Viper, iface interface{}, parts ...string) error {
-	ifv := reflect.ValueOf(iface)
-	ift := reflect.TypeOf(iface)
-	if ift.Kind() == reflect.Ptr {
-		ift = ift.Elem()
-		ifv = ifv.Elem()
-	}
-	for i := 0; i < ift.NumField(); i++ {
-		v := ifv.Field(i)
-		t := ift.Field(i)
-		tv, ok := t.Tag.Lookup("mapstructure")
-		if !ok {
-			tv = t.Name
-		}
-		switch v.Kind() {
-		case reflect.Struct:
-			return BindEnvs(vi, v.Interface(), append(parts, tv)...)
-		default:
-			err := vi.BindEnv(strings.Join(append(parts, tv), "."))
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }
 
 // discoverDefaultValue Discover default values for multiple properties at once
@@ -196,10 +206,6 @@ func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFun
 		if err := vi.MergeConfig(bytes.NewReader(b)); err != nil {
 			return fmt.Errorf("[GoLib-error] Error when discover default value for properties [%s]: %v", propsName, err)
 		}
-		//err = BindEnvs(vi, props, props.Prefix())
-		//if err != nil {
-		//	return fmt.Errorf("[GoLib-error] Error when bind env for properties [%s]: %v", propsName, err)
-		//}
 		debugFunc("[GoLib-debug] Default value was discovered for properties [%s]", propsName)
 	}
 	return nil
