@@ -1,0 +1,12 @@
+org:
+  store:
+    Location: ${STORE_LOCATION}
+    products:
+      - title: Iphone 6
+        price: 600
+        currency: ${PRICE_CURRENCY}
+        variants:
+          - color: red
+            storage: 64gb
+          - color: premium_blue
+            storage: ${PREMIUM_BLUE_STORAGE}
