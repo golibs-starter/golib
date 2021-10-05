@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/creasty/defaults"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
-	"os"
 	"reflect"
 	"strings"
 )
@@ -18,9 +18,10 @@ type Loader interface {
 }
 
 type ViperLoader struct {
-	viper      *viper.Viper
-	option     Option
-	properties []Properties
+	viper            *viper.Viper
+	option           Option
+	properties       []Properties
+	groupPropsConfig map[string]interface{}
 }
 
 func NewLoader(option Option, properties []Properties) (Loader, error) {
@@ -30,9 +31,10 @@ func NewLoader(option Option, properties []Properties) (Loader, error) {
 		return nil, err
 	}
 	return &ViperLoader{
-		viper:      vi,
-		option:     option,
-		properties: properties,
+		viper:            vi,
+		option:           option,
+		properties:       properties,
+		groupPropsConfig: groupPropertiesValues(vi, properties),
 	}, nil
 }
 
@@ -46,8 +48,21 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 			}
 		}
 
-		// Unmarshal from config file
-		if err := l.viper.UnmarshalKey(props.Prefix(), props); err != nil {
+		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+			Metadata:         nil,
+			Result:           props,
+			WeaklyTypedInput: true,
+			DecodeHook: mapstructure.ComposeDecodeHookFunc(
+				mapstructure.StringToTimeDurationHookFunc(),
+				mapstructure.StringToSliceHookFunc(","),
+				MapStructurePlaceholderValueHook(),
+			),
+		})
+		if err != nil {
+			return fmt.Errorf("[GoLib-error] Fatal error when init decoder for key [%s] to [%s]: %v",
+				props.Prefix(), propsName, err)
+		}
+		if err := decoder.Decode(l.groupPropsConfig[props.Prefix()]); err != nil {
 			return fmt.Errorf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
 				props.Prefix(), propsName, err)
 		}
@@ -59,13 +74,6 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 			}
 		}
 		l.option.DebugFunc("[GoLib-debug] LoggingProperties [%s] loaded with prefix [%s]", propsName, props.Prefix())
-	}
-	return nil
-}
-
-func setDefaults(propertiesName string, properties Properties) error {
-	if err := defaults.Set(properties); err != nil {
-		return fmt.Errorf("[GoLib-error] Fatal error when set default values for [%s]: %v", propertiesName, err)
 	}
 	return nil
 }
@@ -85,25 +93,6 @@ func loadViper(option Option, propertiesList []Properties) (*viper.Viper, error)
 	if err := discoverActiveProfiles(vi, option); err != nil {
 		return nil, err
 	}
-
-	// High priority for environment variable.
-	// This is workaround solution because viper does not
-	// treat env vars the same as other config
-	// See https://github.com/spf13/viper/issues/188#issuecomment-399518663
-	//
-	// Notes: Currently vi.AllKeys() doesn't support key for array item, such as: foo.bar.0.username,
-	// so environment variable cannot overwrite these values, replace placeholder also not working
-	// (using PropertiesPostBinding to replace placeholder as a workaround solution).
-	// TODO Improve it or wait for viper in next version
-	for _, key := range vi.AllKeys() {
-		val := vi.Get(key)
-		if newVal, err := ReplacePlaceholderValue(val); err != nil {
-			return nil, err
-		} else {
-			val = newVal
-		}
-		vi.Set(key, val)
-	}
 	return vi, nil
 }
 
@@ -113,8 +102,8 @@ func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFun
 		propsName := reflect.TypeOf(props).String()
 
 		// Set default value if its missing
-		if err := setDefaults(propsName, props); err != nil {
-			return err
+		if err := defaults.Set(props); err != nil {
+			return fmt.Errorf("[GoLib-error] Fatal error when set default values for [%s]: %v", propsName, err)
 		}
 
 		// set default values in viper.
@@ -155,41 +144,47 @@ func discoverActiveProfiles(vi *viper.Viper, option Option) error {
 	return nil
 }
 
-func convertSliceToNestedMap(paths []string, endVal interface{}, inMap map[interface{}]interface{}) map[interface{}]interface{} {
-	if inMap == nil {
-		inMap = map[interface{}]interface{}{}
+func groupPropertiesValues(vi *viper.Viper, propertiesList []Properties) map[string]interface{} {
+	allSettings := vi.AllSettings()
+	group := make(map[string]interface{})
+	for _, props := range propertiesList {
+		m := deepSearchInMap(allSettings, props.Prefix())
+		correctedVal, exists := correctSliceValues(vi, props.Prefix(), m)
+		if exists {
+			group[props.Prefix()] = correctedVal
+		} else {
+			group[props.Prefix()] = m
+		}
 	}
-	if len(paths) == 0 {
-		return inMap
-	}
-	if len(paths) == 1 {
-		inMap[paths[0]] = endVal
-		return inMap
-	}
-	inMap[paths[0]] = convertSliceToNestedMap(paths[1:], endVal, map[interface{}]interface{}{})
-	return inMap
+	return group
 }
 
-// ReplacePlaceholderValue Replaces a value in placeholder format
-// by new value configured in environment variable.
-//
-// Placeholder format: ${EXAMPLE_VAR}
-func ReplacePlaceholderValue(val interface{}) (interface{}, error) {
-	strVal, ok := val.(string)
-	if !ok {
-		return val, nil
+func correctSliceValues(vi *viper.Viper, prefix string, val interface{}) (interface{}, bool) {
+	if slice, ok := val.([]interface{}); ok {
+		for k, v := range slice {
+			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%d", prefix, keyDelimiter, k), v)
+			if exists {
+				slice[k] = correctedVal
+			}
+		}
+	} else if m, ok := val.(map[interface{}]interface{}); ok {
+		for k, v := range m {
+			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%s", prefix, keyDelimiter, k), v)
+			if exists {
+				m[k] = correctedVal
+			}
+		}
+	} else if m, ok := val.(map[string]interface{}); ok {
+		for k, v := range m {
+			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%s", prefix, keyDelimiter, k), v)
+			if exists {
+				m[k] = correctedVal
+			}
+		}
+	} else {
+		if correctedVal := vi.Get(prefix); correctedVal != nil {
+			return correctedVal, true
+		}
 	}
-	// Make sure the value starts with ${ and end with }
-	if !strings.HasPrefix(strVal, "${") || !strings.HasSuffix(strVal, "}") {
-		return val, nil
-	}
-	key := strings.TrimSuffix(strings.TrimPrefix(strVal, "${"), "}")
-	if len(key) == 0 {
-		return nil, fmt.Errorf("invalid config placeholder format. Expected ${EX_ENV}, got [%s]", strVal)
-	}
-	res, present := os.LookupEnv(key)
-	if !present {
-		return nil, fmt.Errorf("mandatory env variable not found [%s]", key)
-	}
-	return res, nil
+	return nil, false
 }

@@ -109,3 +109,93 @@ func Test_convertInlineKeyToMap(t *testing.T) {
 		})
 	}
 }
+
+func Test_deepSearchInMap(t *testing.T) {
+	type args struct {
+		m   map[string]interface{}
+		key string
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]interface{}
+	}{
+		{
+			name: "test 1",
+			args: args{
+				m: map[string]interface{}{
+					"a1": map[string]interface{}{
+						"a2": map[string]interface{}{
+							"a3": 1,
+						},
+					},
+				},
+				key: "a1.a2",
+			},
+			want: map[string]interface{}{
+				"a3": 1,
+			},
+		},
+		{
+			name: "test 2",
+			args: args{
+				m: map[string]interface{}{
+					"a1": map[string]interface{}{
+						"a2": map[string]interface{}{
+							"a3": 1,
+							"a4": 2,
+						},
+					},
+				},
+				key: "a1.a2",
+			},
+			want: map[string]interface{}{
+				"a3": 1,
+				"a4": 2,
+			},
+		},
+		{
+			name: "test 3",
+			args: args{
+				m: map[string]interface{}{
+					"a1": map[string]interface{}{
+						"a2": 1,
+					},
+				},
+				key: "a1",
+			},
+			want: map[string]interface{}{
+				"a2": 1,
+			},
+		},
+		{
+			name: "test 4",
+			args: args{
+				m: map[string]interface{}{
+					"a1": map[string]interface{}{
+						"a2": 1,
+					},
+				},
+				key: "a1.a2",
+			},
+			want: map[string]interface{}{},
+		},
+		{
+			name: "test 5",
+			args: args{
+				m: map[string]interface{}{
+					"a1": 1,
+				},
+				key: "a1",
+			},
+			want: map[string]interface{}{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := deepSearchInMap(tt.args.m, tt.args.key); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("deepSearchInMap() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -1,11 +1,22 @@
-parent1:
-  parent2:
-    key1: key1_val
-    key2:
-      - key2_val1
-      - key2_val2
-    key3:
-      SubKey1: new_sub_val1
-    key4:
-      SubKey1: ""
-      SubKey2: 3
+org:
+  store:
+    Location: Hanoi
+    Tags:
+      - Iphone
+      - Ipad
+    NumberProducts: 2
+    products:
+      - title: Iphone 6
+        price: 600
+        currency: $
+        variants:
+          - color: red
+            storage: 64gb
+          - color: blue
+            storage: 128gb
+      - title: Iphone 13 Pro
+        price: 45000000
+        currency: VND
+        variants:
+          - storage: 1TB
+            color: yellow
