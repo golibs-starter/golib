@@ -59,16 +59,16 @@ func Test_ReplacePlaceholderValue_WhenValidPlaceholderAndEnvIsPresentAndEmpty_Sh
 	assert.Equal(t, "", val)
 }
 
-func Test_convertInlineKeyToMap(t *testing.T) {
+func Test_wrapKeysAroundMap(t *testing.T) {
 	type args struct {
 		paths    []string
-		inMap    map[interface{}]interface{}
+		inMap    map[string]interface{}
 		endValue interface{}
 	}
 	tests := []struct {
 		name string
 		args args
-		want map[interface{}]interface{}
+		want map[string]interface{}
 	}{
 		{
 			name: "Test when end value is not nil",
@@ -77,9 +77,9 @@ func Test_convertInlineKeyToMap(t *testing.T) {
 				endValue: 10,
 				inMap:    nil,
 			},
-			want: map[interface{}]interface{}{
-				"k1": map[interface{}]interface{}{
-					"k2": map[interface{}]interface{}{
+			want: map[string]interface{}{
+				"k1": map[string]interface{}{
+					"k2": map[string]interface{}{
 						"k3": 10,
 					},
 				},
@@ -92,9 +92,9 @@ func Test_convertInlineKeyToMap(t *testing.T) {
 				endValue: nil,
 				inMap:    nil,
 			},
-			want: map[interface{}]interface{}{
-				"k1": map[interface{}]interface{}{
-					"k2": map[interface{}]interface{}{
+			want: map[string]interface{}{
+				"k1": map[string]interface{}{
+					"k2": map[string]interface{}{
 						"k3": nil,
 					},
 				},
@@ -103,8 +103,8 @@ func Test_convertInlineKeyToMap(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := convertSliceToNestedMap(tt.args.paths, tt.args.endValue, tt.args.inMap); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("convertSliceToNestedMap() = %v, want %v", got, tt.want)
+			if got := wrapKeysAroundMap(tt.args.paths, tt.args.endValue, tt.args.inMap); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("wrapKeysAroundMap() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -195,6 +195,73 @@ func Test_deepSearchInMap(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := deepSearchInMap(tt.args.m, tt.args.key); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("deepSearchInMap() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_mapToLowerKey(t *testing.T) {
+	type args struct {
+		mp map[string]interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]interface{}
+	}{
+		{
+			name: "Give a map should return map with lower key",
+			args: args{mp: map[string]interface{}{
+				"K1": map[string]interface{}{
+					"K2": 1,
+				},
+				"k3": map[string]interface{}{
+					"K4": "v",
+				},
+			}},
+			want: map[string]interface{}{
+				"K1": map[string]interface{}{
+					"K2": 1,
+				},
+				"k3": map[string]interface{}{
+					"K4": "v",
+				},
+			},
+		},
+		{
+			name: "Give a map with duplicated keys should return map with lower key and override correctly",
+			args: args{mp: map[string]interface{}{
+				"K1": map[string]interface{}{
+					"K2": 1,
+				},
+				// lower case k3
+				"k3": map[string]interface{}{
+					"K4": "v1",
+				},
+				// upper case K3
+				"K3": map[string]interface{}{
+					"K4": "v2",
+				},
+			}},
+			want: map[string]interface{}{
+				"K1": map[string]interface{}{
+					"K2": 1,
+				},
+				"k3": map[string]interface{}{
+					"K4": "v2",
+				},
+			},
+		},
+		{
+			name: "Give a nil map should return nil",
+			args: args{mp: nil},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := mapToLowerKey(tt.args.mp); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("mapToLowerKey() = %v, want %v", got, tt.want)
 			}
 		})
 	}

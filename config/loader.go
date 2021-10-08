@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/creasty/defaults"
+	"github.com/fatih/structs"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
@@ -49,7 +50,6 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 		}
 
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-			Metadata:         nil,
 			Result:           props,
 			WeaklyTypedInput: true,
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
@@ -106,10 +106,14 @@ func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFun
 			return fmt.Errorf("[GoLib-error] Fatal error when set default values for [%s]: %v", propsName, err)
 		}
 
+		propsMap := structs.Map(props)
+		defaultMap := wrapKeysAroundMap(strings.Split(props.Prefix(), keyDelimiter), propsMap, nil)
+		lowerKeyDefaultMap := mapToLowerKey(defaultMap)
+
 		// set default values in viper.
 		// Viper needs to know if a key exists in order to override it.
 		// https://github.com/spf13/viper/issues/188
-		b, err := yaml.Marshal(convertSliceToNestedMap(strings.Split(props.Prefix(), keyDelimiter), props, nil))
+		b, err := yaml.Marshal(lowerKeyDefaultMap)
 		if err != nil {
 			return err
 		}
@@ -125,21 +129,24 @@ func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFun
 // discoverActiveProfiles Discover values for multiple active profiles at once
 func discoverActiveProfiles(vi *viper.Viper, option Option) error {
 	debugPaths := strings.Join(option.ConfigPaths, ", ")
-	for _, activeProfile := range option.ActiveProfiles {
-		vi.SetConfigName(activeProfile)
-		vi.SetConfigType(option.ConfigFormat)
-		for _, path := range option.ConfigPaths {
-			vi.AddConfigPath(path)
-		}
-		if err := vi.MergeInConfig(); err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+	ext := option.ConfigFormat
+	if ext == "yaml" {
+		ext = "yml"
+	}
+	for _, path := range option.ConfigPaths {
+		for _, activeProfile := range option.ActiveProfiles {
+			filepath := path + "/" + activeProfile + "." + ext
+			fileReader := NewFileReader(filepath, option.ConfigFormat, keyDelimiter)
+			cfMap, err := fileReader.Read()
+			if err != nil {
+				return err
+			}
+			if err := vi.MergeConfigMap(cfMap); err != nil {
 				return fmt.Errorf("[GoLib-error] Error when read active profile [%s] in paths [%s]: %v",
 					activeProfile, debugPaths, err)
 			}
-			return fmt.Errorf("[GoLib-debug] Config file not found when read active profile [%s] in paths [%s]",
-				activeProfile, debugPaths)
+			option.DebugFunc("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
 		}
-		option.DebugFunc("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
 	}
 	return nil
 }

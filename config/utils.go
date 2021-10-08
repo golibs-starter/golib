@@ -56,9 +56,9 @@ func deepSearchInMap(m map[string]interface{}, key string) map[string]interface{
 	return m
 }
 
-func convertSliceToNestedMap(paths []string, endVal interface{}, inMap map[interface{}]interface{}) map[interface{}]interface{} {
+func wrapKeysAroundMap(paths []string, endVal interface{}, inMap map[string]interface{}) map[string]interface{} {
 	if inMap == nil {
-		inMap = map[interface{}]interface{}{}
+		inMap = map[string]interface{}{}
 	}
 	if len(paths) == 0 {
 		return inMap
@@ -67,6 +67,24 @@ func convertSliceToNestedMap(paths []string, endVal interface{}, inMap map[inter
 		inMap[paths[0]] = endVal
 		return inMap
 	}
-	inMap[paths[0]] = convertSliceToNestedMap(paths[1:], endVal, map[interface{}]interface{}{})
+	inMap[paths[0]] = wrapKeysAroundMap(paths[1:], endVal, map[string]interface{}{})
 	return inMap
+}
+
+func mapToLowerKey(mp map[string]interface{}) map[string]interface{} {
+	if mp == nil {
+		return nil
+	}
+	newMap := make(map[string]interface{})
+	for k, v := range mp {
+		//lowerK := strings.ToLower(k)
+		lowerK := k
+		switch vOk := v.(type) {
+		case map[string]interface{}:
+			newMap[lowerK] = mapToLowerKey(vOk)
+		default:
+			newMap[lowerK] = v
+		}
+	}
+	return newMap
 }

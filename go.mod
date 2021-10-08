@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/creasty/defaults v1.5.1
+	github.com/fatih/structs v1.1.0
 	github.com/google/uuid v1.2.0
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/pkg/errors v0.8.1
