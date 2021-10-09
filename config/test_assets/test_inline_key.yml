@@ -11,3 +11,12 @@ org.store:
       variants:
         - color: red
           storage: 64gb
+          images:
+            Sm:
+              size: 120
+              width: 120
+              height: 80
+            Xl:
+              size: 800
+              width: 800
+              height: 600

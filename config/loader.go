@@ -108,12 +108,11 @@ func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFun
 
 		propsMap := structs.Map(props)
 		defaultMap := wrapKeysAroundMap(strings.Split(props.Prefix(), keyDelimiter), propsMap, nil)
-		lowerKeyDefaultMap := mapToLowerKey(defaultMap)
 
 		// set default values in viper.
 		// Viper needs to know if a key exists in order to override it.
 		// https://github.com/spf13/viper/issues/188
-		b, err := yaml.Marshal(lowerKeyDefaultMap)
+		b, err := yaml.Marshal(defaultMap)
 		if err != nil {
 			return err
 		}
