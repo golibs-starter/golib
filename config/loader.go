@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/creasty/defaults"
-	"github.com/fatih/structs"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 	"gitlab.id.vin/vincart/golib/utils"
@@ -115,7 +114,10 @@ func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, option O
 			return fmt.Errorf("[GoLib-error] Fatal error when set default values for [%s]: %v", propsName, err)
 		}
 
-		propsMap := structs.Map(props)
+		propsMap := make(map[string]interface{})
+		if err := mapstructure.Decode(props, &propsMap); err != nil {
+			return err
+		}
 		defaultMap := utils.WrapKeysAroundMap(strings.Split(props.Prefix(), option.KeyDelimiter), propsMap, nil)
 
 		// set default values in viper.
