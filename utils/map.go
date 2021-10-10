@@ -1,44 +1,35 @@
 package utils
 
-import "github.com/emirpasic/gods/maps/linkedhashmap"
+import (
+	"strings"
+)
 
-type MapItem struct {
-	Key   interface{}
-	Value interface{}
-}
-
-func NewMapItem(key interface{}, value interface{}) MapItem {
-	return MapItem{Key: key, Value: value}
-}
-
-func LinkedHMap(items ...MapItem) *linkedhashmap.Map {
-	linkedMap := linkedhashmap.New()
-	for _, item := range items {
-		linkedMap.Put(item.Key, item.Value)
-	}
-	return linkedMap
-}
-
-func LinkedHMapToMapStr(hMap *linkedhashmap.Map) map[string]interface{} {
-	mp := make(map[string]interface{})
-	it := hMap.Iterator()
-	for it.Next() {
-		if k, ok1 := it.Key().(string); ok1 {
-			v := it.Value()
-			switch vOk := v.(type) {
-			case *linkedhashmap.Map:
-				mp[k] = LinkedHMapToMapStr(vOk)
-				break
-			case []*linkedhashmap.Map:
-				m := make([]interface{}, 0)
-				for _, hMp := range vOk {
-					m = append(m, LinkedHMapToMapStr(hMp))
-				}
-				mp[k] = m
-			default:
-				mp[k] = it.Value()
-			}
+func DeepSearchInMap(m map[string]interface{}, key string, keyDelimiter string) map[string]interface{} {
+	parts := strings.Split(key, keyDelimiter)
+	for _, part := range parts {
+		val, ok := m[part]
+		if !ok {
+			return make(map[string]interface{})
+		}
+		m, ok = val.(map[string]interface{})
+		if !ok {
+			return make(map[string]interface{})
 		}
 	}
-	return mp
+	return m
+}
+
+func WrapKeysAroundMap(keyPaths []string, endVal interface{}, inMap map[string]interface{}) map[string]interface{} {
+	if inMap == nil {
+		inMap = map[string]interface{}{}
+	}
+	if len(keyPaths) == 0 {
+		return inMap
+	}
+	if len(keyPaths) == 1 {
+		inMap[keyPaths[0]] = endVal
+		return inMap
+	}
+	inMap[keyPaths[0]] = WrapKeysAroundMap(keyPaths[1:], endVal, map[string]interface{}{})
+	return inMap
 }

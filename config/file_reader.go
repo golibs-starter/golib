@@ -48,10 +48,9 @@ func (y FileReader) unmarshalBytes(bytes []byte) (map[string]interface{}, error)
 		if err := yaml.Unmarshal(bytes, &ms); err != nil {
 			return nil, err
 		}
-		hMap := yamlMapSliceToLinkedHMap(ms)
-		expandHMap := expandInlineKeyInMap(hMap, y.delim)
-		c = utils.LinkedHMapToMapStr(expandHMap)
-		return c, nil
+		hMap := utils.YamlMapSliceToLinkedHMap(ms)
+		expandedHMap := utils.ExpandInlineKeyInLinkedHMap(hMap, y.delim)
+		return utils.LinkedHMapToMapStr(expandedHMap), nil
 	case "json":
 		if err := json.Unmarshal(bytes, &c); err != nil {
 			return nil, err

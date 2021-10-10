@@ -1,15 +1,15 @@
 package utils
 
 import (
-	"github.com/emirpasic/gods/maps/linkedhashmap"
+	assert "github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
-	"time"
 )
 
-func TestLinkedHMapToMapStr(t *testing.T) {
+func Test_DeepSearchInMap(t *testing.T) {
 	type args struct {
-		hMap *linkedhashmap.Map
+		m   map[string]interface{}
+		key string
 	}
 	tests := []struct {
 		name string
@@ -17,62 +17,137 @@ func TestLinkedHMapToMapStr(t *testing.T) {
 		want map[string]interface{}
 	}{
 		{
-			name: "Give a empty LinkedHashMap Should return empty map",
+			name: "Give map in map When search a child map Should return correct",
 			args: args{
-				hMap: LinkedHMap(),
+				m: map[string]interface{}{
+					"a1": map[string]interface{}{
+						"a2": map[string]interface{}{
+							"a3": 1,
+						},
+					},
+				},
+				key: "a1.a2",
+			},
+			want: map[string]interface{}{
+				"a3": 1,
+			},
+		},
+		{
+			name: "Give map in map and child map has multiple key When search a child map Should return correct",
+			args: args{
+				m: map[string]interface{}{
+					"a1": map[string]interface{}{
+						"a2": map[string]interface{}{
+							"a3": 1,
+							"a4": 2,
+						},
+					},
+				},
+				key: "a1.a2",
+			},
+			want: map[string]interface{}{
+				"a3": 1,
+				"a4": 2,
+			},
+		},
+		{
+			name: "Give map in map When search with key not contains key delimiter Should return correct",
+			args: args{
+				m: map[string]interface{}{
+					"a1": map[string]interface{}{
+						"a2": 1,
+					},
+				},
+				key: "a1",
+			},
+			want: map[string]interface{}{
+				"a2": 1,
+			},
+		},
+		{
+			name: "Give map in map When search a value Should return correct",
+			args: args{
+				m: map[string]interface{}{
+					"a1": map[string]interface{}{
+						"a2": 1,
+					},
+				},
+				key: "a1.a2",
 			},
 			want: map[string]interface{}{},
 		},
 		{
-			name: "Give a simple LinkedHashMap Should return correct",
+			name: "Give a simple map When search a value Should return correct",
 			args: args{
-				hMap: LinkedHMap(
-					NewMapItem("a", 1),
-					NewMapItem("b", 2),
-				),
+				m: map[string]interface{}{
+					"a1": 1,
+				},
+				key: "a1",
+			},
+			want: map[string]interface{}{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := DeepSearchInMap(tt.args.m, tt.args.key, "."); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DeepSearchInMap() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	t.Run("Give a map When run deep search Should not change input map", func(t *testing.T) {
+		m := map[string]interface{}{
+			"a1": map[string]interface{}{
+				"a2": 1,
+			},
+		}
+		result := DeepSearchInMap(m, "a1.a2", ".")
+		assert.NotNil(t, result)
+		assert.Equal(t, map[string]interface{}{
+			"a1": map[string]interface{}{
+				"a2": 1,
+			},
+		}, m)
+	})
+}
+
+func Test_WrapKeysAroundMap(t *testing.T) {
+	type args struct {
+		paths    []string
+		inMap    map[string]interface{}
+		endValue interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]interface{}
+	}{
+		{
+			name: "Give a paths When end value is not nil Should return correct",
+			args: args{
+				paths:    []string{"k1", "k2", "k3"},
+				endValue: 10,
+				inMap:    nil,
 			},
 			want: map[string]interface{}{
-				"a": 1,
-				"b": 2,
+				"k1": map[string]interface{}{
+					"k2": map[string]interface{}{
+						"k3": 10,
+					},
+				},
 			},
 		},
 		{
-			name: "Give a complex LinkedHashMap Should return correct",
+			name: "Give a paths When end value is nil Should return correct",
 			args: args{
-				hMap: LinkedHMap(
-					NewMapItem("a", 1),
-					NewMapItem("b", LinkedHMap(
-						NewMapItem("c", 2),
-						NewMapItem("d", LinkedHMap(
-							NewMapItem("e", 3),
-							NewMapItem("f", "vf"),
-							NewMapItem("a", 3*time.Minute),
-						)),
-					)),
-					NewMapItem("h", []*linkedhashmap.Map{
-						LinkedHMap(NewMapItem("i", 5)),
-						LinkedHMap(NewMapItem("k", LinkedHMap(NewMapItem("n", 7)))),
-					}),
-				),
+				paths:    []string{"k1", "k2", "k3"},
+				endValue: nil,
+				inMap:    nil,
 			},
 			want: map[string]interface{}{
-				"a": 1,
-				"b": map[string]interface{}{
-					"c": 2,
-					"d": map[string]interface{}{
-						"e": 3,
-						"f": "vf",
-						"a": 3 * time.Minute,
-					},
-				},
-				"h": []interface{}{
-					map[string]interface{}{
-						"i": 5,
-					},
-					map[string]interface{}{
-						"k": map[string]interface{}{
-							"n": 7,
-						},
+				"k1": map[string]interface{}{
+					"k2": map[string]interface{}{
+						"k3": nil,
 					},
 				},
 			},
@@ -80,8 +155,8 @@ func TestLinkedHMapToMapStr(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := LinkedHMapToMapStr(tt.args.hMap); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("LinkedHMapToMapStr() = %v, want %v", got, tt.want)
+			if got := WrapKeysAroundMap(tt.args.paths, tt.args.endValue, tt.args.inMap); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("WrapKeysAroundMap() = %v, want %v", got, tt.want)
 			}
 		})
 	}

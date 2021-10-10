@@ -7,6 +7,7 @@ import (
 	"github.com/fatih/structs"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
+	"gitlab.id.vin/vincart/golib/utils"
 	"gopkg.in/yaml.v2"
 	"reflect"
 	"strings"
@@ -23,6 +24,7 @@ type ViperLoader struct {
 	option           Option
 	properties       []Properties
 	groupPropsConfig map[string]interface{}
+	decodeHookFunc   mapstructure.DecodeHookFunc
 }
 
 func NewLoader(option Option, properties []Properties) (Loader, error) {
@@ -36,6 +38,11 @@ func NewLoader(option Option, properties []Properties) (Loader, error) {
 		option:           option,
 		properties:       properties,
 		groupPropsConfig: groupPropertiesValues(vi, properties),
+		decodeHookFunc: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToSliceHookFunc(","),
+			MapStructurePlaceholderValueHook(),
+		),
 	}, nil
 }
 
@@ -49,21 +56,8 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 			}
 		}
 
-		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-			Result:           props,
-			WeaklyTypedInput: true,
-			DecodeHook: mapstructure.ComposeDecodeHookFunc(
-				mapstructure.StringToTimeDurationHookFunc(),
-				mapstructure.StringToSliceHookFunc(","),
-				MapStructurePlaceholderValueHook(),
-			),
-		})
-		if err != nil {
-			return fmt.Errorf("[GoLib-error] Fatal error when init decoder for key [%s] to [%s]: %v",
-				props.Prefix(), propsName, err)
-		}
-		if err := decoder.Decode(l.groupPropsConfig[props.Prefix()]); err != nil {
-			return fmt.Errorf("[GoLib-error] Fatal error when binding config key [%s] to [%s]: %v",
+		if err := l.decode(props); err != nil {
+			return fmt.Errorf("[GoLib-error] Fatal error when decode config key [%s] to [%s]: %v",
 				props.Prefix(), propsName, err)
 		}
 
@@ -74,6 +68,21 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 			}
 		}
 		l.option.DebugFunc("[GoLib-debug] LoggingProperties [%s] loaded with prefix [%s]", propsName, props.Prefix())
+	}
+	return nil
+}
+
+func (l ViperLoader) decode(props Properties) error {
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		DecodeHook:       l.decodeHookFunc,
+		WeaklyTypedInput: true,
+		Result:           props,
+	})
+	if err != nil {
+		return err
+	}
+	if err := decoder.Decode(l.groupPropsConfig[props.Prefix()]); err != nil {
+		return err
 	}
 	return nil
 }
@@ -107,7 +116,7 @@ func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFun
 		}
 
 		propsMap := structs.Map(props)
-		defaultMap := wrapKeysAroundMap(strings.Split(props.Prefix(), keyDelimiter), propsMap, nil)
+		defaultMap := utils.WrapKeysAroundMap(strings.Split(props.Prefix(), keyDelimiter), propsMap, nil)
 
 		// set default values in viper.
 		// Viper needs to know if a key exists in order to override it.
@@ -154,7 +163,7 @@ func groupPropertiesValues(vi *viper.Viper, propertiesList []Properties) map[str
 	allSettings := vi.AllSettings()
 	group := make(map[string]interface{})
 	for _, props := range propertiesList {
-		m := deepSearchInMap(allSettings, props.Prefix())
+		m := utils.DeepSearchInMap(allSettings, props.Prefix(), keyDelimiter)
 		correctedVal, exists := correctSliceValues(vi, props.Prefix(), m)
 		if exists {
 			group[props.Prefix()] = correctedVal
