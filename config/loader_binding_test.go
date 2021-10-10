@@ -302,3 +302,17 @@ func TestLoaderBinding_WhenOverrideByMultipleKeysWithCaseInsensitive_ShouldRetur
 	assert.Equal(t, "Apple Company", props.Name)
 	assert.Equal(t, "Hanoi City", props.Location)
 }
+
+func TestLoaderBinding_WhenProfileFileInYamlFormat_ShouldReturnCorrect(t *testing.T) {
+	loader, err := NewLoader(Option{
+		ActiveProfiles: []string{"file_in_yaml_format"},
+		ConfigPaths:    []string{"./test_assets"},
+		ConfigFormat:   "yml",
+	}, []Properties{new(testStore)})
+	assert.NoError(t, err)
+
+	props := testStore{}
+	err = loader.Bind(&props)
+	assert.NoError(t, err)
+	assert.Equal(t, "Apple Inc.", props.Name)
+}

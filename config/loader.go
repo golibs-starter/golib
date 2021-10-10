@@ -13,31 +13,31 @@ import (
 	"strings"
 )
 
-var keyDelimiter = "."
-
 type Loader interface {
 	Bind(properties ...Properties) error
 }
 
 type ViperLoader struct {
-	viper            *viper.Viper
-	option           Option
-	properties       []Properties
-	groupPropsConfig map[string]interface{}
-	decodeHookFunc   mapstructure.DecodeHookFunc
+	viper          *viper.Viper
+	option         Option
+	groupedConfig  map[string]interface{}
+	decodeHookFunc mapstructure.DecodeHookFunc
 }
 
 func NewLoader(option Option, properties []Properties) (Loader, error) {
 	setDefaultOption(&option)
-	vi, err := loadViper(option, properties)
+	reader, err := NewDefaultProfileReader(option.ConfigPaths, option.ConfigFormat, option.KeyDelimiter)
+	if err != nil {
+		return nil, err
+	}
+	vi, err := loadViper(reader, option, properties)
 	if err != nil {
 		return nil, err
 	}
 	return &ViperLoader{
-		viper:            vi,
-		option:           option,
-		properties:       properties,
-		groupPropsConfig: groupPropertiesValues(vi, properties),
+		viper:         vi,
+		option:        option,
+		groupedConfig: groupPropertiesConfig(vi, properties, option),
 		decodeHookFunc: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToSliceHookFunc(","),
@@ -81,32 +81,32 @@ func (l ViperLoader) decode(props Properties) error {
 	if err != nil {
 		return err
 	}
-	if err := decoder.Decode(l.groupPropsConfig[props.Prefix()]); err != nil {
+	if err := decoder.Decode(l.groupedConfig[props.Prefix()]); err != nil {
 		return err
 	}
 	return nil
 }
 
-func loadViper(option Option, propertiesList []Properties) (*viper.Viper, error) {
+func loadViper(reader ProfileReader, option Option, propertiesList []Properties) (*viper.Viper, error) {
 	option.DebugFunc("[GoLib-debug] Loading active profiles [%s] in paths [%s] with format [%s]",
 		strings.Join(option.ActiveProfiles, ", "), strings.Join(option.ConfigPaths, ", "), option.ConfigFormat)
 
-	vi := viper.NewWithOptions(viper.KeyDelimiter(keyDelimiter))
-	vi.SetEnvKeyReplacer(strings.NewReplacer(keyDelimiter, "_"))
+	vi := viper.NewWithOptions(viper.KeyDelimiter(option.KeyDelimiter))
+	vi.SetEnvKeyReplacer(strings.NewReplacer(option.KeyDelimiter, "_"))
 	vi.AutomaticEnv()
 
-	if err := discoverDefaultValue(vi, propertiesList, option.DebugFunc); err != nil {
+	if err := discoverDefaultValue(vi, propertiesList, option); err != nil {
 		return nil, err
 	}
 
-	if err := discoverActiveProfiles(vi, option); err != nil {
+	if err := discoverActiveProfiles(vi, reader, option); err != nil {
 		return nil, err
 	}
 	return vi, nil
 }
 
 // discoverDefaultValue Discover default values for multiple properties at once
-func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFunc DebugFunc) error {
+func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, option Option) error {
 	for _, props := range propertiesList {
 		propsName := reflect.TypeOf(props).String()
 
@@ -116,7 +116,7 @@ func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFun
 		}
 
 		propsMap := structs.Map(props)
-		defaultMap := utils.WrapKeysAroundMap(strings.Split(props.Prefix(), keyDelimiter), propsMap, nil)
+		defaultMap := utils.WrapKeysAroundMap(strings.Split(props.Prefix(), option.KeyDelimiter), propsMap, nil)
 
 		// set default values in viper.
 		// Viper needs to know if a key exists in order to override it.
@@ -129,42 +129,34 @@ func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, debugFun
 		if err := vi.MergeConfig(bytes.NewReader(b)); err != nil {
 			return fmt.Errorf("[GoLib-error] Error when discover default value for properties [%s]: %v", propsName, err)
 		}
-		debugFunc("[GoLib-debug] Default value was discovered for properties [%s]", propsName)
+		option.DebugFunc("[GoLib-debug] Default value was discovered for properties [%s]", propsName)
 	}
 	return nil
 }
 
 // discoverActiveProfiles Discover values for multiple active profiles at once
-func discoverActiveProfiles(vi *viper.Viper, option Option) error {
+func discoverActiveProfiles(vi *viper.Viper, reader ProfileReader, option Option) error {
 	debugPaths := strings.Join(option.ConfigPaths, ", ")
-	ext := option.ConfigFormat
-	if ext == "yaml" {
-		ext = "yml"
-	}
-	for _, path := range option.ConfigPaths {
-		for _, activeProfile := range option.ActiveProfiles {
-			filepath := path + "/" + activeProfile + "." + ext
-			fileReader := NewFileReader(filepath, option.ConfigFormat, keyDelimiter)
-			cfMap, err := fileReader.Read()
-			if err != nil {
-				return err
-			}
-			if err := vi.MergeConfigMap(cfMap); err != nil {
-				return fmt.Errorf("[GoLib-error] Error when read active profile [%s] in paths [%s]: %v",
-					activeProfile, debugPaths, err)
-			}
-			option.DebugFunc("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
+	for _, activeProfile := range option.ActiveProfiles {
+		cfMap, err := reader.Read(activeProfile)
+		if err != nil {
+			return err
 		}
+		if err := vi.MergeConfigMap(cfMap); err != nil {
+			return fmt.Errorf("[GoLib-error] Error when read active profile [%s] in paths [%s]: %v",
+				activeProfile, debugPaths, err)
+		}
+		option.DebugFunc("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
 	}
 	return nil
 }
 
-func groupPropertiesValues(vi *viper.Viper, propertiesList []Properties) map[string]interface{} {
+func groupPropertiesConfig(vi *viper.Viper, propertiesList []Properties, option Option) map[string]interface{} {
 	allSettings := vi.AllSettings()
 	group := make(map[string]interface{})
 	for _, props := range propertiesList {
-		m := utils.DeepSearchInMap(allSettings, props.Prefix(), keyDelimiter)
-		correctedVal, exists := correctSliceValues(vi, props.Prefix(), m)
+		m := utils.DeepSearchInMap(allSettings, props.Prefix(), option.KeyDelimiter)
+		correctedVal, exists := correctSliceValues(vi, props.Prefix(), option.KeyDelimiter, m)
 		if exists {
 			group[props.Prefix()] = correctedVal
 		} else {
@@ -174,24 +166,24 @@ func groupPropertiesValues(vi *viper.Viper, propertiesList []Properties) map[str
 	return group
 }
 
-func correctSliceValues(vi *viper.Viper, prefix string, val interface{}) (interface{}, bool) {
+func correctSliceValues(vi *viper.Viper, prefix string, delim string, val interface{}) (interface{}, bool) {
 	if slice, ok := val.([]interface{}); ok {
 		for k, v := range slice {
-			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%d", prefix, keyDelimiter, k), v)
+			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%d", prefix, delim, k), delim, v)
 			if exists {
 				slice[k] = correctedVal
 			}
 		}
 	} else if m, ok := val.(map[interface{}]interface{}); ok {
 		for k, v := range m {
-			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%s", prefix, keyDelimiter, k), v)
+			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%s", prefix, delim, k), delim, v)
 			if exists {
 				m[k] = correctedVal
 			}
 		}
 	} else if m, ok := val.(map[string]interface{}); ok {
 		for k, v := range m {
-			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%s", prefix, keyDelimiter, k), v)
+			correctedVal, exists := correctSliceValues(vi, fmt.Sprintf("%s%s%s", prefix, delim, k), delim, v)
 			if exists {
 				m[k] = correctedVal
 			}
