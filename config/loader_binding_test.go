@@ -29,11 +29,21 @@ type testProduct struct {
 type testVariant struct {
 	Color   string
 	Storage string
+	Images  map[string]testVariantImage
+}
+
+type testVariantImage struct {
+	Size   string
+	Width  int64
+	Height int64
 }
 
 func TestLoaderBinding_WhenCustomizeProps_WithInlineParent_ShouldReturnWithCorrectValue(t *testing.T) {
 	err := os.Setenv("ORG_STORE_PRODUCTS_0_PRICE", "610")
 	assert.NoError(t, err)
+	defer func() {
+		_ = os.Unsetenv("ORG_STORE_PRODUCTS_0_PRICE")
+	}()
 
 	loader, err := NewLoader(Option{
 		ActiveProfiles: []string{"test_inline_key"},
@@ -59,6 +69,13 @@ func TestLoaderBinding_WhenCustomizeProps_WithInlineParent_ShouldReturnWithCorre
 	assert.Len(t, props.Products[0].Variants, 1)
 	assert.Equal(t, "red", props.Products[0].Variants[0].Color)
 	assert.Equal(t, "64gb", props.Products[0].Variants[0].Storage)
+	assert.Len(t, props.Products[0].Variants[0].Images, 2)
+	assert.Equal(t, "120", props.Products[0].Variants[0].Images["Sm"].Size)
+	assert.Equal(t, int64(120), props.Products[0].Variants[0].Images["Sm"].Width)
+	assert.Equal(t, int64(80), props.Products[0].Variants[0].Images["Sm"].Height)
+	assert.Equal(t, "800", props.Products[0].Variants[0].Images["Xl"].Size)
+	assert.Equal(t, int64(800), props.Products[0].Variants[0].Images["Xl"].Width)
+	assert.Equal(t, int64(600), props.Products[0].Variants[0].Images["Xl"].Height)
 }
 
 func TestLoaderBinding_WhenCustomizeProps_WithInlineKeyOverrideNestedKey_ShouldReturnWithCorrectValue(t *testing.T) {
@@ -79,25 +96,39 @@ func TestLoaderBinding_WhenCustomizeProps_WithInlineKeyOverrideNestedKey_ShouldR
 	assert.Equal(t, []string{"0967xxx", "0968xxx"}, props.PhoneNumbers)
 }
 
-// TODO currently inline key is cannot override by nested key, to be good if we can do it
-//func TestLoaderBinding_WhenCustomizeProps_WithNestedKeyOverrideInlineKey_ShouldReturnWithCorrectValue(t *testing.T) {
-//	loader, err := NewLoader(Option{
-//		ActiveProfiles: []string{"test_inline_key", "test_nested_key_override"},
-//		ConfigPaths:    []string{"./test_assets"},
-//		ConfigFormat:   "yaml",
-//	}, []Properties{new(testStore)})
-//	assert.NoError(t, err)
-//
-//	props := testStore{}
-//	err = loader.Bind(&props)
-//	assert.NoError(t, err)
-//
-//	assert.Equal(t, "Apple", props.Name)
-//	assert.Equal(t, "Vietnam", props.Location)
-//	assert.Equal(t, []string{"iphone"}, props.Tags)
-//	assert.Equal(t, []string{"0969xxx", "0970xxx"}, props.PhoneNumbers)
-//	assert.Equal(t, 1, props.NumberProducts)
-//}
+func TestLoaderBinding_WhenCustomizeProps_WithNestedKeyOverrideInlineKey_ShouldReturnWithCorrectValue(t *testing.T) {
+	loader, err := NewLoader(Option{
+		ActiveProfiles: []string{"test_inline_key", "test_nested_key_override"},
+		ConfigPaths:    []string{"./test_assets"},
+		ConfigFormat:   "yaml",
+	}, []Properties{new(testStore)})
+	assert.NoError(t, err)
+
+	props := testStore{}
+	err = loader.Bind(&props)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "Apple", props.Name)
+	assert.Equal(t, "Vietnam", props.Location)
+	assert.Equal(t, []string{"iphone"}, props.Tags)
+	assert.Equal(t, []string{"0969xxx", "0970xxx"}, props.PhoneNumbers)
+	assert.Equal(t, 1, props.NumberProducts)
+	assert.Len(t, props.Products, 1)
+
+	assert.Equal(t, "Iphone 6", props.Products[0].Title)
+	assert.EqualValues(t, 600, props.Products[0].Price)
+	assert.Equal(t, "$", props.Products[0].Currency)
+	assert.Len(t, props.Products[0].Variants, 1)
+	assert.Equal(t, "red", props.Products[0].Variants[0].Color)
+	assert.Equal(t, "64gb", props.Products[0].Variants[0].Storage)
+	assert.Len(t, props.Products[0].Variants[0].Images, 2)
+	assert.Equal(t, "120", props.Products[0].Variants[0].Images["Sm"].Size)
+	assert.Equal(t, int64(120), props.Products[0].Variants[0].Images["Sm"].Width)
+	assert.Equal(t, int64(80), props.Products[0].Variants[0].Images["Sm"].Height)
+	assert.Equal(t, "800", props.Products[0].Variants[0].Images["Xl"].Size)
+	assert.Equal(t, int64(800), props.Products[0].Variants[0].Images["Xl"].Width)
+	assert.Equal(t, int64(600), props.Products[0].Variants[0].Images["Xl"].Height)
+}
 
 func TestLoaderBinding_WhenCustomizeProps_AndEnvHasBeenSet_ShouldReturnWithCorrectValue(t *testing.T) {
 	err1 := os.Setenv("ORG_STORE_NUMBERPRODUCTS", "3")
@@ -241,4 +272,47 @@ func TestLoaderBinding_WhenConfigWithPlaceholderValue_AndEnvIsNotSet_ShouldRetur
 	props := testStore{}
 	err = loader.Bind(&props)
 	assert.Error(t, err)
+}
+
+func TestLoaderBinding_WhenOverrideByKeyWithCaseInsensitive_ShouldReturnCorrect(t *testing.T) {
+	loader, err := NewLoader(Option{
+		ActiveProfiles: []string{"test_key_case_insensitive"},
+		ConfigPaths:    []string{"./test_assets"},
+		ConfigFormat:   "yaml",
+	}, []Properties{new(testStore)})
+	assert.NoError(t, err)
+
+	props := testStore{}
+	err = loader.Bind(&props)
+	assert.NoError(t, err)
+	assert.Equal(t, "Apple Inc", props.Name)
+}
+
+func TestLoaderBinding_WhenOverrideByMultipleKeysWithCaseInsensitive_ShouldReturnCorrect(t *testing.T) {
+	loader, err := NewLoader(Option{
+		ActiveProfiles: []string{"test_key_case_insensitive_override"},
+		ConfigPaths:    []string{"./test_assets"},
+		ConfigFormat:   "yaml",
+	}, []Properties{new(testStore)})
+	assert.NoError(t, err)
+
+	props := testStore{}
+	err = loader.Bind(&props)
+	assert.NoError(t, err)
+	assert.Equal(t, "Apple Company", props.Name)
+	assert.Equal(t, "Hanoi City", props.Location)
+}
+
+func TestLoaderBinding_WhenProfileFileInYamlFormat_ShouldReturnCorrect(t *testing.T) {
+	loader, err := NewLoader(Option{
+		ActiveProfiles: []string{"file_in_yaml_format"},
+		ConfigPaths:    []string{"./test_assets"},
+		ConfigFormat:   "yml",
+	}, []Properties{new(testStore)})
+	assert.NoError(t, err)
+
+	props := testStore{}
+	err = loader.Bind(&props)
+	assert.NoError(t, err)
+	assert.Equal(t, "Apple Inc.", props.Name)
 }

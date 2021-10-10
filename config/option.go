@@ -17,6 +17,7 @@ type Option struct {
 	ActiveProfiles []string
 	ConfigPaths    []string
 	ConfigFormat   string // yaml, json
+	KeyDelimiter   string
 	DebugFunc      DebugFunc
 }
 
@@ -34,6 +35,10 @@ func setDefaultOption(option *Option) {
 
 	if len(option.ConfigPaths) == 0 {
 		option.ConfigPaths = []string{DefaultConfigPath}
+	}
+
+	if len(option.KeyDelimiter) == 0 {
+		option.KeyDelimiter = "."
 	}
 
 	if option.DebugFunc == nil {
