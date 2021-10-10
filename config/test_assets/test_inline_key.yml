@@ -1,5 +1,6 @@
 org.store:
   Location: Hanoi
+  BuildingAddress: 123 Nguyen Trai, q.Thanh Xuan, tp.Ha Noi
   Tags:
     - Iphone
     - Ipad

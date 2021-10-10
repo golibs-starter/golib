@@ -13,6 +13,7 @@ type testStore struct {
 	PhoneNumbers   []string `default:"[\"0967xxx\", \"0968xxx\"]"`
 	NumberProducts int
 	Products       []testProduct
+	Address        string `mapstructure:"BuildingAddress"`
 }
 
 func (t testStore) Prefix() string {
@@ -58,6 +59,7 @@ func TestLoaderBinding_WhenCustomizeProps_WithInlineParent_ShouldReturnWithCorre
 
 	assert.Equal(t, "Apple", props.Name)
 	assert.Equal(t, "Hanoi", props.Location)
+	assert.Equal(t, "123 Nguyen Trai, q.Thanh Xuan, tp.Ha Noi", props.Address)
 	assert.Equal(t, []string{"Iphone", "Ipad"}, props.Tags)
 	assert.Equal(t, []string{"0967xxx", "0968xxx"}, props.PhoneNumbers)
 	assert.Equal(t, 1, props.NumberProducts)
