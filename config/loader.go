@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/creasty/defaults"
 	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"gitlab.id.vin/vincart/golib/utils"
 	"gopkg.in/yaml.v2"
@@ -29,7 +30,7 @@ func NewLoader(option Option, properties []Properties) (Loader, error) {
 	if err != nil {
 		return nil, err
 	}
-	vi, err := loadViper(reader, option, properties)
+	vi, err := loadViper(reader, option)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +56,7 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 			}
 		}
 
-		if err := l.decode(props); err != nil {
+		if err := l.decodeWithDefaults(props); err != nil {
 			return fmt.Errorf("[GoLib-error] Fatal error when decode config key [%s] to [%s]: %v",
 				props.Prefix(), propsName, err)
 		}
@@ -71,7 +72,7 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 	return nil
 }
 
-func (l ViperLoader) decode(props Properties) error {
+func (l ViperLoader) decodeWithDefaults(props Properties) error {
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		DecodeHook:       l.decodeHookFunc,
 		WeaklyTypedInput: true,
@@ -80,13 +81,49 @@ func (l ViperLoader) decode(props Properties) error {
 	if err != nil {
 		return err
 	}
-	if err := decoder.Decode(l.groupedConfig[props.Prefix()]); err != nil {
+	loadedCfMap, ok := l.groupedConfig[props.Prefix()].(map[string]interface{})
+	if !ok {
+		return errors.New("loaded config inside prefix is not a map")
+	}
+	if err := decoder.Decode(loadedCfMap); err != nil {
+		return errors.New("cannot decode props")
+	}
+
+	// Set default value if its missing
+	if err := defaults.Set(props); err != nil {
+		return errors.WithMessage(err, "cannot set default")
+	}
+
+	// Set defaults is not enough here, because all zero values will be replaced with default value.
+	// Example:
+	//  When your config is `store.open (default:true)`,
+	//  if you want to set `store.open=false`, after run above code, it will replace with `true` by default.
+	//  => This behavior is not expected.
+	//
+	// The idea is convert properties to map again, then merge loaded config to that map.
+	propsMap := make(map[string]interface{})
+	if err := mapstructure.Decode(props, &propsMap); err != nil {
+		return errors.WithMessage(err, "cannot decode props to map")
+	}
+	tmpVi := viper.New()
+	tmpVi.SetConfigType("yaml")
+	b, err := yaml.Marshal(propsMap)
+	if err != nil {
 		return err
+	}
+	if err := tmpVi.MergeConfig(bytes.NewReader(b)); err != nil {
+		return errors.WithMessage(err, "cannot merge propsMap")
+	}
+	if err = tmpVi.MergeConfigMap(loadedCfMap); err != nil {
+		return errors.WithMessage(err, "cannot merge loadedCfMap")
+	}
+	if err := decoder.Decode(tmpVi.AllSettings()); err != nil {
+		return errors.New("cannot decode props again")
 	}
 	return nil
 }
 
-func loadViper(reader ProfileReader, option Option, propertiesList []Properties) (*viper.Viper, error) {
+func loadViper(reader ProfileReader, option Option) (*viper.Viper, error) {
 	option.DebugFunc("[GoLib-debug] Loading active profiles [%s] in paths [%s] with format [%s]",
 		strings.Join(option.ActiveProfiles, ", "), strings.Join(option.ConfigPaths, ", "), option.ConfigFormat)
 
@@ -94,46 +131,10 @@ func loadViper(reader ProfileReader, option Option, propertiesList []Properties)
 	vi.SetEnvKeyReplacer(strings.NewReplacer(option.KeyDelimiter, "_"))
 	vi.AutomaticEnv()
 
-	if err := discoverDefaultValue(vi, propertiesList, option); err != nil {
-		return nil, err
-	}
-
 	if err := discoverActiveProfiles(vi, reader, option); err != nil {
 		return nil, err
 	}
 	return vi, nil
-}
-
-// discoverDefaultValue Discover default values for multiple properties at once
-func discoverDefaultValue(vi *viper.Viper, propertiesList []Properties, option Option) error {
-	for _, props := range propertiesList {
-		propsName := reflect.TypeOf(props).String()
-
-		// Set default value if its missing
-		if err := defaults.Set(props); err != nil {
-			return fmt.Errorf("[GoLib-error] Fatal error when set default values for [%s]: %v", propsName, err)
-		}
-
-		propsMap := make(map[string]interface{})
-		if err := mapstructure.Decode(props, &propsMap); err != nil {
-			return err
-		}
-		defaultMap := utils.WrapKeysAroundMap(strings.Split(props.Prefix(), option.KeyDelimiter), propsMap, nil)
-
-		// set default values in viper.
-		// Viper needs to know if a key exists in order to override it.
-		// https://github.com/spf13/viper/issues/188
-		b, err := yaml.Marshal(defaultMap)
-		if err != nil {
-			return err
-		}
-		vi.SetConfigType("yaml")
-		if err := vi.MergeConfig(bytes.NewReader(b)); err != nil {
-			return fmt.Errorf("[GoLib-error] Error when discover default value for properties [%s]: %v", propsName, err)
-		}
-		option.DebugFunc("[GoLib-debug] Default value was discovered for properties [%s]", propsName)
-	}
-	return nil
 }
 
 // discoverActiveProfiles Discover values for multiple active profiles at once

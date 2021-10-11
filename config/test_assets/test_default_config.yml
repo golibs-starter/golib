@@ -1,5 +1,6 @@
 org:
   store:
+    open: false
     Location: Hanoi
     Tags:
       - Iphone
@@ -11,3 +12,7 @@ org:
         variants:
           - color: red
             storage: 64gb
+            images:
+              Normal:
+                width: 120
+                height: 80

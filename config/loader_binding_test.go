@@ -13,7 +13,8 @@ type testStore struct {
 	PhoneNumbers   []string `default:"[\"0967xxx\", \"0968xxx\"]"`
 	NumberProducts int
 	Products       []testProduct
-	Address        string `mapstructure:"BuildingAddress"`
+	Address        string `mapstructure:"BuildingAddress" default:"Apple Centre Building"`
+	Open           bool   `default:"true"`
 }
 
 func (t testStore) Prefix() string {
@@ -23,7 +24,7 @@ func (t testStore) Prefix() string {
 type testProduct struct {
 	Title    string
 	Price    int64
-	Currency string
+	Currency string `default:"$"`
 	Variants []*testVariant
 }
 
@@ -34,7 +35,7 @@ type testVariant struct {
 }
 
 type testVariantImage struct {
-	Size   string
+	Size   string `default:"normal"`
 	Width  int64
 	Height int64
 }
@@ -63,6 +64,7 @@ func TestLoaderBinding_WhenCustomizeProps_WithInlineParent_ShouldReturnWithCorre
 	assert.Equal(t, []string{"Iphone", "Ipad"}, props.Tags)
 	assert.Equal(t, []string{"0967xxx", "0968xxx"}, props.PhoneNumbers)
 	assert.Equal(t, 1, props.NumberProducts)
+	assert.True(t, props.Open)
 	assert.Len(t, props.Products, 1)
 
 	assert.Equal(t, "Iphone 6", props.Products[0].Title)
@@ -183,36 +185,45 @@ func TestLoaderBinding_WhenCustomizeProps_AndEnvHasBeenSet_ShouldReturnWithCorre
 	assert.Equal(t, "1TB", props.Products[1].Variants[0].Storage)
 }
 
-// TODO currently default value inside slice is not working, to be good if we can do it
-//func TestLoaderBinding_WhenNoCustomizeValueInSlice_ShouldReturnWithCorrectDefaultValueInSlice(t *testing.T) {
-//	err := os.Setenv("ORG_STORE_PRODUCTS_0_PRICE", "610")
-//	assert.NoError(t, err)
-//
-//	loader, err := NewLoader(Option{
-//		ActiveProfiles: []string{"test_default_in_slice"},
-//		ConfigPaths:    []string{"./test_assets"},
-//		ConfigFormat:   "yaml",
-//	}, []Properties{new(testStore)})
-//	assert.NoError(t, err)
-//
-//	props := testStore{}
-//	err = loader.Bind(&props)
-//	assert.NoError(t, err)
-//
-//	assert.Equal(t, "Apple", props.Name)
-//	assert.Equal(t, "Hanoi", props.Location)
-//	assert.Equal(t, []string{"Iphone", "Ipad"}, props.Tags)
-//	assert.Equal(t, []string{"0967xxx", "0968xxx"}, props.PhoneNumbers)
-//	assert.Equal(t, 1, props.NumberProducts)
-//	assert.Len(t, props.Products, 1)
-//
-//	assert.Equal(t, "Iphone 6", props.Products[0].Title)
-//	assert.EqualValues(t, 610, props.Products[0].Price)
-//	assert.Equal(t, "$", props.Products[0].Currency)
-//	assert.Len(t, props.Products[0].Variants, 1)
-//	assert.Equal(t, "red", props.Products[0].Variants[0].Color)
-//	assert.Equal(t, "64gb", props.Products[0].Variants[0].Storage)
-//}
+func TestLoaderBinding_WhenDefaultHasBeenSet_ShouldReturnWithCorrectDefaultValueInSlice(t *testing.T) {
+	err := os.Setenv("ORG_STORE_PRODUCTS_0_PRICE", "610")
+	assert.NoError(t, err)
+	defer func() {
+		_ = os.Unsetenv("ORG_STORE_PRODUCTS_0_PRICE")
+	}()
+
+	loader, err := NewLoader(Option{
+		ActiveProfiles: []string{"test_default_config"},
+		ConfigPaths:    []string{"./test_assets"},
+		ConfigFormat:   "yaml",
+	}, []Properties{new(testStore)})
+	assert.NoError(t, err)
+
+	props := testStore{}
+	err = loader.Bind(&props)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "Apple", props.Name)
+	assert.Equal(t, "Hanoi", props.Location)
+	assert.Equal(t, "Apple Centre Building", props.Address)
+	assert.Equal(t, []string{"Iphone", "Ipad"}, props.Tags)
+	assert.Equal(t, []string{"0967xxx", "0968xxx"}, props.PhoneNumbers)
+	assert.False(t, props.Open)
+	assert.Equal(t, 1, props.NumberProducts)
+	assert.Len(t, props.Products, 1)
+
+	assert.Equal(t, "Iphone 6", props.Products[0].Title)
+	assert.EqualValues(t, 610, props.Products[0].Price)
+	assert.Equal(t, "$", props.Products[0].Currency)
+	assert.Len(t, props.Products[0].Variants, 1)
+	assert.Equal(t, "red", props.Products[0].Variants[0].Color)
+	assert.Equal(t, "64gb", props.Products[0].Variants[0].Storage)
+	assert.Len(t, props.Products[0].Variants[0].Images, 1)
+	assert.EqualValues(t, 120, props.Products[0].Variants[0].Images["Normal"].Width)
+	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["Normal"].Height)
+	// TODO fix default in map
+	//assert.Equal(t, "normal", props.Products[0].Variants[0].Images["Normal"].Size)
+}
 
 func TestLoaderBinding_WhenConfigWithPlaceholderValue_AndEnvHasBeenSet_ShouldReturnWithValueInEnv(t *testing.T) {
 	err1 := os.Setenv("STORE_LOCATION", "Haiduong")
