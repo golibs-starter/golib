@@ -221,8 +221,7 @@ func TestLoaderBinding_WhenDefaultHasBeenSet_ShouldReturnWithCorrectDefaultValue
 	assert.Len(t, props.Products[0].Variants[0].Images, 1)
 	assert.EqualValues(t, 120, props.Products[0].Variants[0].Images["Normal"].Width)
 	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["Normal"].Height)
-	// TODO fix default in map
-	//assert.Equal(t, "normal", props.Products[0].Variants[0].Images["Normal"].Size)
+	assert.Equal(t, "normal", props.Products[0].Variants[0].Images["Normal"].Size)
 }
 
 func TestLoaderBinding_WhenConfigWithPlaceholderValue_AndEnvHasBeenSet_ShouldReturnWithValueInEnv(t *testing.T) {

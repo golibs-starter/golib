@@ -1,14 +1,12 @@
 package config
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/creasty/defaults"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"github.com/zenthangplus/defaults"
 	"gitlab.id.vin/vincart/golib/utils"
-	"gopkg.in/yaml.v2"
 	"reflect"
 	"strings"
 )
@@ -106,12 +104,7 @@ func (l ViperLoader) decodeWithDefaults(props Properties) error {
 		return errors.WithMessage(err, "cannot decode props to map")
 	}
 	tmpVi := viper.New()
-	tmpVi.SetConfigType("yaml")
-	b, err := yaml.Marshal(propsMap)
-	if err != nil {
-		return err
-	}
-	if err := tmpVi.MergeConfig(bytes.NewReader(b)); err != nil {
+	if err := tmpVi.MergeConfigMap(propsMap); err != nil {
 		return errors.WithMessage(err, "cannot merge propsMap")
 	}
 	if err = tmpVi.MergeConfigMap(loadedCfMap); err != nil {
