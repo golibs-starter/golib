@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/zenthangplus/defaults"
 	"gitlab.id.vin/vincart/golib/utils"
+	"gopkg.in/yaml.v2"
 	"reflect"
 	"strings"
 )
@@ -103,14 +104,19 @@ func (l ViperLoader) decodeWithDefaults(props Properties) error {
 	if err := mapstructure.Decode(props, &propsMap); err != nil {
 		return errors.WithMessage(err, "cannot decode props to map")
 	}
-	tmpVi := viper.New()
-	if err := tmpVi.MergeConfigMap(propsMap); err != nil {
-		return errors.WithMessage(err, "cannot merge propsMap")
+
+	// Because mapstructure cannot decode struct inside slice, so convert to yaml and unmarshal again
+	propsMapBytes, err := yaml.Marshal(propsMap)
+	if err != nil {
+		return errors.WithMessage(err, "cannot encode propsMap to yaml")
 	}
-	if err = tmpVi.MergeConfigMap(loadedCfMap); err != nil {
-		return errors.WithMessage(err, "cannot merge loadedCfMap")
+	var defaultProps map[string]interface{}
+	if err := yaml.Unmarshal(propsMapBytes, &defaultProps); err != nil {
+		return errors.WithMessage(err, "cannot unmarshal propsMapBytes")
 	}
-	if err := decoder.Decode(tmpVi.AllSettings()); err != nil {
+
+	newPropsMap := utils.MergeCaseInsensitiveMaps(loadedCfMap, defaultProps)
+	if err := decoder.Decode(newPropsMap); err != nil {
 		return errors.New("cannot decode props again")
 	}
 	return nil

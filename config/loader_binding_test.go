@@ -35,9 +35,10 @@ type testVariant struct {
 }
 
 type testVariantImage struct {
-	Size   string `default:"normal"`
-	Width  int64
-	Height int64
+	Size      string `default:"normal"`
+	Width     int64
+	Height    int64
+	IsDefault bool `default:"true"`
 }
 
 func TestLoaderBinding_WhenCustomizeProps_WithInlineParent_ShouldReturnWithCorrectValue(t *testing.T) {
@@ -218,10 +219,15 @@ func TestLoaderBinding_WhenDefaultHasBeenSet_ShouldReturnWithCorrectDefaultValue
 	assert.Len(t, props.Products[0].Variants, 1)
 	assert.Equal(t, "red", props.Products[0].Variants[0].Color)
 	assert.Equal(t, "64gb", props.Products[0].Variants[0].Storage)
-	assert.Len(t, props.Products[0].Variants[0].Images, 1)
+	assert.Len(t, props.Products[0].Variants[0].Images, 2)
 	assert.EqualValues(t, 120, props.Products[0].Variants[0].Images["Normal"].Width)
 	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["Normal"].Height)
-	assert.Equal(t, "normal", props.Products[0].Variants[0].Images["Normal"].Size)
+	assert.Equal(t, "", props.Products[0].Variants[0].Images["Normal"].Size)
+	assert.True(t, props.Products[0].Variants[0].Images["Normal"].IsDefault)
+	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["Thumb"].Width)
+	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["Thumb"].Height)
+	assert.Equal(t, "thumb", props.Products[0].Variants[0].Images["Thumb"].Size)
+	assert.False(t, props.Products[0].Variants[0].Images["Thumb"].IsDefault)
 }
 
 func TestLoaderBinding_WhenConfigWithPlaceholderValue_AndEnvHasBeenSet_ShouldReturnWithValueInEnv(t *testing.T) {

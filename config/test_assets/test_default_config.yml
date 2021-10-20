@@ -14,5 +14,11 @@ org:
             storage: 64gb
             images:
               Normal:
+                size: ""
                 width: 120
                 height: 80
+              Thumb:
+                size: "thumb"
+                width: 80
+                height: 80
+                isDefault: false
