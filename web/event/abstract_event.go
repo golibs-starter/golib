@@ -7,6 +7,10 @@ import (
 	webContext "gitlab.id.vin/vincart/golib/web/context"
 )
 
+type AbstractEventWrapper interface {
+	GetAbstractEvent() *AbstractEvent
+}
+
 type AbstractEvent struct {
 	*event.ApplicationEvent
 	RequestId         string `json:"request_id"`
@@ -37,4 +41,8 @@ func NewAbstractEvent(ctx context.Context, eventName string, payload interface{}
 
 func (a AbstractEvent) String() string {
 	return a.ToString(a)
+}
+
+func (a *AbstractEvent) GetAbstractEvent() *AbstractEvent {
+	return a
 }
