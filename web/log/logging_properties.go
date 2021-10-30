@@ -13,7 +13,7 @@ func NewLoggingProperties(loader config.Loader) (*LoggingProperties, error) {
 type LoggingProperties struct {
 	Development    bool `default:"false"`
 	JsonOutputMode bool `default:"true"`
-	CallerSkip     int  `default:"2"`
+	CallerSkip     int  `default:"4"`
 }
 
 func (l LoggingProperties) Prefix() string {

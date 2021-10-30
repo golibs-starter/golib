@@ -24,9 +24,9 @@ func NewPublisher(opts ...PublisherOpt) *publisher {
 func (p *publisher) Publish(event Event) {
 	p.eventCh <- event
 	if p.notLogPayloadForEvents != nil && p.notLogPayloadForEvents[event.Name()] {
-		p.debugLog("Event [%s] was fired with id [%s]", event.Name(), event.Identifier())
+		p.debugLog(event, "Event [%s] was fired with id [%s]", event.Name(), event.Identifier())
 	} else {
-		p.debugLog("Event [%s] was fired with id [%s], payload [%s]",
+		p.debugLog(event, "Event [%s] was fired with id [%s], payload [%s]",
 			event.Name(), event.Identifier(), event.String())
 	}
 }

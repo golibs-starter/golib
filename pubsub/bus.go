@@ -34,12 +34,12 @@ func (b *EventBus) Register(subscribers ...Subscriber) {
 	for _, subscriber := range subscribers {
 		subscriberId := reflect.TypeOf(subscriber).String()
 		if _, exists := b.mapSubscribers[subscriberId]; exists {
-			b.debugLog("Subscriber [%s] already registered", subscriberId)
+			b.debugLog(nil, "Subscriber [%s] already registered", subscriberId)
 			continue
 		}
 		b.mapSubscribers[subscriberId] = true
 		b.subscribers = append(b.subscribers, subscriber)
-		b.debugLog("Register subscriber [%s] successful", subscriberId)
+		b.debugLog(nil, "Register subscriber [%s] successful", subscriberId)
 	}
 }
 

@@ -66,7 +66,7 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 				return err
 			}
 		}
-		l.option.DebugFunc("[GoLib-debug] LoggingProperties [%s] loaded with prefix [%s]", propsName, props.Prefix())
+		l.option.DebugFunc("[GoLib-debug] Properties [%s] was loaded with prefix [%s]", propsName, props.Prefix())
 	}
 	return nil
 }

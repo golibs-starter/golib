@@ -1,7 +1,6 @@
 package listener
 
 import (
-	mainLog "gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/pubsub"
 	"gitlab.id.vin/vincart/golib/web/constant"
 	"gitlab.id.vin/vincart/golib/web/event"
@@ -23,7 +22,7 @@ func (r RequestCompletedLogListener) Supports(e pubsub.Event) bool {
 func (r RequestCompletedLogListener) Handle(e pubsub.Event) {
 	ev := e.(*event.RequestCompletedEvent)
 	if payload, ok := ev.Payload().(event.RequestCompletedPayload); ok {
-		mainLog.Infow([]interface{}{constant.ContextReqMeta, r.makeHttpRequestLog(&payload)}, "finish router")
+		log.Infow([]interface{}{constant.ContextReqMeta, r.makeHttpRequestLog(&payload)}, "finish router")
 	}
 }
 

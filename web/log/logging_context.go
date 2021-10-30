@@ -48,6 +48,9 @@ func keysAndValuesFromContext(ctx context.Context) []interface{} {
 
 func keysAndValuesFromEvent(e pubsub.Event) []interface{} {
 	var logContext = make([]interface{}, 0)
+	if e == nil {
+		return logContext
+	}
 	if we, ok := e.(event.AbstractEventWrapper); ok {
 		logContext = []interface{}{constant.ContextReqMeta, BuildLoggingContextFromEvent(we.GetAbstractEvent())}
 	}
@@ -92,4 +95,44 @@ func Errore(e pubsub.Event, msgFormat string, args ...interface{}) {
 
 func Fatale(e pubsub.Event, msgFormat string, args ...interface{}) {
 	mainLog.Fatalw(keysAndValuesFromEvent(e), msgFormat, args...)
+}
+
+func Debugf(msgFormat string, args ...interface{}) {
+	mainLog.Debugf(msgFormat, args...)
+}
+
+func Infof(msgFormat string, args ...interface{}) {
+	mainLog.Infof(msgFormat, args...)
+}
+
+func Warnf(msgFormat string, args ...interface{}) {
+	mainLog.Warnf(msgFormat, args...)
+}
+
+func Errorf(msgFormat string, args ...interface{}) {
+	mainLog.Errorf(msgFormat, args...)
+}
+
+func Fatalf(msgFormat string, args ...interface{}) {
+	mainLog.Fatalf(msgFormat, args...)
+}
+
+func Debugw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+	mainLog.Debugw(keysAndValues, msgFormat, args...)
+}
+
+func Infow(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+	mainLog.Infow(keysAndValues, msgFormat, args...)
+}
+
+func Warnw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+	mainLog.Warnw(keysAndValues, msgFormat, args...)
+}
+
+func Errorw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+	mainLog.Errorw(keysAndValues, msgFormat, args...)
+}
+
+func Fatalw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+	mainLog.Fatalw(keysAndValues, msgFormat, args...)
 }

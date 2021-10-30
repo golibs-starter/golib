@@ -2,9 +2,9 @@ package golib
 
 import (
 	"gitlab.id.vin/vincart/golib/event"
-	"gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/pubsub"
 	"gitlab.id.vin/vincart/golib/web/listener"
+	"gitlab.id.vin/vincart/golib/web/log"
 	"go.uber.org/fx"
 )
 
@@ -28,12 +28,12 @@ type EventPublisherOut struct {
 	EventBus  *pubsub.EventBus
 }
 
-func NewEventPublisher(logger log.Logger, props *event.Properties) EventPublisherOut {
+func NewEventPublisher(props *event.Properties) EventPublisherOut {
 	publisher := pubsub.NewPublisher(
-		pubsub.WithPublisherDebugLog(logger.Debugf),
+		pubsub.WithPublisherDebugLog(log.Debuge),
 		pubsub.WithPublisherNotLogPayload(props.Log.NotLogPayloadForEvents),
 	)
-	eventBus := pubsub.NewEventBus(publisher, pubsub.WithEventBusDebugLog(logger.Debugf))
+	eventBus := pubsub.NewEventBus(publisher, pubsub.WithEventBusDebugLog(log.Debuge))
 	return EventPublisherOut{
 		EventBus:  eventBus,
 		Publisher: publisher,
