@@ -10,7 +10,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
-	github.com/zenthangplus/defaults v1.6.0-beta
+	github.com/zenthangplus/defaults v1.6.2-beta
 	go.uber.org/fx v1.13.1
 	go.uber.org/zap v1.18.1
 	gopkg.in/yaml.v2 v2.4.0
