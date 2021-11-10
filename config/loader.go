@@ -85,7 +85,7 @@ func (l ViperLoader) decodeWithDefaults(props Properties) error {
 		return errors.New("loaded config inside prefix is not a map")
 	}
 	if err := decoder.Decode(loadedCfMap); err != nil {
-		return errors.New("cannot decode props")
+		return errors.WithMessage(err, "cannot decode props")
 	}
 
 	// Set default value if its missing
