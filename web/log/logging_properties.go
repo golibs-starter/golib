@@ -17,5 +17,5 @@ type LoggingProperties struct {
 }
 
 func (l LoggingProperties) Prefix() string {
-	return "application.logging"
+	return "app.logging"
 }

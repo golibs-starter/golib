@@ -35,7 +35,12 @@ Using `fx.Option` to include dependencies for injection.
 ```go
 options := []fx.Option{
     golib.AppOpt(),//required
-    golib.PropertiesOpt(),//required
+
+    // Required
+	// Supported environment variables
+    // If you want to load more profiles by order, use comma char. Example internal,local. It will load
+	// APP_PROFILES=local
+    golib.PropertiesOpt(),
 
     // When you want to use default logging strategy.
     golib.LoggingOpt(),
@@ -49,15 +54,56 @@ options := []fx.Option{
     // When you want to provide build info to above info service.
     golib.BuildInfoOpt(Version, CommitHash, BuildTime),
 
-    //When you want to enable http client auto config with contextual client by default
+    // When you want to enable http client auto config with contextual client by default
     golib.HttpClientOpt(),
-    //When you want to provide an additional wrapper to easy to control http client's security.
-    golibsec.SecuredHttpClientOpt(),
 
     // When you want to tell GoLib to load your properties.
     golib.ProvideProps(properties.NewCustomProperties),
 
     // When you want to register your event listener.
-	golib.ProvideEventListener(listener.NewCustomListener),
+    golib.ProvideEventListener(listener.NewCustomListener),
 }
+```
+
+### Configuration
+
+#### 1. Environment variables
+
+| Var | Default | Description |
+|---|---|---|
+| `APP_PROFILES` | None | Defines the list of active profiles, separate by comma. By default, `default` profile is always load even this env configured. Example: when `APP_PROFILES=internal,uat` then both `default` `internal` and `uat` will be loaded by order.  |
+| `APP_CONFIG_PATHS` | `./config` | Defines the location of config directory, when the application is started, it will scan profiles in this path. |
+| `APP_CONFIG_FORMAT` | `yaml` | Defines the format of config file. Currently we only support Yaml format (both `yaml` `yml` are accepted). |
+
+Besides, all our configs can be overridden by environment variables. For example:
+
+```yaml
+store:
+    name: Fruit store # Equivalent to STORE_NAME
+    items:
+        - name: Apple # Equivalent to STORE_ITEMS_0_NAME
+          price: 5 # Equivalent to STORE_ITEMS_0_PRICE
+        - name: Lemon # Equivalent to STORE_ITEMS_1_NAME
+          price: 0.5 # Equivalent to STORE_ITEMS_1_PRICE
+```
+
+#### 2. Available configurations
+
+```yaml
+# Configuration available for golib.AppOpt()
+app:
+    name: Service Name # Specify application name. Default `unspecified`
+    port: 8080 # Defines the running port. Default `8080`
+    path: /service-base-path/ # Defines base path (context path). Default `/`
+
+    # Configuration available for golib.LoggingOpt()
+    logging:
+        development: false # Enable or disable development mode. Default `false`
+        jsonOutputMode: true # Enable or disable json output. Default `true`
+
+# Configuration available for golib.EventOpt()
+vinid.event:
+    notLogPayloadForEvents:
+        - OrderCreatedEvent
+        - OrderUpdatedEvent
 ```

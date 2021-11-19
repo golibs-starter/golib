@@ -7,11 +7,11 @@ func NewAppProperties(loader Loader) (*AppProperties, error) {
 }
 
 type AppProperties struct {
-	Name string `mapstructure:"name" default:"unspecified"`
-	Port int    `mapstructure:"port" default:"8080"`
-	Path string `mapstructure:"path" default:"/"`
+	Name string `default:"unspecified"`
+	Port int    `default:"8080"`
+	Path string `default:"/"`
 }
 
 func (a AppProperties) Prefix() string {
-	return "application"
+	return "app"
 }

@@ -38,9 +38,9 @@ type PropertiesLoaderIn struct {
 
 func NewPropertiesLoader(in PropertiesLoaderIn, options ...Option) (config.Loader, error) {
 	option := new(config.Option)
-	option.ActiveProfiles = utils.SliceFromCommaString(os.Getenv("APPLICATION_ENV"))
-	option.ConfigPaths = utils.SliceFromCommaString(os.Getenv("APPLICATION_CONFIG_PATHS"))
-	option.ConfigFormat = os.Getenv("APPLICATION_CONFIG_FORMAT")
+	option.ActiveProfiles = utils.SliceFromCommaString(os.Getenv("APP_PROFILES"))
+	option.ConfigPaths = utils.SliceFromCommaString(os.Getenv("APP_CONFIG_PATHS"))
+	option.ConfigFormat = os.Getenv("APP_CONFIG_FORMAT")
 	option.DebugFunc = log.Debugf
 	for _, optFunc := range options {
 		optFunc(option)
