@@ -25,7 +25,7 @@ git config --global url."https://oath2:{your_access_token}@gitlab.id.vin/".inste
 
 Both `go get` and `go mod` are supported.
 ```shell
-go get gitlab.id.vin/vincart/common/golib
+go get gitlab.id.vin/vincart/golib
 ```
 
 ### Usage

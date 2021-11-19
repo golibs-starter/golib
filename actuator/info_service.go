@@ -1,7 +1,7 @@
 package actuator
 
 import (
-	"gitlab.id.vin/vincart/common/golib/config"
+	"gitlab.id.vin/vincart/golib/config"
 )
 
 type InfoService interface {

@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/mitchellh/mapstructure"
-	"gitlab.id.vin/vincart/common/golib/utils"
+	"gitlab.id.vin/vincart/golib/utils"
 	"reflect"
 )
 

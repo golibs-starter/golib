@@ -1,7 +1,7 @@
 package response
 
 import (
-	"gitlab.id.vin/vincart/common/golib/exception"
+	"gitlab.id.vin/vincart/golib/exception"
 	"net/http"
 )
 

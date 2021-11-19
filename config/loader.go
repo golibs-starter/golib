@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"github.com/zenthangplus/defaults"
-	"gitlab.id.vin/vincart/common/golib/utils"
+	"gitlab.id.vin/vincart/golib/utils"
 	"gopkg.in/yaml.v2"
 	"reflect"
 	"strings"

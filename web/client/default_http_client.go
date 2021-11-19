@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/pkg/errors"
-	"gitlab.id.vin/vincart/common/golib/log"
+	"gitlab.id.vin/vincart/golib/log"
 	"io"
 	"io/ioutil"
 	"net/http"

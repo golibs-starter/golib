@@ -1,7 +1,7 @@
 package response
 
 import (
-	"gitlab.id.vin/vincart/common/golib/web/render"
+	"gitlab.id.vin/vincart/golib/web/render"
 	"net/http"
 )
 

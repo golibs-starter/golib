@@ -2,11 +2,11 @@ package log
 
 import (
 	"context"
-	mainLog "gitlab.id.vin/vincart/common/golib/log"
-	"gitlab.id.vin/vincart/common/golib/pubsub"
-	"gitlab.id.vin/vincart/common/golib/web/constant"
-	webContext "gitlab.id.vin/vincart/common/golib/web/context"
-	"gitlab.id.vin/vincart/common/golib/web/event"
+	mainLog "gitlab.id.vin/vincart/golib/log"
+	"gitlab.id.vin/vincart/golib/pubsub"
+	"gitlab.id.vin/vincart/golib/web/constant"
+	webContext "gitlab.id.vin/vincart/golib/web/context"
+	"gitlab.id.vin/vincart/golib/web/event"
 )
 
 type LoggingContext struct {

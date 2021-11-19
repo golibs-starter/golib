@@ -1,6 +1,6 @@
 package build
 
-import "gitlab.id.vin/vincart/common/golib/actuator"
+import "gitlab.id.vin/vincart/golib/actuator"
 
 type Version string
 type CommitHash string

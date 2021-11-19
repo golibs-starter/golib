@@ -2,7 +2,7 @@ package context
 
 import (
 	"context"
-	"gitlab.id.vin/vincart/common/golib/web/constant"
+	"gitlab.id.vin/vincart/golib/web/constant"
 	"net/http"
 )
 

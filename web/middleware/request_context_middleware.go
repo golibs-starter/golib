@@ -3,10 +3,10 @@ package middleware
 import (
 	mainContext "context"
 	"errors"
-	"gitlab.id.vin/vincart/common/golib/pubsub"
-	"gitlab.id.vin/vincart/common/golib/web/context"
-	"gitlab.id.vin/vincart/common/golib/web/event"
-	"gitlab.id.vin/vincart/common/golib/web/log"
+	"gitlab.id.vin/vincart/golib/pubsub"
+	"gitlab.id.vin/vincart/golib/web/context"
+	"gitlab.id.vin/vincart/golib/web/event"
+	"gitlab.id.vin/vincart/golib/web/log"
 	"net/http"
 	"time"
 )
