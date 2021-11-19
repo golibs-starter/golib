@@ -33,33 +33,42 @@ go get gitlab.id.vin/vincart/golib
 Using `fx.Option` to include dependencies for injection.
 
 ```go
-options := []fx.Option{
-    // Required
-    golib.AppOpt(),
+package main
 
-    // Required
-    golib.PropertiesOpt(),
+import (
+    "gitlab.id.vin/vincart/golib"
+    "go.uber.org/fx"
+)
 
-    // When you want to use default logging strategy.
-    golib.LoggingOpt(),
+func main() {
+    options := []fx.Option{
+        // Required
+        golib.AppOpt(),
 
-    // When you want to enable event publisher
-    golib.EventOpt(),
+        // Required
+        golib.PropertiesOpt(),
 
-    // When you want to enable actuator endpoints.
-    // By default, we provide HealthService and InfoService.
-    golib.ActuatorEndpointOpt(),
-    // When you want to provide build info to above InfoService.
-    golib.BuildInfoOpt(Version, CommitHash, BuildTime),
+        // When you want to use default logging strategy.
+        golib.LoggingOpt(),
 
-    // When you want to enable http client auto config with contextual client by default
-    golib.HttpClientOpt(),
+        // When you want to enable event publisher
+        golib.EventOpt(),
 
-    // When you want to tell GoLib to load your properties.
-    golib.ProvideProps(properties.NewCustomProperties),
+        // When you want to enable actuator endpoints.
+        // By default, we provide HealthService and InfoService.
+        golib.ActuatorEndpointOpt(),
+        // When you want to provide build info to above InfoService.
+        golib.BuildInfoOpt(Version, CommitHash, BuildTime),
 
-    // When you want to register your event listener.
-    golib.ProvideEventListener(listener.NewCustomListener),
+        // When you want to enable http client auto config with contextual client by default
+        golib.HttpClientOpt(),
+
+        // When you want to tell GoLib to load your properties.
+        golib.ProvideProps(properties.NewCustomProperties),
+
+        // When you want to register your event listener.
+        golib.ProvideEventListener(listener.NewCustomListener),
+    }
 }
 ```
 
