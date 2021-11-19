@@ -1,7 +1,7 @@
 package log
 
 import (
-	"gitlab.id.vin/vincart/golib/config"
+	"gitlab.id.vin/vincart/common/golib/config"
 )
 
 func NewLoggingProperties(loader config.Loader) (*LoggingProperties, error) {

@@ -25,7 +25,7 @@ git config --global url."https://oath2:{your_access_token}@gitlab.id.vin/".inste
 
 Both `go get` and `go mod` are supported.
 ```shell
-go get gitlab.id.vin/vincart/golib
+go get gitlab.id.vin/vincart/common/golib
 ```
 
 ### Usage
@@ -34,12 +34,10 @@ Using `fx.Option` to include dependencies for injection.
 
 ```go
 options := []fx.Option{
-    golib.AppOpt(),//required
+    // Required
+    golib.AppOpt(),
 
     // Required
-	// Supported environment variables
-    // If you want to load more profiles by order, use comma char. Example internal,local. It will load
-	// APP_PROFILES=local
     golib.PropertiesOpt(),
 
     // When you want to use default logging strategy.

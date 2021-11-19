@@ -2,9 +2,9 @@ package golib
 
 import (
 	"fmt"
-	"gitlab.id.vin/vincart/golib/config"
-	"gitlab.id.vin/vincart/golib/log"
-	"gitlab.id.vin/vincart/golib/utils"
+	"gitlab.id.vin/vincart/common/golib/config"
+	"gitlab.id.vin/vincart/common/golib/log"
+	"gitlab.id.vin/vincart/common/golib/utils"
 	"go.uber.org/fx"
 	"os"
 	"reflect"

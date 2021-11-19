@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"gitlab.id.vin/vincart/golib/web/context"
+	"gitlab.id.vin/vincart/common/golib/web/context"
 	"net/http"
 )
 

@@ -2,10 +2,10 @@ package middleware
 
 import (
 	assert "github.com/stretchr/testify/require"
-	"gitlab.id.vin/vincart/golib/pubsub"
-	"gitlab.id.vin/vincart/golib/web/constant"
-	"gitlab.id.vin/vincart/golib/web/context"
-	"gitlab.id.vin/vincart/golib/web/event"
+	"gitlab.id.vin/vincart/common/golib/pubsub"
+	"gitlab.id.vin/vincart/common/golib/web/constant"
+	"gitlab.id.vin/vincart/common/golib/web/context"
+	"gitlab.id.vin/vincart/common/golib/web/event"
 	"net/http"
 	"testing"
 )
