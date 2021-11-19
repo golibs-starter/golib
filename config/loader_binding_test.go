@@ -9,16 +9,23 @@ import (
 type testStore struct {
 	Name           string
 	Location       string
+	Path           string `default:"Apple/Central"`
 	Tags           []string
 	PhoneNumbers   []string `default:"[\"0967xxx\", \"0968xxx\"]"`
 	NumberProducts int
 	Products       []testProduct
 	Address        string `mapstructure:"BuildingAddress" default:"Apple Centre Building"`
 	Open           bool   `default:"true"`
+	Staffs         map[string]testStoreStaff
 }
 
 func (t testStore) Prefix() string {
 	return "org.store"
+}
+
+type testStoreStaff struct {
+	Name  string
+	Email string
 }
 
 type testProduct struct {
@@ -41,7 +48,7 @@ type testVariantImage struct {
 	IsDefault bool `default:"true"`
 }
 
-func TestLoaderBinding_WhenCustomizeProps_WithInlineParent_ShouldReturnWithCorrectValue(t *testing.T) {
+func TestLoaderBinding_GivenInlineParent_ShouldReturnWithCorrectValue(t *testing.T) {
 	err := os.Setenv("ORG_STORE_PRODUCTS_0_PRICE", "610")
 	assert.NoError(t, err)
 	defer func() {
@@ -83,7 +90,7 @@ func TestLoaderBinding_WhenCustomizeProps_WithInlineParent_ShouldReturnWithCorre
 	assert.Equal(t, int64(600), props.Products[0].Variants[0].Images["Xl"].Height)
 }
 
-func TestLoaderBinding_WhenCustomizeProps_WithInlineKeyOverrideNestedKey_ShouldReturnWithCorrectValue(t *testing.T) {
+func TestLoaderBinding_GivenInlineKeyOverrideNestedKey_ShouldReturnWithCorrectValue(t *testing.T) {
 	loader, err := NewLoader(Option{
 		ActiveProfiles: []string{"test_inline_key_override"}, //override value in default profile
 		ConfigPaths:    []string{"./test_assets"},
@@ -101,7 +108,7 @@ func TestLoaderBinding_WhenCustomizeProps_WithInlineKeyOverrideNestedKey_ShouldR
 	assert.Equal(t, []string{"0967xxx", "0968xxx"}, props.PhoneNumbers)
 }
 
-func TestLoaderBinding_WhenCustomizeProps_WithNestedKeyOverrideInlineKey_ShouldReturnWithCorrectValue(t *testing.T) {
+func TestLoaderBinding_GivenNestedKeyOverrideInlineKey_ShouldReturnWithCorrectValue(t *testing.T) {
 	loader, err := NewLoader(Option{
 		ActiveProfiles: []string{"test_inline_key", "test_nested_key_override"},
 		ConfigPaths:    []string{"./test_assets"},
@@ -135,17 +142,20 @@ func TestLoaderBinding_WhenCustomizeProps_WithNestedKeyOverrideInlineKey_ShouldR
 	assert.Equal(t, int64(600), props.Products[0].Variants[0].Images["Xl"].Height)
 }
 
-func TestLoaderBinding_WhenCustomizeProps_AndEnvHasBeenSet_ShouldReturnWithCorrectValue(t *testing.T) {
+func TestLoaderBinding_WhenEnvHasBeenSet_ShouldReturnWithCorrectValue(t *testing.T) {
 	err1 := os.Setenv("ORG_STORE_NUMBERPRODUCTS", "3")
 	assert.NoError(t, err1)
-	err2 := os.Setenv("ORG_STORE_PRODUCTS_0_PRICE", "610")
+	err2 := os.Setenv("ORG_STORE_PATH", "Apple/Secondary Building")
 	assert.NoError(t, err2)
-	err3 := os.Setenv("ORG_STORE_PRODUCTS_0_VARIANTS_1_COLOR", "space_blue")
+	err3 := os.Setenv("ORG_STORE_PRODUCTS_0_PRICE", "610")
 	assert.NoError(t, err3)
-	err4 := os.Setenv("ORG_STORE_PRODUCTS_1_TITLE", "Iphone 13 Pro Max")
+	err4 := os.Setenv("ORG_STORE_PRODUCTS_0_VARIANTS_1_COLOR", "space_blue")
 	assert.NoError(t, err4)
+	err5 := os.Setenv("ORG_STORE_PRODUCTS_1_TITLE", "Iphone 13 Pro Max")
+	assert.NoError(t, err5)
 	defer func() {
 		_ = os.Unsetenv("ORG_STORE_NUMBERPRODUCTS")
+		_ = os.Unsetenv("ORG_STORE_PATH")
 		_ = os.Unsetenv("ORG_STORE_PRODUCTS_0_PRICE")
 		_ = os.Unsetenv("ORG_STORE_PRODUCTS_0_VARIANTS_1_COLOR")
 		_ = os.Unsetenv("ORG_STORE_PRODUCTS_1_TITLE")
@@ -164,6 +174,7 @@ func TestLoaderBinding_WhenCustomizeProps_AndEnvHasBeenSet_ShouldReturnWithCorre
 
 	assert.Equal(t, "Apple", props.Name)
 	assert.Equal(t, "Hanoi", props.Location)
+	assert.Equal(t, "Apple/Secondary Building", props.Path)
 	assert.Equal(t, []string{"Iphone", "Ipad"}, props.Tags)
 	assert.Equal(t, []string{"0967xxx", "0968xxx"}, props.PhoneNumbers)
 	assert.Equal(t, 3, props.NumberProducts)
@@ -334,3 +345,20 @@ func TestLoaderBinding_WhenProfileFileInYamlFormat_ShouldReturnCorrect(t *testin
 	assert.NoError(t, err)
 	assert.Equal(t, "Apple Inc.", props.Name)
 }
+
+// TODO Should improve it, currently we make lowercase for all map keys.
+//func TestLoaderBinding_WhenConfigWithMap_ShouldReturnCorrect(t *testing.T) {
+//	loader, err := NewLoader(Option{
+//		ActiveProfiles: []string{"test_map_key"},
+//		ConfigPaths:    []string{"./test_assets"},
+//		ConfigFormat:   "yml",
+//	}, []Properties{new(testStore)})
+//	assert.NoError(t, err)
+//
+//	props := testStore{}
+//	err = loader.Bind(&props)
+//	assert.NoError(t, err)
+//	assert.Equal(t, "Apple", props.Name)
+//	assert.Len(t, props.Staffs, 2)
+//	assert.Equal(t, "Sam", props.Staffs["Manager"].Name)
+//}

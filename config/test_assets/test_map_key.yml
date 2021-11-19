@@ -1,0 +1,8 @@
+org.store:
+  staffs:
+    Manager:
+      name: Sam
+      email: Sam@onemount.com
+    Sale:
+      name: Alex
+      email: alex@onemount.com

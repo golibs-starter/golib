@@ -29,7 +29,7 @@ func NewLoader(option Option, properties []Properties) (Loader, error) {
 	if err != nil {
 		return nil, err
 	}
-	vi, err := loadViper(reader, option)
+	vi, err := loadViper(reader, option, properties)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (l ViperLoader) decodeWithDefaults(props Properties) error {
 	return nil
 }
 
-func loadViper(reader ProfileReader, option Option) (*viper.Viper, error) {
+func loadViper(reader ProfileReader, option Option, propertiesList []Properties) (*viper.Viper, error) {
 	option.DebugFunc("[GoLib-debug] Loading active profiles [%s] in paths [%s] with format [%s]",
 		strings.Join(option.ActiveProfiles, ", "), strings.Join(option.ConfigPaths, ", "), option.ConfigFormat)
 
@@ -133,7 +133,34 @@ func loadViper(reader ProfileReader, option Option) (*viper.Viper, error) {
 	if err := discoverActiveProfiles(vi, reader, option); err != nil {
 		return nil, err
 	}
+
+	if err := discoverEnvKeys(vi, option, propertiesList); err != nil {
+		return nil, err
+	}
 	return vi, nil
+}
+
+// discoverEnvKeys Discover env keys for multiple properties at once
+func discoverEnvKeys(vi *viper.Viper, option Option, propertiesList []Properties) error {
+	for _, props := range propertiesList {
+		propsName := reflect.TypeOf(props).String()
+		propsMap := make(map[string]interface{})
+		if err := mapstructure.Decode(props, &propsMap); err != nil {
+			return errors.WithMessage(err, "cannot decode props to map")
+		}
+
+		// set default values in viper.
+		// Viper needs to know if a key exists in order to override it.
+		// https://github.com/spf13/viper/issues/188
+		defaultMap := convertSliceToNestedMap(strings.Split(props.Prefix(), option.KeyDelimiter), propsMap, nil)
+		for key, env := range buildEnvKeys(defaultMap, option.KeyDelimiter, "_", "", "") {
+			if err := vi.BindEnv(key, env); err != nil {
+				return fmt.Errorf("[GoLib-error] Error when build env keys properties [%s]: %v", propsName, err)
+			}
+		}
+		option.DebugFunc("[GoLib-debug] Default value was discovered for properties [%s]", propsName)
+	}
+	return nil
 }
 
 // discoverActiveProfiles Discover values for multiple active profiles at once
@@ -196,4 +223,67 @@ func correctSliceValues(vi *viper.Viper, prefix string, delim string, val interf
 		}
 	}
 	return nil, false
+}
+
+func convertSliceToNestedMap(paths []string, endVal interface{}, inMap map[interface{}]interface{}) map[interface{}]interface{} {
+	if inMap == nil {
+		inMap = map[interface{}]interface{}{}
+	}
+	if len(paths) == 0 {
+		return inMap
+	}
+	if len(paths) == 1 {
+		inMap[paths[0]] = endVal
+		return inMap
+	}
+	inMap[paths[0]] = convertSliceToNestedMap(paths[1:], endVal, map[interface{}]interface{}{})
+	return inMap
+}
+
+func buildEnvKeys(data map[interface{}]interface{}, keyDelim string, envDelim, baseKey string, baseEnv string) map[string]string {
+	keyEnvMap := make(map[string]string)
+	if data == nil {
+		return keyEnvMap
+	}
+	for key, val := range data {
+		keyStr, ok := key.(string)
+		if !ok {
+			continue
+		}
+		kPath := keyStr
+		ePath := keyStr
+		if baseKey != "" {
+			kPath = baseKey + keyDelim + keyStr
+			ePath = baseEnv + envDelim + keyStr
+		}
+		ePath = strings.ToUpper(ePath)
+		switch valT := val.(type) {
+		case map[string]interface{}:
+			if len(valT) == 0 {
+				keyEnvMap[kPath] = ePath
+				break
+			}
+			mapI := make(map[interface{}]interface{})
+			for k1, v1 := range valT {
+				mapI[k1] = v1
+			}
+			for sk, sv := range buildEnvKeys(mapI, keyDelim, envDelim, kPath, ePath) {
+				keyEnvMap[sk] = sv
+			}
+			break
+		case map[interface{}]interface{}:
+			if len(valT) == 0 {
+				keyEnvMap[kPath] = ePath
+				break
+			}
+			for sk, sv := range buildEnvKeys(valT, keyDelim, envDelim, kPath, ePath) {
+				keyEnvMap[sk] = sv
+			}
+			break
+		default:
+			keyEnvMap[kPath] = ePath
+			break
+		}
+	}
+	return keyEnvMap
 }

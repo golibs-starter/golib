@@ -21,4 +21,18 @@ Or with access token in URL:
 git config --global url."https://oath2:{your_access_token}@gitlab.id.vin/".insteadOf https://gitlab.id.vin/
 ```
 
-> TODO Add more instructions
+### Setup instruction
+
+Both `go get` and `go mod` are supported.
+```shell
+go get gitlab.id.vin/vincart/golib
+```
+
+### Usage
+
+Using `fx.Option` to include dependencies for injection.
+
+```go
+options := []fx.Option{
+}
+```
