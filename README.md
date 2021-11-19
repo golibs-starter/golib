@@ -47,9 +47,9 @@ options := []fx.Option{
     golib.EventOpt(),
 
     // When you want to enable actuator endpoints.
-	// By default, we provide HealthService and InfoService.
+    // By default, we provide HealthService and InfoService.
     golib.ActuatorEndpointOpt(),
-    // When you want to provide build info to above info service.
+    // When you want to provide build info to above InfoService.
     golib.BuildInfoOpt(Version, CommitHash, BuildTime),
 
     // When you want to enable http client auto config with contextual client by default
