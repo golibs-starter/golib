@@ -37,6 +37,7 @@ package main
 
 import (
     "gitlab.id.vin/vincart/golib"
+    "gitlab.id.vin/vincart/golib/web/client"
     "go.uber.org/fx"
 )
 
@@ -68,7 +69,18 @@ func main() {
 
         // When you want to register your event listener.
         golib.ProvideEventListener(listener.NewCustomListener),
+
+        // Example using http client
+        fx.Provide(NewExampleService),
     }
+}
+
+type ExampleService struct {
+    httpClient client.ContextualHttpClient
+}
+
+func NewExampleService(httpClient client.ContextualHttpClient) *ExampleService {
+    return &ExampleService{httpClient: httpClient}
 }
 ```
 
@@ -97,20 +109,30 @@ store:
 #### 2. Available configurations
 
 ```yaml
-# Configuration available for golib.AppOpt()
+# Configuration available for AppOpt()
 app:
-    name: Service Name # Specify application name. Default `unspecified`
-    port: 8080 # Defines the running port. Default `8080`
-    path: /service-base-path/ # Defines base path (context path). Default `/`
+  name: Service Name # Specify application name. Default `unspecified`
+  port: 8080 # Defines the running port. Default `8080`
+  path: /service-base-path/ # Defines base path (context path). Default `/`
 
-    # Configuration available for golib.LoggingOpt()
-    logging:
-        development: false # Enable or disable development mode. Default `false`
-        jsonOutputMode: true # Enable or disable json output. Default `true`
+  # Configuration available for LoggingOpt()
+  logging:
+    development: false # Enable or disable development mode. Default `false`
+    jsonOutputMode: true # Enable or disable json output. Default `true`
 
-# Configuration available for golib.EventOpt()
-vinid.event:
+vinid:
+  event: # Configuration available for EventOpt()
     notLogPayloadForEvents:
-        - OrderCreatedEvent
-        - OrderUpdatedEvent
+      - OrderCreatedEvent
+      - OrderUpdatedEvent
+  httpClient: # Configuration for HttpClientOpt()
+    timeout: 60s # Request timeout, in duration format. Default 60s
+    maxIdleConns: 100 # Default 100
+    maxIdleConnsPerHost: 10 # Default 10
+    maxConnsPerHost: 100 # Default 100
+    proxy:
+      url: http://localhost:8080 # Proxy url
+      appliedUris: # List of URIs, which will be requested under above proxy
+        - https://foo.com/path/
+        - https://bar.com/path/
 ```
