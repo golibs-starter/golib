@@ -5,6 +5,9 @@ type Exception interface {
 	// Code returns error code
 	Code() uint
 
-	// Error returns error message
+	// Message return the simple message
+	Message() string
+
+	// Error returns detailed error message
 	Error() string
 }

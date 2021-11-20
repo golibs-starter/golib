@@ -33,7 +33,7 @@ func Error(err error) Response {
 	message := "Internal Server Error"
 	if e, ok := err.(exception.Exception); ok {
 		code = int(e.Code())
-		message = err.Error()
+		message = e.Message()
 	}
 	return Response{
 		Meta: Meta{

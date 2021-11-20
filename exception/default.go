@@ -7,4 +7,5 @@ var (
 	Unauthorized = New(http.StatusUnauthorized, "Unauthorized")
 	Forbidden    = New(http.StatusForbidden, "Forbidden")
 	NotFound     = New(http.StatusNotFound, "Resource Not Found")
+	SystemError  = New(http.StatusInternalServerError, "System Error")
 )
