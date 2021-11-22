@@ -1,5 +1,7 @@
 package actuator
 
+import "context"
+
 const (
 	StatusUp   = "UP"
 	StatusDown = "DOWN"
@@ -31,5 +33,5 @@ type HealthChecker interface {
 	// Check status of current component,
 	// Return status details includes status: UP or DOWN,
 	// and the reason if it's down
-	Check() StatusDetails
+	Check(ctx context.Context) StatusDetails
 }

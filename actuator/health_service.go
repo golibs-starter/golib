@@ -1,7 +1,9 @@
 package actuator
 
+import "context"
+
 type HealthService interface {
-	Check() Health
+	Check(ctx context.Context) Health
 }
 
 type DefaultHealthService struct {
@@ -12,14 +14,14 @@ func NewDefaultHealthService(checkers []HealthChecker) HealthService {
 	return &DefaultHealthService{checkers: checkers}
 }
 
-func (h DefaultHealthService) Check() Health {
+func (h DefaultHealthService) Check(ctx context.Context) Health {
 	health := Health{
 		Status: StatusUp,
 	}
 	if len(h.checkers) > 0 {
 		health.Components = make(map[string]StatusDetails)
 		for _, checker := range h.checkers {
-			details := checker.Check()
+			details := checker.Check(ctx)
 			if details.Status == StatusDown {
 				health.Status = StatusDown
 			}
