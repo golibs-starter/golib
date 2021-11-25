@@ -18,9 +18,9 @@ type AbstractEvent struct {
 	TechnicalUsername string `json:"technical_username"`
 }
 
-func NewAbstractEvent(ctx context.Context, eventName string, payload interface{}) *AbstractEvent {
+func NewAbstractEvent(ctx context.Context, eventName string) *AbstractEvent {
 	absEvent := AbstractEvent{
-		ApplicationEvent: event.NewApplicationEvent(eventName, payload),
+		ApplicationEvent: event.NewApplicationEvent(eventName),
 	}
 	requestAttributes := webContext.GetRequestAttributes(ctx)
 	if requestAttributes == nil {

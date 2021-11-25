@@ -5,11 +5,27 @@ import (
 	"time"
 )
 
-type RequestCompletedEvent struct {
-	*AbstractEvent
+func NewRequestCompletedEvent(ctx context.Context, payload *RequestCompletedMessage) *RequestCompletedEvent {
+	return &RequestCompletedEvent{
+		AbstractEvent: NewAbstractEvent(ctx, "RequestCompletedEvent"),
+		PayloadData:   payload,
+	}
 }
 
-type RequestCompletedPayload struct {
+type RequestCompletedEvent struct {
+	*AbstractEvent
+	PayloadData *RequestCompletedMessage `json:"payload"`
+}
+
+func (a RequestCompletedEvent) Payload() interface{} {
+	return a.PayloadData
+}
+
+func (a RequestCompletedEvent) String() string {
+	return a.ToString(a)
+}
+
+type RequestCompletedMessage struct {
 	Status            int           `json:"status"`
 	ExecutionTime     time.Duration `json:"duration_ms"`
 	Uri               string        `json:"uri"`
@@ -26,12 +42,4 @@ type RequestCompletedPayload struct {
 	DeviceId          string        `json:"device_id"`
 	DeviceSessionId   string        `json:"device_session_id"`
 	TechnicalUsername string        `json:"technical_username"`
-}
-
-func NewRequestCompletedEvent(ctx context.Context, payload RequestCompletedPayload) *RequestCompletedEvent {
-	return &RequestCompletedEvent{NewAbstractEvent(ctx, "RequestCompletedEvent", payload)}
-}
-
-func (a RequestCompletedEvent) String() string {
-	return a.ToString(a)
 }

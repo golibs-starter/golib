@@ -21,12 +21,12 @@ func (r RequestCompletedLogListener) Supports(e pubsub.Event) bool {
 
 func (r RequestCompletedLogListener) Handle(e pubsub.Event) {
 	ev := e.(*event.RequestCompletedEvent)
-	if payload, ok := ev.Payload().(event.RequestCompletedPayload); ok {
-		log.Infow([]interface{}{constant.ContextReqMeta, r.makeHttpRequestLog(&payload)}, "finish router")
+	if payload, ok := ev.Payload().(*event.RequestCompletedMessage); ok {
+		log.Infow([]interface{}{constant.ContextReqMeta, r.makeHttpRequestLog(payload)}, "finish router")
 	}
 }
 
-func (r RequestCompletedLogListener) makeHttpRequestLog(message *event.RequestCompletedPayload) *log.HttpRequestLog {
+func (r RequestCompletedLogListener) makeHttpRequestLog(message *event.RequestCompletedMessage) *log.HttpRequestLog {
 	return &log.HttpRequestLog{
 		LoggingContext: log.LoggingContext{
 			UserId:            message.UserId,

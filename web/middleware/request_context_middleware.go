@@ -45,7 +45,7 @@ func getAdvancedResponseWriter(w http.ResponseWriter) (*context.AdvancedResponse
 }
 
 func publishRequestCompletedEvent(ctx mainContext.Context, requestAttributes *context.RequestAttributes) {
-	pubsub.Publish(event.NewRequestCompletedEvent(ctx, event.RequestCompletedPayload{
+	pubsub.Publish(event.NewRequestCompletedEvent(ctx, &event.RequestCompletedMessage{
 		Status:            requestAttributes.StatusCode,
 		ExecutionTime:     requestAttributes.ExecutionTime,
 		Uri:               requestAttributes.Uri,

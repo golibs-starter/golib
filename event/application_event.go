@@ -15,12 +15,11 @@ type ApplicationEvent struct {
 	Event          string                 `json:"event"`
 	Source         string                 `json:"source"`
 	ServiceCode    string                 `json:"service_code"`
-	PayloadData    interface{}            `json:"payload"`
 	AdditionalData map[string]interface{} `json:"additional_data"`
 	Timestamp      int64                  `json:"timestamp"`
 }
 
-func NewApplicationEvent(eventName string, payload interface{}) *ApplicationEvent {
+func NewApplicationEvent(eventName string) *ApplicationEvent {
 	id := ""
 	if genId, err := uuid.NewUUID(); err != nil {
 		log.Warnf("Cannot create new event due by error [%v]", err)
@@ -28,11 +27,10 @@ func NewApplicationEvent(eventName string, payload interface{}) *ApplicationEven
 		id = genId.String()
 	}
 	return &ApplicationEvent{
-		Id:          id,
-		Event:       eventName,
-		Source:      DefaultEventSource,
-		PayloadData: payload,
-		Timestamp:   utils.Time2Ms(time.Now()),
+		Id:        id,
+		Event:     eventName,
+		Source:    DefaultEventSource,
+		Timestamp: utils.Time2Ms(time.Now()),
 	}
 }
 
@@ -42,10 +40,6 @@ func (a ApplicationEvent) Identifier() string {
 
 func (a ApplicationEvent) Name() string {
 	return a.Event
-}
-
-func (a ApplicationEvent) Payload() interface{} {
-	return a.PayloadData
 }
 
 func (a ApplicationEvent) String() string {
