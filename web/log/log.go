@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	mainLog "gitlab.id.vin/vincart/golib/log"
 	"gitlab.id.vin/vincart/golib/pubsub"
 	"gitlab.id.vin/vincart/golib/web/constant"
 	webContext "gitlab.id.vin/vincart/golib/web/context"
@@ -58,81 +57,81 @@ func keysAndValuesFromEvent(e pubsub.Event) []interface{} {
 }
 
 func Debug(ctx context.Context, msgFormat string, args ...interface{}) {
-	mainLog.Debugw(keysAndValuesFromContext(ctx), msgFormat, args...)
+	global.Debugw(keysAndValuesFromContext(ctx), msgFormat, args...)
 }
 
 func Info(ctx context.Context, msgFormat string, args ...interface{}) {
-	mainLog.Infow(keysAndValuesFromContext(ctx), msgFormat, args...)
+	global.Infow(keysAndValuesFromContext(ctx), msgFormat, args...)
 }
 
 func Warn(ctx context.Context, msgFormat string, args ...interface{}) {
-	mainLog.Warnw(keysAndValuesFromContext(ctx), msgFormat, args...)
+	global.Warnw(keysAndValuesFromContext(ctx), msgFormat, args...)
 }
 
 func Error(ctx context.Context, msgFormat string, args ...interface{}) {
-	mainLog.Errorw(keysAndValuesFromContext(ctx), msgFormat, args...)
+	global.Errorw(keysAndValuesFromContext(ctx), msgFormat, args...)
 }
 
 func Fatal(ctx context.Context, msgFormat string, args ...interface{}) {
-	mainLog.Fatalw(keysAndValuesFromContext(ctx), msgFormat, args...)
+	global.Fatalw(keysAndValuesFromContext(ctx), msgFormat, args...)
 }
 
 func Debuge(e pubsub.Event, msgFormat string, args ...interface{}) {
-	mainLog.Debugw(keysAndValuesFromEvent(e), msgFormat, args...)
+	global.Debugw(keysAndValuesFromEvent(e), msgFormat, args...)
 }
 
 func Infoe(e pubsub.Event, msgFormat string, args ...interface{}) {
-	mainLog.Infow(keysAndValuesFromEvent(e), msgFormat, args...)
+	global.Infow(keysAndValuesFromEvent(e), msgFormat, args...)
 }
 
 func Warne(e pubsub.Event, msgFormat string, args ...interface{}) {
-	mainLog.Warnw(keysAndValuesFromEvent(e), msgFormat, args...)
+	global.Warnw(keysAndValuesFromEvent(e), msgFormat, args...)
 }
 
 func Errore(e pubsub.Event, msgFormat string, args ...interface{}) {
-	mainLog.Errorw(keysAndValuesFromEvent(e), msgFormat, args...)
+	global.Errorw(keysAndValuesFromEvent(e), msgFormat, args...)
 }
 
 func Fatale(e pubsub.Event, msgFormat string, args ...interface{}) {
-	mainLog.Fatalw(keysAndValuesFromEvent(e), msgFormat, args...)
+	global.Fatalw(keysAndValuesFromEvent(e), msgFormat, args...)
 }
 
 func Debugf(msgFormat string, args ...interface{}) {
-	mainLog.Debugf(msgFormat, args...)
+	global.Debugf(msgFormat, args...)
 }
 
 func Infof(msgFormat string, args ...interface{}) {
-	mainLog.Infof(msgFormat, args...)
+	global.Infof(msgFormat, args...)
 }
 
 func Warnf(msgFormat string, args ...interface{}) {
-	mainLog.Warnf(msgFormat, args...)
+	global.Warnf(msgFormat, args...)
 }
 
 func Errorf(msgFormat string, args ...interface{}) {
-	mainLog.Errorf(msgFormat, args...)
+	global.Errorf(msgFormat, args...)
 }
 
 func Fatalf(msgFormat string, args ...interface{}) {
-	mainLog.Fatalf(msgFormat, args...)
+	global.Fatalf(msgFormat, args...)
 }
 
 func Debugw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	mainLog.Debugw(keysAndValues, msgFormat, args...)
+	global.Debugw(keysAndValues, msgFormat, args...)
 }
 
 func Infow(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	mainLog.Infow(keysAndValues, msgFormat, args...)
+	global.Infow(keysAndValues, msgFormat, args...)
 }
 
 func Warnw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	mainLog.Warnw(keysAndValues, msgFormat, args...)
+	global.Warnw(keysAndValues, msgFormat, args...)
 }
 
 func Errorw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	mainLog.Errorw(keysAndValues, msgFormat, args...)
+	global.Errorw(keysAndValues, msgFormat, args...)
 }
 
 func Fatalw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	mainLog.Fatalw(keysAndValues, msgFormat, args...)
+	global.Fatalw(keysAndValues, msgFormat, args...)
 }

@@ -9,13 +9,20 @@ import (
 
 func LoggingOpt() fx.Option {
 	return fx.Options(
-		ProvideProps(webLog.NewLoggingProperties),
+		ProvideProps(log.NewProperties),
 		fx.Provide(NewLogger),
 		fx.Invoke(RegisterLogger),
 	)
 }
 
-func NewLogger(props *webLog.LoggingProperties) (log.Logger, error) {
+type NewLoggerOut struct {
+	fx.Out
+	Core log.Logger
+	Web  log.Logger `name:"web_logger"`
+}
+
+func NewLogger(props *log.Properties) (NewLoggerOut, error) {
+	out := NewLoggerOut{}
 	// Create new logger instance
 	logger, err := log.NewLogger(&log.Options{
 		Development:    props.Development,
@@ -23,11 +30,20 @@ func NewLogger(props *webLog.LoggingProperties) (log.Logger, error) {
 		CallerSkip:     props.CallerSkip,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error when init logger: [%v]", err)
+		return out, fmt.Errorf("error when init logger: [%v]", err)
 	}
-	return logger, nil
+	out.Core = logger
+	out.Web = logger.Clone(log.AddCallerSkip(1))
+	return out, nil
 }
 
-func RegisterLogger(logger log.Logger) {
-	log.ReplaceGlobal(logger)
+type RegisterLoggerIn struct {
+	fx.In
+	Core log.Logger
+	Web  log.Logger `name:"web_logger"`
+}
+
+func RegisterLogger(in RegisterLoggerIn) {
+	log.ReplaceGlobal(in.Core)
+	webLog.ReplaceGlobal(in.Web)
 }

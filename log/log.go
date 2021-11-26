@@ -6,28 +6,13 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type Options struct {
-	// Development puts the logger in development mode, which changes the
-	// behavior of DPanicLevel and takes stack traces more liberally.
-	Development bool
-
-	// Enable json output mode
-	JsonOutputMode bool
-
-	// Skip number of callers before show caller
-	CallerSkip int
-}
-
-const (
-	OutputModeJson    = "json"
-	OutputModeConsole = "console"
-)
-
 type logger struct {
-	options *Options
+	options     *Options
+	coreLogger  *zap.Logger
+	sugarLogger *zap.SugaredLogger
 }
 
-func NewLogger(options *Options) (Logger, error) {
+func NewLogger(options *Options) (*logger, error) {
 	var sampling = zap.SamplingConfig{
 		Initial:    100,
 		Thereafter: 100,
@@ -58,10 +43,24 @@ func NewLogger(options *Options) (Logger, error) {
 	if err != nil {
 		return nil, err
 	}
-	zap.ReplaceGlobals(
-		zapLogger.WithOptions(zap.AddCallerSkip(options.CallerSkip)),
-	)
-	return &logger{options: options}, nil
+	coreLogger := zapLogger.WithOptions(zap.AddCallerSkip(options.CallerSkip))
+	return &logger{
+		options:     options,
+		coreLogger:  coreLogger,
+		sugarLogger: coreLogger.Sugar(),
+	}, nil
+}
+
+func (l *logger) Clone(options ...OptionFunc) Logger {
+	cp := *l
+	newOpt := *l.options
+	cp.options = &newOpt
+	for _, opt := range options {
+		opt(cp.options)
+	}
+	cp.coreLogger = l.coreLogger.WithOptions(zap.AddCallerSkip(cp.options.CallerSkip))
+	cp.sugarLogger = cp.coreLogger.Sugar()
+	return &cp
 }
 
 func (l *logger) logw(level zapcore.Level, keysAndValues []interface{}, msgFormat string, args ...interface{}) {
@@ -71,29 +70,29 @@ func (l *logger) logw(level zapcore.Level, keysAndValues []interface{}, msgForma
 	}
 	switch level {
 	case zapcore.DebugLevel:
-		zap.S().Debugw(msg, keysAndValues...)
+		l.sugarLogger.Debugw(msg, keysAndValues...)
 		break
 	case zapcore.InfoLevel:
-		zap.S().Infow(msg, keysAndValues...)
+		l.sugarLogger.Infow(msg, keysAndValues...)
 		break
 	case zapcore.WarnLevel:
-		zap.S().Warnw(msg, keysAndValues...)
+		l.sugarLogger.Warnw(msg, keysAndValues...)
 		break
 	case zapcore.ErrorLevel:
-		zap.S().Errorw(msg, keysAndValues...)
+		l.sugarLogger.Errorw(msg, keysAndValues...)
 		break
 	case zapcore.FatalLevel:
-		zap.S().Fatalw(msg, keysAndValues...)
+		l.sugarLogger.Fatalw(msg, keysAndValues...)
 		break
 	}
 }
 
 func (l *logger) Info(args ...interface{}) {
-	zap.S().Info(args...)
+	l.sugarLogger.Info(args...)
 }
 
 func (l *logger) Infof(msgFormat string, args ...interface{}) {
-	zap.S().Infof(msgFormat, args...)
+	l.sugarLogger.Infof(msgFormat, args...)
 }
 
 func (l *logger) Infow(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
@@ -101,11 +100,11 @@ func (l *logger) Infow(keysAndValues []interface{}, msgFormat string, args ...in
 }
 
 func (l *logger) Debug(args ...interface{}) {
-	zap.S().Debug(args...)
+	l.sugarLogger.Debug(args...)
 }
 
 func (l *logger) Debugf(msgFormat string, args ...interface{}) {
-	zap.S().Debugf(msgFormat, args...)
+	l.sugarLogger.Debugf(msgFormat, args...)
 }
 
 func (l *logger) Debugw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
@@ -113,11 +112,11 @@ func (l *logger) Debugw(keysAndValues []interface{}, msgFormat string, args ...i
 }
 
 func (l *logger) Warn(args ...interface{}) {
-	zap.S().Warn(args...)
+	l.sugarLogger.Warn(args...)
 }
 
 func (l *logger) Warnf(msgFormat string, args ...interface{}) {
-	zap.S().Warnf(msgFormat, args...)
+	l.sugarLogger.Warnf(msgFormat, args...)
 }
 
 func (l *logger) Warnw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
@@ -125,11 +124,11 @@ func (l *logger) Warnw(keysAndValues []interface{}, msgFormat string, args ...in
 }
 
 func (l *logger) Error(args ...interface{}) {
-	zap.S().Error(args...)
+	l.sugarLogger.Error(args...)
 }
 
 func (l *logger) Errorf(msgFormat string, args ...interface{}) {
-	zap.S().Errorf(msgFormat, args...)
+	l.sugarLogger.Errorf(msgFormat, args...)
 }
 
 func (l *logger) Errorw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
@@ -137,11 +136,11 @@ func (l *logger) Errorw(keysAndValues []interface{}, msgFormat string, args ...i
 }
 
 func (l *logger) Fatal(args ...interface{}) {
-	zap.S().Fatal(args...)
+	l.sugarLogger.Fatal(args...)
 }
 
 func (l *logger) Fatalf(msgFormat string, args ...interface{}) {
-	zap.S().Fatalf(msgFormat, args...)
+	l.sugarLogger.Fatalf(msgFormat, args...)
 }
 
 func (l *logger) Fatalw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
