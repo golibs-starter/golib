@@ -10,15 +10,6 @@ import (
 
 const DefaultEventSource = "not_used"
 
-type ApplicationEvent struct {
-	Id             string                 `json:"id"`
-	Event          string                 `json:"event"`
-	Source         string                 `json:"source"`
-	ServiceCode    string                 `json:"service_code"`
-	AdditionalData map[string]interface{} `json:"additional_data"`
-	Timestamp      int64                  `json:"timestamp"`
-}
-
 func NewApplicationEvent(eventName string) *ApplicationEvent {
 	id := ""
 	if genId, err := uuid.NewUUID(); err != nil {
@@ -34,12 +25,25 @@ func NewApplicationEvent(eventName string) *ApplicationEvent {
 	}
 }
 
+type ApplicationEvent struct {
+	Id             string                 `json:"id"`
+	Event          string                 `json:"event"`
+	Source         string                 `json:"source"`
+	ServiceCode    string                 `json:"service_code"`
+	AdditionalData map[string]interface{} `json:"additional_data"`
+	Timestamp      int64                  `json:"timestamp"`
+}
+
 func (a ApplicationEvent) Identifier() string {
 	return a.Id
 }
 
 func (a ApplicationEvent) Name() string {
 	return a.Event
+}
+
+func (a ApplicationEvent) Payload() interface{} {
+	return nil
 }
 
 func (a ApplicationEvent) String() string {
