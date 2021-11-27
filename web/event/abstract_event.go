@@ -2,9 +2,9 @@ package event
 
 import (
 	"context"
-	"gitlab.id.vin/vincart/golib/event"
-	"gitlab.id.vin/vincart/golib/web/constant"
-	webContext "gitlab.id.vin/vincart/golib/web/context"
+	"gitlab.com/golibs-starter/golib/event"
+	"gitlab.com/golibs-starter/golib/web/constant"
+	webContext "gitlab.com/golibs-starter/golib/web/context"
 )
 
 type AbstractEventWrapper interface {

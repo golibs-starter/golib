@@ -2,8 +2,8 @@ package golib
 
 import (
 	"fmt"
-	"gitlab.id.vin/vincart/golib/log"
-	webLog "gitlab.id.vin/vincart/golib/web/log"
+	"gitlab.com/golibs-starter/golib/log"
+	webLog "gitlab.com/golibs-starter/golib/web/log"
 	"go.uber.org/fx"
 )
 

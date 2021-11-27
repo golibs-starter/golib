@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/stretchr/testify/assert"
-	"gitlab.id.vin/vincart/golib/web/constant"
+	"gitlab.com/golibs-starter/golib/web/constant"
 	"net/http"
 	"testing"
 )

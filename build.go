@@ -1,7 +1,7 @@
 package golib
 
 import (
-	"gitlab.id.vin/vincart/golib/build"
+	"gitlab.com/golibs-starter/golib/build"
 	"go.uber.org/fx"
 )
 

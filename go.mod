@@ -1,4 +1,4 @@
-module gitlab.id.vin/vincart/golib
+module gitlab.com/golibs-starter/golib
 
 go 1.14
 

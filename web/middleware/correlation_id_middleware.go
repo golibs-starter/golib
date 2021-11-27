@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"github.com/google/uuid"
-	"gitlab.id.vin/vincart/golib/web/constant"
-	"gitlab.id.vin/vincart/golib/web/context"
-	"gitlab.id.vin/vincart/golib/web/log"
+	"gitlab.com/golibs-starter/golib/web/constant"
+	"gitlab.com/golibs-starter/golib/web/context"
+	"gitlab.com/golibs-starter/golib/web/log"
 	"net/http"
 )
 

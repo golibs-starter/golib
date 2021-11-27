@@ -2,8 +2,8 @@ package golib
 
 import (
 	"fmt"
-	"gitlab.id.vin/vincart/golib/config"
-	"gitlab.id.vin/vincart/golib/web/client"
+	"gitlab.com/golibs-starter/golib/config"
+	"gitlab.com/golibs-starter/golib/web/client"
 	"go.uber.org/fx"
 )
 
@@ -28,7 +28,7 @@ type HttpClientAutoConfigIn struct {
 // Alternatively you can wrap the default client.ContextualHttpClient with
 // one or more other client.ContextualHttpClient to customize the behavior.
 // To do that, your provider have to return ContextualHttpClientWrapper.
-// For example https://gitlab.id.vin/vincart/golib-security/-/blob/develop/httpclient.go
+// For example https://gitlab.com/golibs-starter/golib-security/-/blob/develop/httpclient.go
 func NewContextualHttpClient(in HttpClientAutoConfigIn) (client.ContextualHttpClient, error) {
 	// Create default http client
 	defaultHttpClient, err := client.NewDefaultHttpClient(in.HttpClientProperties)

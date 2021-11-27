@@ -25,7 +25,7 @@ git config --global url."https://oath2:{your_access_token}@gitlab.id.vin/".inste
 
 Both `go get` and `go mod` are supported.
 ```shell
-go get gitlab.id.vin/vincart/golib
+go get gitlab.com/golibs-starter/golib
 ```
 
 ### Usage
@@ -36,8 +36,8 @@ Using `fx.Option` to include dependencies for injection.
 package main
 
 import (
-    "gitlab.id.vin/vincart/golib"
-    "gitlab.id.vin/vincart/golib/web/client"
+    "gitlab.com/golibs-starter/golib"
+    "gitlab.com/golibs-starter/golib/web/client"
     "go.uber.org/fx"
 )
 

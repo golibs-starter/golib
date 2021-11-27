@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/pkg/errors"
-	"gitlab.id.vin/vincart/golib/utils"
+	"gitlab.com/golibs-starter/golib/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"

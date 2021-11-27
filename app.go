@@ -2,8 +2,8 @@ package golib
 
 import (
 	"context"
-	"gitlab.id.vin/vincart/golib/config"
-	"gitlab.id.vin/vincart/golib/web/middleware"
+	"gitlab.com/golibs-starter/golib/config"
+	"gitlab.com/golibs-starter/golib/web/middleware"
 	"go.uber.org/fx"
 	"net/http"
 )

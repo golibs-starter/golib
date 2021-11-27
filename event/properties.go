@@ -1,6 +1,6 @@
 package event
 
-import "gitlab.id.vin/vincart/golib/config"
+import "gitlab.com/golibs-starter/golib/config"
 
 func NewProperties(loader config.Loader) (*Properties, error) {
 	props := Properties{}

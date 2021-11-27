@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"gitlab.id.vin/vincart/golib/utils"
+	"gitlab.com/golibs-starter/golib/utils"
 )
 
 const (

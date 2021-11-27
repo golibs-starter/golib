@@ -1,10 +1,10 @@
 package listener
 
 import (
-	"gitlab.id.vin/vincart/golib/pubsub"
-	"gitlab.id.vin/vincart/golib/web/constant"
-	"gitlab.id.vin/vincart/golib/web/event"
-	"gitlab.id.vin/vincart/golib/web/log"
+	"gitlab.com/golibs-starter/golib/pubsub"
+	"gitlab.com/golibs-starter/golib/web/constant"
+	"gitlab.com/golibs-starter/golib/web/event"
+	"gitlab.com/golibs-starter/golib/web/log"
 )
 
 type RequestCompletedLogListener struct {

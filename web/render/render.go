@@ -1,7 +1,7 @@
 package render
 
 import (
-	"gitlab.id.vin/vincart/golib/log"
+	"gitlab.com/golibs-starter/golib/log"
 	"net/http"
 )
 

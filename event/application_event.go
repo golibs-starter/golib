@@ -3,8 +3,8 @@ package event
 import (
 	"encoding/json"
 	"github.com/google/uuid"
-	"gitlab.id.vin/vincart/golib/log"
-	"gitlab.id.vin/vincart/golib/utils"
+	"gitlab.com/golibs-starter/golib/log"
+	"gitlab.com/golibs-starter/golib/utils"
 	"time"
 )
 

@@ -1,9 +1,9 @@
 package golib
 
 import (
-	"gitlab.id.vin/vincart/golib/actuator"
-	"gitlab.id.vin/vincart/golib/config"
-	webActuator "gitlab.id.vin/vincart/golib/web/actuator"
+	"gitlab.com/golibs-starter/golib/actuator"
+	"gitlab.com/golibs-starter/golib/config"
+	webActuator "gitlab.com/golibs-starter/golib/web/actuator"
 	"go.uber.org/fx"
 )
 

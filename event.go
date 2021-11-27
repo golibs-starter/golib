@@ -1,10 +1,10 @@
 package golib
 
 import (
-	"gitlab.id.vin/vincart/golib/event"
-	"gitlab.id.vin/vincart/golib/pubsub"
-	"gitlab.id.vin/vincart/golib/web/listener"
-	"gitlab.id.vin/vincart/golib/web/log"
+	"gitlab.com/golibs-starter/golib/event"
+	"gitlab.com/golibs-starter/golib/pubsub"
+	"gitlab.com/golibs-starter/golib/web/listener"
+	"gitlab.com/golibs-starter/golib/web/log"
 	"go.uber.org/fx"
 )
 

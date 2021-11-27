@@ -1,8 +1,8 @@
 package actuator
 
 import (
-	"gitlab.id.vin/vincart/golib/actuator"
-	"gitlab.id.vin/vincart/golib/web/response"
+	"gitlab.com/golibs-starter/golib/actuator"
+	"gitlab.com/golibs-starter/golib/web/response"
 	"net/http"
 )
 

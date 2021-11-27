@@ -2,9 +2,9 @@ package client
 
 import (
 	"context"
-	"gitlab.id.vin/vincart/golib/config"
-	"gitlab.id.vin/vincart/golib/web/constant"
-	webContext "gitlab.id.vin/vincart/golib/web/context"
+	"gitlab.com/golibs-starter/golib/config"
+	"gitlab.com/golibs-starter/golib/web/constant"
+	webContext "gitlab.com/golibs-starter/golib/web/context"
 	"net/http"
 )
 
