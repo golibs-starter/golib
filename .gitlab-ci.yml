@@ -16,7 +16,7 @@ test:
       - tags
   before_script:
     - apk update && apk add git build-base
-    - export GOPRIVATE=gitlab.id.vin
-    - git config --global url."https://$GITLAB_USER:$GITLAB_ACCESS_TOKEN@gitlab.id.vin/".insteadOf "https://gitlab.id.vin/"
+    - export GOPRIVATE=gitlab.com
+    - git config --global url."https://$GITLAB_USER:$GITLAB_ACCESS_TOKEN@gitlab.com/".insteadOf "https://gitlab.com/"
   script:
     - go test ./...
