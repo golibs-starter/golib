@@ -1,16 +1,9 @@
-include:
-  - project: 'devops/gitlab-ci-templates'
-    ref: master
-    file: "/common/libs-next-gen.yml"
-
 stages:
   - verify
 
 test:
   stage: verify
   image: golang:1.14-alpine
-  tags:
-    - vincart-nonprod
   except:
     refs:
       - tags
