@@ -90,7 +90,7 @@ func NewExampleService(httpClient client.ContextualHttpClient) *ExampleService {
 
 | Var | Default | Description |
 |---|---|---|
-| `APP_PROFILES` | None | Defines the list of active profiles, separate by comma. By default, `default` profile is always load even this env configured. Example: when `APP_PROFILES=internal,uat` then both `default` `internal` and `uat` will be loaded by order.  |
+| `APP_PROFILES` or `APP_ENV` | None | Defines the list of active profiles, separate by comma. By default, `default` profile is always load even this env configured. Example: when `APP_PROFILES=internal,uat` then both `default` `internal` and `uat` will be loaded by order.  |
 | `APP_CONFIG_PATHS` | `./config` | Defines the location of config directory, when the application is started, it will scan profiles in this path. |
 | `APP_CONFIG_FORMAT` | `yaml` | Defines the format of config file. Currently we only support Yaml format (both `yaml` `yml` are accepted). |
 
