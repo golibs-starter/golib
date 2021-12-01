@@ -13,7 +13,7 @@ type Properties struct {
 }
 
 func (p Properties) Prefix() string {
-	return "vinid.event"
+	return "app.event"
 }
 
 type LogProperties struct {

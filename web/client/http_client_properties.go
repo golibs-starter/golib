@@ -38,7 +38,7 @@ type HttpClientProperties struct {
 }
 
 func (h HttpClientProperties) Prefix() string {
-	return "vinid.httpClient"
+	return "app.httpClient"
 }
 
 type ProxyProperties struct {
