@@ -109,8 +109,8 @@ store:
 #### 2. Available configurations
 
 ```yaml
-# Configuration available for AppOpt()
 app:
+  # Configuration available for AppOpt()
   name: Service Name # Specify application name. Default `unspecified`
   port: 8080 # Defines the running port. Default `8080`
   path: /service-base-path/ # Defines base path (context path). Default `/`
@@ -120,12 +120,14 @@ app:
     development: false # Enable or disable development mode. Default `false`
     jsonOutputMode: true # Enable or disable json output. Default `true`
 
-vinid:
-  event: # Configuration available for EventOpt()
+  # Configuration available for EventOpt()
+  event:
     notLogPayloadForEvents:
       - OrderCreatedEvent
       - OrderUpdatedEvent
-  httpClient: # Configuration for HttpClientOpt()
+
+  # Configuration for HttpClientOpt()
+  httpClient:
     timeout: 60s # Request timeout, in duration format. Default 60s
     maxIdleConns: 100 # Default 100
     maxIdleConnsPerHost: 10 # Default 10
