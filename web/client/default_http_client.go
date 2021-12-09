@@ -17,16 +17,15 @@ type DefaultHttpClient struct {
 	properties *HttpClientProperties
 }
 
-func NewDefaultHttpClient(properties *HttpClientProperties) (HttpClient, error) {
+func NewDefaultHttpClient(base *http.Client, properties *HttpClientProperties) (HttpClient, error) {
 	transport, err := setupHttpTransport(properties)
 	if err != nil {
 		return nil, err
 	}
+	base.Timeout = properties.Timeout
+	base.Transport = transport
 	return &DefaultHttpClient{
-		client: &http.Client{
-			Timeout:   properties.Timeout,
-			Transport: transport,
-		},
+		client:     base,
 		properties: properties,
 	}, nil
 }
