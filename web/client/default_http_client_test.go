@@ -22,7 +22,7 @@ func TestNewDefaultHttpClient(t *testing.T) {
 			},
 		},
 	}
-	client, err := NewDefaultHttpClient(props)
+	client, err := NewDefaultHttpClient(&http.Client{}, props)
 	assert.Nil(t, err)
 	assert.IsType(t, &DefaultHttpClient{}, client)
 	defaultClient := client.(*DefaultHttpClient)
@@ -41,7 +41,7 @@ func TestNewDefaultHttpClient_WhenTransportIsError_ShouldReturnError(t *testing.
 			},
 		},
 	}
-	_, err := NewDefaultHttpClient(props)
+	_, err := NewDefaultHttpClient(&http.Client{}, props)
 	assert.NotNil(t, err)
 }
 
