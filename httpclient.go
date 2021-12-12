@@ -5,6 +5,7 @@ import (
 	"gitlab.com/golibs-starter/golib/config"
 	"gitlab.com/golibs-starter/golib/web/client"
 	"go.uber.org/fx"
+	"net/http"
 )
 
 func HttpClientOpt() fx.Option {
@@ -23,18 +24,28 @@ type HttpClientAutoConfigIn struct {
 	Wrappers             []ContextualHttpClientWrapper `group:"contextual_http_client_wrapper"`
 }
 
+type HttpClientAutoConfigOut struct {
+	fx.Out
+	Base                 *http.Client
+	HttpClient           client.HttpClient
+	ContextualHttpClient client.ContextualHttpClient
+}
+
 // NewContextualHttpClient Initiate a client.ContextualHttpClient with
 // configs are loaded automatically.
 // Alternatively you can wrap the default client.ContextualHttpClient with
 // one or more other client.ContextualHttpClient to customize the behavior.
 // To do that, your provider have to return ContextualHttpClientWrapper.
 // For example https://gitlab.com/golibs-starter/golib-security/-/blob/develop/httpclient.go
-func NewContextualHttpClient(in HttpClientAutoConfigIn) (client.ContextualHttpClient, error) {
+func NewContextualHttpClient(in HttpClientAutoConfigIn) (HttpClientAutoConfigOut, error) {
+	out := HttpClientAutoConfigOut{Base: &http.Client{}}
+
 	// Create default http client
-	defaultHttpClient, err := client.NewDefaultHttpClient(in.HttpClientProperties)
+	defaultHttpClient, err := client.NewDefaultHttpClient(out.Base, in.HttpClientProperties)
 	if err != nil {
-		return nil, fmt.Errorf("error when init default http client: [%v]", err)
+		return out, fmt.Errorf("error when init default http client: [%v]", err)
 	}
+	out.HttpClient = defaultHttpClient
 
 	// Wrap around by TraceableHttpClient by default
 	var httpClient = client.NewTraceableHttpClient(defaultHttpClient, in.AppProperties)
@@ -43,9 +54,9 @@ func NewContextualHttpClient(in HttpClientAutoConfigIn) (client.ContextualHttpCl
 	for _, wrapper := range in.Wrappers {
 		httpClient, err = wrapper(httpClient)
 		if err != nil {
-			return nil, err
+			return out, err
 		}
 	}
-
-	return httpClient, nil
+	out.ContextualHttpClient = httpClient
+	return out, nil
 }

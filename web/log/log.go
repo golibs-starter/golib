@@ -26,6 +26,16 @@ func BuildLoggingContextFromReqAttr(requestAttributes *webContext.RequestAttribu
 	}
 }
 
+func BuildLoggingContextFromEventAttr(attributes *event.Attributes) *LoggingContext {
+	return &LoggingContext{
+		DeviceId:          attributes.DeviceId,
+		DeviceSessionId:   attributes.DeviceSessionId,
+		CorrelationId:     attributes.CorrelationId,
+		UserId:            attributes.UserId,
+		TechnicalUsername: attributes.TechnicalUsername,
+	}
+}
+
 func BuildLoggingContextFromEvent(e *event.AbstractEvent) *LoggingContext {
 	deviceId, _ := e.AdditionalData[constant.HeaderDeviceId].(string)
 	deviceSessionId, _ := e.AdditionalData[constant.HeaderDeviceSessionId].(string)
@@ -41,6 +51,9 @@ func BuildLoggingContextFromEvent(e *event.AbstractEvent) *LoggingContext {
 func keysAndValuesFromContext(ctx context.Context) []interface{} {
 	if requestAttributes := webContext.GetRequestAttributes(ctx); requestAttributes != nil {
 		return []interface{}{constant.ContextReqMeta, BuildLoggingContextFromReqAttr(requestAttributes)}
+	}
+	if eventAttributes := event.GetAttributes(ctx); eventAttributes != nil {
+		return []interface{}{constant.ContextReqMeta, BuildLoggingContextFromEventAttr(eventAttributes)}
 	}
 	return nil
 }

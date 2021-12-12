@@ -16,6 +16,7 @@ type AbstractEvent struct {
 	RequestId         string `json:"request_id"`
 	UserId            string `json:"user_id"`
 	TechnicalUsername string `json:"technical_username"`
+	ctx               context.Context
 }
 
 func NewAbstractEvent(ctx context.Context, eventName string) *AbstractEvent {
@@ -36,7 +37,22 @@ func NewAbstractEvent(ctx context.Context, eventName string) *AbstractEvent {
 		constant.HeaderOldDeviceId:        requestAttributes.DeviceId,
 		constant.HeaderOldDeviceSessionId: requestAttributes.DeviceSessionId,
 	}
+	absEvent.generateContext(ctx)
 	return &absEvent
+}
+
+func (a *AbstractEvent) generateContext(parent context.Context) {
+	if parent == nil {
+		parent = context.Background()
+	}
+	a.ctx = context.WithValue(parent, constant.ContextEventAttributes, MakeAttributes(a))
+}
+
+func (a *AbstractEvent) Context() context.Context {
+	if a.ctx == nil {
+		a.generateContext(nil)
+	}
+	return a.ctx
 }
 
 func (a AbstractEvent) String() string {
