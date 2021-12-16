@@ -80,7 +80,7 @@ func (l ViperLoader) decodeWithDefaults(props Properties) error {
 	if err != nil {
 		return err
 	}
-	loadedCfMap, ok := l.groupedConfig[props.Prefix()].(map[string]interface{})
+	loadedCfMap, ok := l.groupedConfig[normalizeKey(props.Prefix())].(map[string]interface{})
 	if !ok {
 		return errors.New("loaded config inside prefix is not a map")
 	}
@@ -152,7 +152,7 @@ func discoverEnvKeys(vi *viper.Viper, option Option, propertiesList []Properties
 		// set default values in viper.
 		// Viper needs to know if a key exists in order to override it.
 		// https://github.com/spf13/viper/issues/188
-		defaultMap := convertSliceToNestedMap(strings.Split(props.Prefix(), option.KeyDelimiter), propsMap, nil)
+		defaultMap := convertSliceToNestedMap(strings.Split(normalizeKey(props.Prefix()), option.KeyDelimiter), propsMap, nil)
 		for key, env := range buildEnvKeys(defaultMap, option.KeyDelimiter, "_", "", "") {
 			if err := vi.BindEnv(key, env); err != nil {
 				return fmt.Errorf("[GoLib-error] Error when build env keys properties [%s]: %v", propsName, err)
@@ -184,12 +184,13 @@ func groupPropertiesConfig(vi *viper.Viper, propertiesList []Properties, option 
 	allSettings := vi.AllSettings()
 	group := make(map[string]interface{})
 	for _, props := range propertiesList {
-		m := utils.DeepSearchInMap(allSettings, props.Prefix(), option.KeyDelimiter)
-		correctedVal, exists := correctSliceValues(vi, props.Prefix(), option.KeyDelimiter, m)
+		normalizedPrefix := normalizeKey(props.Prefix())
+		m := utils.DeepSearchInMap(allSettings, normalizedPrefix, option.KeyDelimiter)
+		correctedVal, exists := correctSliceValues(vi, normalizedPrefix, option.KeyDelimiter, m)
 		if exists {
-			group[props.Prefix()] = correctedVal
+			group[normalizedPrefix] = correctedVal
 		} else {
-			group[props.Prefix()] = m
+			group[normalizedPrefix] = m
 		}
 	}
 	return group
@@ -286,4 +287,8 @@ func buildEnvKeys(data map[interface{}]interface{}, keyDelim string, envDelim, b
 		}
 	}
 	return keyEnvMap
+}
+
+func normalizeKey(key string) string {
+	return strings.ToLower(key)
 }
