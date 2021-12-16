@@ -48,6 +48,15 @@ type testVariantImage struct {
 	IsDefault bool `default:"true"`
 }
 
+type testStoreWithCamlCasePrefix struct {
+	Name     string
+	Location string
+}
+
+func (t testStoreWithCamlCasePrefix) Prefix() string {
+	return "org.storeWithCamlCase"
+}
+
 func TestLoaderBinding_GivenInlineParent_ShouldReturnWithCorrectValue(t *testing.T) {
 	err := os.Setenv("ORG_STORE_PRODUCTS_0_PRICE", "610")
 	assert.NoError(t, err)
@@ -344,6 +353,21 @@ func TestLoaderBinding_WhenProfileFileInYamlFormat_ShouldReturnCorrect(t *testin
 	err = loader.Bind(&props)
 	assert.NoError(t, err)
 	assert.Equal(t, "Apple Inc.", props.Name)
+}
+
+func TestLoaderBinding_WhenPrefixIsCamlCase_ShouldReturnCorrect(t *testing.T) {
+	loader, err := NewLoader(Option{
+		ActiveProfiles: []string{"test_caml_case_prefix"},
+		ConfigPaths:    []string{"./test_assets"},
+		ConfigFormat:   "yml",
+	}, []Properties{new(testStoreWithCamlCasePrefix)})
+	assert.NoError(t, err)
+
+	props := testStoreWithCamlCasePrefix{}
+	err = loader.Bind(&props)
+	assert.NoError(t, err)
+	assert.Equal(t, "Apple Inc.", props.Name)
+	assert.Equal(t, "Hanoi", props.Location)
 }
 
 // TODO Should improve it, currently we make lowercase for all map keys.
