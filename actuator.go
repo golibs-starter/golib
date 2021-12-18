@@ -28,6 +28,7 @@ type ActuatorOut struct {
 // NewActuatorEndpoint Initiate actuator endpoint with
 // health checker and informer automatically.
 //
+// ================= Health Checker ======================
 // To register a Health Checker, your component have to
 // produce an actuator.HealthChecker with group `actuator_health_checker`
 // in the result of provider function.
@@ -39,6 +40,14 @@ type ActuatorOut struct {
 //   }
 //   func NewRedis() (RedisOut, error) {}
 //
+// or using ProvideHealthChecker
+//   func NewSampleHealthChecker() actuator.HealthChecker {
+//   	return &SampleHealthChecker{}
+//   }
+//   ProvideHealthChecker(NewSampleHealthChecker)
+//
+//
+// =================== Informer =========================
 // Similar to Health Checker, an Informer also registered by produce an actuator.Informer.
 // For example, a GitRevision provider produce the following result:
 //   type GitRevisionOut struct {
@@ -46,6 +55,13 @@ type ActuatorOut struct {
 //      Informer actuator.Informer `group:"actuator_informer"`
 //   }
 //   func NewGitRevision() (GitRevisionOut, error) {}
+//
+// or using ProvideInformer
+//   func NewSampleInformer() actuator.Informer {
+//   	return &SampleInformer{}
+//   }
+//   ProvideInformer(NewSampleInformer)
+//
 func NewActuatorEndpoint(in ActuatorIn) ActuatorOut {
 	healthService := actuator.NewDefaultHealthService(in.Checkers)
 	infoService := actuator.NewDefaultInfoService(in.Props, in.Informers)
@@ -54,4 +70,14 @@ func NewActuatorEndpoint(in ActuatorIn) ActuatorOut {
 		HealthService:   healthService,
 		InformerService: infoService,
 	}
+}
+
+// ProvideHealthChecker A simple way to provide a health checker
+func ProvideHealthChecker(healthCheckerConstructor interface{}) fx.Option {
+	return fx.Provide(fx.Annotated{Group: "actuator_health_checker", Target: healthCheckerConstructor})
+}
+
+// ProvideInformer A simple way to provide an informer
+func ProvideInformer(informerConstructor interface{}) fx.Option {
+	return fx.Provide(fx.Annotated{Group: "actuator_informer", Target: informerConstructor})
 }

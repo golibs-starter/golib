@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -21,6 +22,7 @@ type ViperLoader struct {
 	option         Option
 	groupedConfig  map[string]interface{}
 	decodeHookFunc mapstructure.DecodeHookFunc
+	validate       *validator.Validate
 }
 
 func NewLoader(option Option, properties []Properties) (Loader, error) {
@@ -42,6 +44,7 @@ func NewLoader(option Option, properties []Properties) (Loader, error) {
 			mapstructure.StringToSliceHookFunc(","),
 			MapStructurePlaceholderValueHook(),
 		),
+		validate: validator.New(),
 	}, nil
 }
 
@@ -56,8 +59,13 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 		}
 
 		if err := l.decodeWithDefaults(props); err != nil {
-			return fmt.Errorf("[GoLib-error] Fatal error when decode config key [%s] to [%s]: %v",
-				props.Prefix(), propsName, err)
+			return errors.WithMessage(err,
+				fmt.Sprintf("[GoLib-error] Error when decode config key [%s] to [%s]", props.Prefix(), propsName))
+		}
+
+		if err := l.validateProps(props); err != nil {
+			return errors.WithMessage(err,
+				fmt.Sprintf("[GoLib-error] Error when validate properties [%s]", propsName))
 		}
 
 		// Run post-binding life cycle
@@ -69,6 +77,10 @@ func (l *ViperLoader) Bind(propertiesList ...Properties) error {
 		l.option.DebugFunc("[GoLib-debug] Properties [%s] was loaded with prefix [%s]", propsName, props.Prefix())
 	}
 	return nil
+}
+
+func (l *ViperLoader) validateProps(props Properties) error {
+	return l.validate.Struct(props)
 }
 
 func (l ViperLoader) decodeWithDefaults(props Properties) error {
