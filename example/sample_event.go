@@ -11,7 +11,7 @@ import (
 
 // NewSampleEvent In order to get more tracing content,
 // inject the request context to your event.
-// Then using pubsub.Publish() to publish it
+// Then using pubsub.Publish(NewSampleEvent(ctx, &SampleEventMessage{})) to publish it
 func NewSampleEvent(ctx context.Context, payload *SampleEventMessage) *SampleEvent {
 	return &SampleEvent{
 		AbstractEvent: event.NewAbstractEvent(ctx, "SampleEvent"),

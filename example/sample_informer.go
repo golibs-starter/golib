@@ -7,7 +7,9 @@ package example
 import "gitlab.id.vin/vincart/golib/actuator"
 
 // NewSampleInformer
+// Use golib.ProvideInformer(NewSampleInformer) to register an informer.
 // In this example, the /actuator/info endpoint with return:
+//
 //{
 //  "meta": {
 //    "code": 200,

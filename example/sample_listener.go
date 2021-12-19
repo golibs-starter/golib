@@ -8,6 +8,8 @@ import (
 // === Example about declare listener (subscriber) ==
 // ==================================================
 
+// NewSampleListener
+// Use golib.ProvideEventListener(NewSampleListener) to declare a listener
 func NewSampleListener() pubsub.Subscriber {
 	return &SampleListener{}
 }

@@ -11,6 +11,7 @@ import (
 // ==================================================
 
 // NewSampleService In this case Contextual Http Client is required
+// Use fx.Provide(NewSampleService) to register a service
 func NewSampleService(httpClient client.ContextualHttpClient) *SampleService {
 	return &SampleService{httpClient: httpClient}
 }

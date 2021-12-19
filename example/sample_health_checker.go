@@ -10,6 +10,7 @@ import (
 )
 
 // NewSampleHealthChecker
+// Use golib.ProvideHealthChecker(NewSampleHealthChecker) to register a health checker.
 // In this example, the `/actuator/health` endpoint with return:
 //{
 //  "meta": {
