@@ -2,6 +2,7 @@ package example
 
 import (
 	"gitlab.id.vin/vincart/golib/pubsub"
+	"gitlab.id.vin/vincart/golib/web/log"
 )
 
 // ==================================================
@@ -10,11 +11,12 @@ import (
 
 // NewSampleListener
 // Use golib.ProvideEventListener(NewSampleListener) to declare a listener
-func NewSampleListener() pubsub.Subscriber {
-	return &SampleListener{}
+func NewSampleListener(service *SampleService) pubsub.Subscriber {
+	return &SampleListener{service: service}
 }
 
 type SampleListener struct {
+	service *SampleService
 }
 
 func (s SampleListener) Supports(e pubsub.Event) bool {
@@ -23,5 +25,16 @@ func (s SampleListener) Supports(e pubsub.Event) bool {
 }
 
 func (s SampleListener) Handle(e pubsub.Event) {
-	// Handle when receive event
+	// You can use event as a log context
+	// Note that the context only appear when your event embeds web AbstractEvent
+	log.Infoe(e, "A log with context")
+
+	// Cast to concrete event
+	sampleEvent := e.(*SampleEvent)
+
+	// You can get context in the web abstract event directly
+	log.Info(sampleEvent.Context(), "Another log with context")
+
+	// Then pass the context to the next call
+	_ = s.service.DoSomething(sampleEvent.Context())
 }

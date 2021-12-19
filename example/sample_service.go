@@ -4,6 +4,7 @@ import (
 	"context"
 	"gitlab.id.vin/vincart/golib/pubsub"
 	"gitlab.id.vin/vincart/golib/web/client"
+	"gitlab.id.vin/vincart/golib/web/log"
 )
 
 // ==================================================
@@ -20,11 +21,22 @@ type SampleService struct {
 	httpClient client.ContextualHttpClient
 }
 
-func (s SampleService) DoSomething(ctx context.Context) {
+func (s SampleService) DoSomething(ctx context.Context) error {
+	// You can write log with current context
+	log.Info(ctx, "Write something to log with context")
 
-	// Sample for publish an event
+	// Then pass the context to ContextualHttpClient's call
+	var result struct{}
+	_, err := s.httpClient.Get(ctx, "https://example", &result)
+	if err != nil {
+		log.Error(ctx, "Http client call with error [%s]", err)
+		return err
+	}
+
+	// Even pass the context to an event
 	pubsub.Publish(NewSampleEvent(ctx, &SampleEventMessage{
 		Field1: "val1",
 		Field2: "val2",
 	}))
+	return nil
 }
