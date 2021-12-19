@@ -49,7 +49,7 @@ See examples:
 - [Register an informer](./example/sample_informer.go)
 - [Register a health checker](./example/sample_health_checker.go)
 
-> More complex examples in [golib-sample](../golib-sample)
+> More complex examples in [golib-sample](https://gitlab.id.vin/vincart/golib-sample)
 
 ### Configuration
 
