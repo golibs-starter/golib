@@ -38,198 +38,16 @@ go get gitlab.id.vin/vincart/golib
 
 Using `fx.Option` to include dependencies for injection.
 
-```go
-package main
+See examples:
 
-import (
-	"context"
-	"gitlab.id.vin/vincart/golib"
-	"gitlab.id.vin/vincart/golib/actuator"
-	"gitlab.id.vin/vincart/golib/config"
-	"gitlab.id.vin/vincart/golib/pubsub"
-	"gitlab.id.vin/vincart/golib/web/client"
-	"go.uber.org/fx"
-	"time"
-)
-
-func main() {
-	_ = []fx.Option{
-		// Required
-		golib.AppOpt(),
-
-		// Required
-		golib.PropertiesOpt(),
-
-		// When you want to use default logging strategy.
-		golib.LoggingOpt(),
-
-		// When you want to enable event publisher
-		golib.EventOpt(),
-
-		// When you want to enable actuator endpoints.
-		// By default, we provide HealthService and InfoService.
-		golib.ActuatorEndpointOpt(),
-		// When you want to provide build info to above InfoService.
-		golib.BuildInfoOpt(Version, CommitHash, BuildTime),
-		// When you want to provide custom health checker and informer
-		golib.ProvideHealthChecker(NewSampleHealthChecker),
-		golib.ProvideInformer(NewSampleInformer),
-
-		// When you want to enable http client auto config with contextual client by default
-		golib.HttpClientOpt(),
-
-		// When you want to tell GoLib to load your properties.
-		golib.ProvideProps(NewSampleProperties),
-
-		// When you want to declare a service
-		fx.Provide(NewSampleService),
-
-		// When you want to register your event listener.
-		golib.ProvideEventListener(NewSampleListener),
-	}
-}
-
-// ==================================================
-// ============ Example for build info ==============
-// ==================================================
-// These infos might inject in the build time
-var (
-	Version    = "1.0"
-	CommitHash = "49d52932"
-	BuildTime  = "2021/11/30 20:08:12"
-)
-
-// ==================================================
-// ===== Example for register a health component ====
-// ==================================================
-// In this example, endpoint /actuator/health with return
-//{
-//  "meta": {
-//    "code": 200,
-//    "message": "Server is up"
-//  },
-//  "data": {
-//    "status": "UP",
-//    "components": {
-//      "sample": {
-//        "status": "UP"
-//      }
-//    }
-//  }
-//}
-
-func NewSampleHealthChecker() actuator.HealthChecker {
-	return &SampleHealthChecker{}
-}
-
-type SampleHealthChecker struct {
-}
-
-func (h SampleHealthChecker) Component() string {
-	return "sample"
-}
-
-func (h SampleHealthChecker) Check(ctx context.Context) actuator.StatusDetails {
-	// Do something to check status and
-	// return actuator.StatusUp or actuator.StatusDown
-	return actuator.StatusDetails{Status: actuator.StatusUp}
-}
-
-// ==================================================
-// ========= Example for register a informer ========
-// ==================================================
-// In this example, endpoint /actuator/info with return
-//{
-//  "meta": {
-//    "code": 200,
-//    "message": "Successful"
-//  },
-//  "data": {
-//    "service_name": "Sample Service",
-//    "info": {
-//      "sample": {
-//        "key1": "val1"
-//      }
-//    }
-//  }
-//}
-
-func NewSampleInformer() actuator.Informer {
-	return &SampleInformer{}
-}
-
-type SampleInformer struct {
-}
-
-func (s SampleInformer) Key() string {
-	return "sample"
-}
-
-func (s SampleInformer) Value() interface{} {
-	return map[string]interface{}{"key1": "val1"}
-}
-
-// ==================================================
-// ======== Example about declare properties ========
-// ==================================================
-
-func NewSampleProperties(loader config.Loader) (*SampleProperties, error) {
-	props := SampleProperties{}
-	err := loader.Bind(&props)
-	return &props, err
-}
-
-type SampleProperties struct {
-	// We use github.com/go-playground/validator to validate properties
-	Field1 string `validate:"required"`
-
-	// We use https://github.com/zenthangplus/defaults to set default for properties
-	Field2 int `default:"10"`
-
-	// We use github.com/mitchellh/mapstructure to bind config to properties
-	Field3 []time.Duration `mapstructure:"field3_new_name"`
-}
-
-// Prefix
-// Defines the properties prefix
-func (s SampleProperties) Prefix() string {
-	return "app.sample"
-}
-
-// ==================================================
-// ======== Example about inject dependencies =======
-// ==================================================
-
-// NewSampleService In this case Contextual Http Client is required
-func NewSampleService(httpClient client.ContextualHttpClient) *SampleService {
-	return &SampleService{httpClient: httpClient}
-}
-
-type SampleService struct {
-	httpClient client.ContextualHttpClient
-}
-
-// ==================================================
-// === Example about declare listener (subscriber) ==
-// ==================================================
-
-func NewSampleListener() pubsub.Subscriber {
-	return &SampleListener{}
-}
-
-type SampleListener struct {
-}
-
-func (s SampleListener) Supports(e pubsub.Event) bool {
-	_, ok := e.(*event.RequestCompletedEvent)
-	return ok
-}
-
-func (s SampleListener) Handle(e pubsub.Event) {
-	// Handle when receive event
-}
-
-```
+- [Bootstrap your application](./example/bootstrap.go)
+- [Declare a properties](./example/sample_properties.go)
+- [Declare an event](./example/sample_event.go)
+- [Declare a service](./example/sample_service.go)
+- [Declare a listener (subscriber)](./example/sample_listener.go)
+- [Provide build info](./example/samle_build_info.go)
+- [Register an informer](./example/sample_informer.go)
+- [Register a health checker](./example/sample_health_checker.go)
 
 > More complex examples in [golib-sample](../golib-sample)
 
@@ -237,11 +55,11 @@ func (s SampleListener) Handle(e pubsub.Event) {
 
 #### 1. Environment variables
 
-| Var                         | Default    | Description                                                                                                                                                                                                                                |
-|-----------------------------|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `APP_PROFILES` or `APP_ENV` | None       | Defines the list of active profiles, separate by comma. By default, `default` profile is always load even this env configured. Example: when `APP_PROFILES=internal,uat` then both `default` `internal` and `uat` will be loaded by order. |
-| `APP_CONFIG_PATHS`          | `./config` | Defines the location of config directory, when the application is started, it will scan profiles in this path.                                                                                                                             |
-| `APP_CONFIG_FORMAT`         | `yaml`     | Defines the format of config file. Currently we only support Yaml format (both `yaml` `yml` are accepted).                                                                                                                                 |
+| Var                         | Default    | Description                                                                                                                                                                                                                                      |
+|-----------------------------|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `APP_PROFILES` or `APP_ENV` | `local`    | Defines the list of active profiles, separate by comma. **By default, `default` profile is always load even this env configured**. <br/> Example: when `APP_PROFILES=internal` then both `default` `internal` and `uat` will be loaded by order. |
+| `APP_CONFIG_PATHS`          | `./config` | Defines the location of config directory, when the application is started, it will scan profiles in this path.                                                                                                                                   |
+| `APP_CONFIG_FORMAT`         | `yaml`     | Defines the format of config file. Currently we only support Yaml format (both `yaml` `yml` are accepted).                                                                                                                                       |
 
 Besides, all our configs can be overridden by environment variables. For example:
 
