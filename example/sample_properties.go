@@ -1,7 +1,7 @@
 package example
 
 import (
-	"gitlab.id.vin/vincart/golib/config"
+	"gitlab.com/golibs-starter/golib/config"
 	"time"
 )
 

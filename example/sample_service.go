@@ -2,9 +2,9 @@ package example
 
 import (
 	"context"
-	"gitlab.id.vin/vincart/golib/pubsub"
-	"gitlab.id.vin/vincart/golib/web/client"
-	"gitlab.id.vin/vincart/golib/web/log"
+	"gitlab.com/golibs-starter/golib/pubsub"
+	"gitlab.com/golibs-starter/golib/web/client"
+	"gitlab.com/golibs-starter/golib/web/log"
 )
 
 // ==================================================

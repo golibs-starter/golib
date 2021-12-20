@@ -5,7 +5,7 @@ package example
 // ==================================================
 
 import (
-	"gitlab.id.vin/vincart/golib"
+	"gitlab.com/golibs-starter/golib"
 	"go.uber.org/fx"
 )
 

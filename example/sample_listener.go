@@ -1,8 +1,8 @@
 package example
 
 import (
-	"gitlab.id.vin/vincart/golib/pubsub"
-	"gitlab.id.vin/vincart/golib/web/log"
+	"gitlab.com/golibs-starter/golib/pubsub"
+	"gitlab.com/golibs-starter/golib/web/log"
 )
 
 // ==================================================

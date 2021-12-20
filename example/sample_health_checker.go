@@ -6,7 +6,7 @@ package example
 
 import (
 	"context"
-	"gitlab.id.vin/vincart/golib/actuator"
+	"gitlab.com/golibs-starter/golib/actuator"
 )
 
 // NewSampleHealthChecker

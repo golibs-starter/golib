@@ -6,7 +6,7 @@ package example
 
 import (
 	"context"
-	"gitlab.id.vin/vincart/golib/web/event"
+	"gitlab.com/golibs-starter/golib/web/event"
 )
 
 // NewSampleEvent In order to get more tracing content,

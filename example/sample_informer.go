@@ -4,7 +4,7 @@ package example
 // ========= Example for register a informer ========
 // ==================================================
 
-import "gitlab.id.vin/vincart/golib/actuator"
+import "gitlab.com/golibs-starter/golib/actuator"
 
 // NewSampleInformer
 // Use golib.ProvideInformer(NewSampleInformer) to register an informer.
