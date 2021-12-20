@@ -9,7 +9,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
-    "strings"
+	"strings"
 )
 
 func ProvideProps(propConstructor interface{}) fx.Option {
@@ -39,10 +39,10 @@ type PropertiesLoaderIn struct {
 
 func NewPropertiesLoader(in PropertiesLoaderIn, options ...Option) (config.Loader, error) {
 	option := new(config.Option)
-    profiles := strings.TrimSpace(os.Getenv("APP_PROFILES"))
-    if len(profiles) == 0 {
-        profiles = strings.TrimSpace(os.Getenv("APP_ENV"))
-    }
+	profiles := strings.TrimSpace(os.Getenv("APP_PROFILES"))
+	if len(profiles) == 0 {
+		profiles = strings.TrimSpace(os.Getenv("APP_ENV"))
+	}
 	option.ActiveProfiles = utils.SliceFromCommaString(profiles)
 	option.ConfigPaths = utils.SliceFromCommaString(os.Getenv("APP_CONFIG_PATHS"))
 	option.ConfigFormat = os.Getenv("APP_CONFIG_FORMAT")
@@ -50,9 +50,9 @@ func NewPropertiesLoader(in PropertiesLoaderIn, options ...Option) (config.Loade
 	for _, optFunc := range options {
 		optFunc(option)
 	}
-    if len(option.ActiveProfiles) == 0 {
-        option.ActiveProfiles = []string{"local"}
-    }
+	if len(option.ActiveProfiles) == 0 {
+		option.ActiveProfiles = []string{"local"}
+	}
 	loader, err := config.NewLoader(*option, in.Properties)
 	if err != nil {
 		return nil, err
