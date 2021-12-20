@@ -1,0 +1,16 @@
+org:
+  storeWithValidation:
+    name: ""
+    tags:
+      - Iphone
+      - Ipad
+    products:
+      - { code: "IPHONE_6", title: "Iphone 6" }
+      - { code: "IPAD_MINI", title: "Ipad mini" }
+    productCodeMap:
+      IPHONE_6:
+        code: "IPHONE_6"
+        title: "Iphone 6"
+      IPAD_MINI:
+        code: "IPAD_MINI"
+        title: "Ipad mini"
