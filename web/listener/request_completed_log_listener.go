@@ -36,7 +36,7 @@ func (r RequestCompletedLogListener) makeHttpRequestLog(message *event.RequestCo
 			TechnicalUsername: message.TechnicalUsername,
 		},
 		Status:         message.Status,
-		ExecutionTime:  message.ExecutionTime,
+		ExecutionTime:  message.ExecutionTime.Milliseconds(),
 		RequestPattern: message.Mapping,
 		RequestPath:    message.Uri,
 		Method:         message.Method,
