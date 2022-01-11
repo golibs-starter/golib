@@ -2,7 +2,13 @@ org.store:
   staffs:
     Manager:
       name: Sam
-      email: Sam@onemount.com
+      email: sam@example.com
+      enabled: false
     Sale:
       name: Alex
-      email: alex@onemount.com
+      email: alex@example.com
+      enabled: true
+    Support:
+      name: Jam
+      email: jam@example.com
+      enabled: true

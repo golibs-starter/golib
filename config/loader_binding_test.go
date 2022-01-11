@@ -24,8 +24,9 @@ func (t testStore) Prefix() string {
 }
 
 type testStoreStaff struct {
-	Name  string
-	Email string
+	Name    string
+	Email   string
+	Enabled bool
 }
 
 type testProduct struct {
@@ -368,6 +369,66 @@ func TestLoaderBinding_WhenPrefixIsCamlCase_ShouldReturnCorrect(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Apple Inc.", props.Name)
 	assert.Equal(t, "Hanoi", props.Location)
+}
+
+func TestLoaderBinding_WhenConfigWithMap_ShouldReturnCorrect(t *testing.T) {
+	loader, err := NewLoader(Option{
+		ActiveProfiles: []string{"test_map_key"},
+		ConfigPaths:    []string{"./test_assets"},
+		ConfigFormat:   "yml",
+	}, []Properties{new(testStore)})
+	assert.NoError(t, err)
+
+	props := testStore{}
+	err = loader.Bind(&props)
+	assert.NoError(t, err)
+	assert.Equal(t, "Apple", props.Name)
+	assert.Len(t, props.Staffs, 3)
+	assert.Equal(t, "Sam", props.Staffs["manager"].Name)
+	assert.Equal(t, "sam@example.com", props.Staffs["manager"].Email)
+	assert.Equal(t, false, props.Staffs["manager"].Enabled)
+	assert.Equal(t, "Alex", props.Staffs["sale"].Name)
+	assert.Equal(t, "alex@example.com", props.Staffs["sale"].Email)
+	assert.Equal(t, true, props.Staffs["sale"].Enabled)
+	assert.Equal(t, "Jam", props.Staffs["support"].Name)
+	assert.Equal(t, "jam@example.com", props.Staffs["support"].Email)
+	assert.Equal(t, true, props.Staffs["support"].Enabled)
+}
+
+func TestLoaderBinding_WhenConfigWithMapAndOverrideByEnv_ShouldReturnCorrect(t *testing.T) {
+	err1 := os.Setenv("ORG_STORE_STAFFS_MANAGER_NAME", "Sam Override")
+	assert.NoError(t, err1)
+	err2 := os.Setenv("ORG_STORE_STAFFS_MANAGER_ENABLED", "true")
+	assert.NoError(t, err2)
+	err3 := os.Setenv("ORG_STORE_STAFFS_SUPPORT_ENABLED", "0")
+	assert.NoError(t, err3)
+	defer func() {
+		_ = os.Unsetenv("ORG_STORE_STAFFS_MANAGER_NAME")
+		_ = os.Unsetenv("ORG_STORE_STAFFS_MANAGER_ENABLED")
+		_ = os.Unsetenv("ORG_STORE_STAFFS_SUPPORT_ENABLED")
+	}()
+
+	loader, err := NewLoader(Option{
+		ActiveProfiles: []string{"test_map_key"},
+		ConfigPaths:    []string{"./test_assets"},
+		ConfigFormat:   "yml",
+	}, []Properties{new(testStore)})
+	assert.NoError(t, err)
+
+	props := testStore{}
+	err = loader.Bind(&props)
+	assert.NoError(t, err)
+	assert.Equal(t, "Apple", props.Name)
+	assert.Len(t, props.Staffs, 3)
+	assert.Equal(t, "Sam Override", props.Staffs["manager"].Name)
+	assert.Equal(t, "sam@example.com", props.Staffs["manager"].Email)
+	assert.Equal(t, true, props.Staffs["manager"].Enabled)
+	assert.Equal(t, "Alex", props.Staffs["sale"].Name)
+	assert.Equal(t, "alex@example.com", props.Staffs["sale"].Email)
+	assert.Equal(t, true, props.Staffs["sale"].Enabled)
+	assert.Equal(t, "Jam", props.Staffs["support"].Name)
+	assert.Equal(t, "jam@example.com", props.Staffs["support"].Email)
+	assert.Equal(t, false, props.Staffs["support"].Enabled)
 }
 
 // TODO Should improve it, currently we make lowercase for all map keys.
