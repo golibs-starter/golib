@@ -28,6 +28,15 @@ func ProvideProps(propConstructor interface{}) fx.Option {
 	)
 }
 
+func ProvidePropsOption(option Option) fx.Option {
+	return fx.Provide(fx.Annotated{
+		Group: "properties_option",
+		Target: func() Option {
+			return option
+		},
+	})
+}
+
 func PropertiesOpt() fx.Option {
 	return fx.Provide(NewPropertiesLoader)
 }
@@ -35,21 +44,27 @@ func PropertiesOpt() fx.Option {
 type PropertiesLoaderIn struct {
 	fx.In
 	Properties []config.Properties `group:"properties"`
+	Options    []Option            `group:"properties_option"`
 }
 
-func NewPropertiesLoader(in PropertiesLoaderIn, options ...Option) (config.Loader, error) {
-	option := new(config.Option)
+func NewPropertiesLoader(in PropertiesLoaderIn) (config.Loader, error) {
 	profiles := strings.TrimSpace(os.Getenv("APP_PROFILES"))
 	if len(profiles) == 0 {
 		profiles = strings.TrimSpace(os.Getenv("APP_ENV"))
 	}
+
+	// Set default option
+	option := new(config.Option)
 	option.ActiveProfiles = utils.SliceFromCommaString(profiles)
 	option.ConfigPaths = utils.SliceFromCommaString(os.Getenv("APP_CONFIG_PATHS"))
 	option.ConfigFormat = os.Getenv("APP_CONFIG_FORMAT")
 	option.DebugFunc = log.Debugf
-	for _, optFunc := range options {
+
+	// Apply user option
+	for _, optFunc := range in.Options {
 		optFunc(option)
 	}
+
 	if len(option.ActiveProfiles) == 0 {
 		option.ActiveProfiles = []string{"local"}
 	}
