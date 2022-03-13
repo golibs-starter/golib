@@ -108,9 +108,9 @@ app:
         logging:
             disabled: false # Enable/disable all http request log
             predefinedDisabledUrls: # Shouldn't modify it, use disabledUrls instead
-              - { urlPattern: "/actuator/.*" }
+              - { urlPattern: "^/actuator/.*" } # By default, we disable all actuator requests
             disabledUrls: # Not log request for urls that matching method & url pattern
-              - { method: "GET", urlPattern: "/an-url-with-disabled-log/.*" }
-              - { method: "POST", urlPattern: "/another-url" }
+              - { method: "GET", urlPattern: "^/an-url-with-disabled-log/.*" }
+              - { method: "POST", urlPattern: "^/another-url$" }
 
 ```

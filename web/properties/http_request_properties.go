@@ -14,7 +14,7 @@ func NewHttpRequestLogProperties(loader config.Loader) (*HttpRequestLogPropertie
 
 type HttpRequestLogProperties struct {
 	Disabled               bool
-	PredefinedDisabledUrls []*UrlMatching `default:"[{\"UrlPattern\":\"/actuator/.*\"}]"`
+	PredefinedDisabledUrls []*UrlMatching `default:"[{\"UrlPattern\":\"^/actuator/.*\"}]"`
 	DisabledUrls           []*UrlMatching
 	allDisabledUrls        []*UrlMatching
 }

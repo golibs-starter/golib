@@ -1,19 +1,28 @@
 package listener
 
 import (
+	"gitlab.com/golibs-starter/golib/config"
 	"gitlab.com/golibs-starter/golib/pubsub"
 	"gitlab.com/golibs-starter/golib/web/constant"
 	"gitlab.com/golibs-starter/golib/web/event"
 	"gitlab.com/golibs-starter/golib/web/log"
 	"gitlab.com/golibs-starter/golib/web/properties"
+	"strings"
 )
 
 type RequestCompletedLogListener struct {
+	appProps         *config.AppProperties
 	httpRequestProps *properties.HttpRequestLogProperties
 }
 
-func NewRequestCompletedLogListener(httpRequestProps *properties.HttpRequestLogProperties) pubsub.Subscriber {
-	return &RequestCompletedLogListener{httpRequestProps: httpRequestProps}
+func NewRequestCompletedLogListener(
+	appProps *config.AppProperties,
+	httpRequestProps *properties.HttpRequestLogProperties,
+) pubsub.Subscriber {
+	return &RequestCompletedLogListener{
+		appProps:         appProps,
+		httpRequestProps: httpRequestProps,
+	}
 }
 
 func (r RequestCompletedLogListener) Supports(e pubsub.Event) bool {
@@ -27,7 +36,8 @@ func (r RequestCompletedLogListener) Handle(e pubsub.Event) {
 	}
 	ev := e.(*event.RequestCompletedEvent)
 	if payload, ok := ev.Payload().(*event.RequestCompletedMessage); ok {
-		if r.isDisabled(payload.Method, payload.Uri) {
+		// TODO Should remove context path in the highest filter
+		if r.isDisabled(payload.Method, r.removeContextPath(payload.Uri, r.appProps.Path)) {
 			return
 		}
 		log.Infow([]interface{}{constant.ContextReqMeta, r.makeHttpRequestLog(payload)}, "finish router")
@@ -44,6 +54,11 @@ func (r RequestCompletedLogListener) isDisabled(method string, uri string) bool 
 		}
 	}
 	return false
+}
+
+func (r RequestCompletedLogListener) removeContextPath(uri string, contextPath string) string {
+	uri = strings.TrimPrefix(uri, contextPath)
+	return "/" + strings.TrimLeft(uri, "/")
 }
 
 func (r RequestCompletedLogListener) makeHttpRequestLog(message *event.RequestCompletedMessage) *log.HttpRequestLog {
