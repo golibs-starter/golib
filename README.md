@@ -104,4 +104,13 @@ app:
             appliedUris: # List of URIs, which will be requested under above proxy
                 - https://foo.com/path/
                 - https://bar.com/path/
+    httpRequest:
+        logging:
+            disabled: false # Enable/disable all http request log
+            predefinedDisabledUrls: # Shouldn't modify it, use disabledUrls instead
+              - { urlPattern: "/actuator/.*" }
+            disabledUrls: # Not log request for urls that matching method & url pattern
+              - { method: "GET", urlPattern: "/an-url-with-disabled-log/.*" }
+              - { method: "POST", urlPattern: "/another-url" }
+
 ```

@@ -3,14 +3,12 @@ package golib
 import (
 	"gitlab.com/golibs-starter/golib/event"
 	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/web/listener"
 	"gitlab.com/golibs-starter/golib/web/log"
 	"go.uber.org/fx"
 )
 
 func EventOpt() fx.Option {
 	return fx.Options(
-		ProvideEventListener(listener.NewRequestCompletedLogListener),
 		ProvideProps(event.NewProperties),
 		fx.Provide(NewEventPublisher),
 		fx.Invoke(RegisterEventPublisher),
