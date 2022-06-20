@@ -7,7 +7,7 @@ type HttpRequestLog struct {
 	RequestPattern string `json:"request_pattern"`
 	RequestPath    string `json:"request_path"`
 	Method         string `json:"request_method"`
-	Query          string `json:"query"`
+	Query          string `json:"query,omitempty"`
 	Url            string `json:"url"`
 	RequestId      string `json:"request_id"`
 	CallerId       string `json:"caller_id"`
