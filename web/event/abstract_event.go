@@ -20,23 +20,28 @@ type AbstractEvent struct {
 }
 
 func NewAbstractEvent(ctx context.Context, name string, options ...event.AppEventOpt) *AbstractEvent {
-	e := AbstractEvent{
-		ApplicationEvent: event.NewApplicationEvent(name, options...),
-	}
+	evt := AbstractEvent{}
+	evt.ApplicationEvent = event.NewApplicationEvent(name, options...)
 	requestAttributes := webContext.GetRequestAttributes(ctx)
-	if requestAttributes == nil {
-		return &e
+	if requestAttributes != nil {
+		evt.ServiceCode = requestAttributes.ServiceCode
+		evt.RequestId = requestAttributes.CorrelationId
+		evt.UserId = requestAttributes.SecurityAttributes.UserId
+		evt.TechnicalUsername = requestAttributes.SecurityAttributes.TechnicalUsername
+		if len(requestAttributes.ClientIpAddress) > 0 {
+			evt.AddAdditionData(constant.HeaderClientIpAddress, requestAttributes.ClientIpAddress)
+		}
+		if len(requestAttributes.DeviceId) > 0 {
+			evt.AddAdditionData(constant.HeaderDeviceId, requestAttributes.DeviceId)
+			evt.AddAdditionData(constant.HeaderOldDeviceId, requestAttributes.DeviceId)
+		}
+		if len(requestAttributes.DeviceSessionId) > 0 {
+			evt.AddAdditionData(constant.HeaderDeviceSessionId, requestAttributes.DeviceSessionId)
+			evt.AddAdditionData(constant.HeaderOldDeviceSessionId, requestAttributes.DeviceSessionId)
+		}
 	}
-	e.RequestId = requestAttributes.CorrelationId
-	e.UserId = requestAttributes.SecurityAttributes.UserId
-	e.TechnicalUsername = requestAttributes.SecurityAttributes.TechnicalUsername
-	e.AddAdditionData(constant.HeaderClientIpAddress, requestAttributes.ClientIpAddress)
-	e.AddAdditionData(constant.HeaderDeviceId, requestAttributes.DeviceId)
-	e.AddAdditionData(constant.HeaderDeviceSessionId, requestAttributes.DeviceSessionId)
-	e.AddAdditionData(constant.HeaderOldDeviceId, requestAttributes.DeviceId)
-	e.AddAdditionData(constant.HeaderOldDeviceSessionId, requestAttributes.DeviceSessionId)
-	e.generateContext(ctx)
-	return &e
+	evt.generateContext(ctx)
+	return &evt
 }
 
 func (a *AbstractEvent) generateContext(parent context.Context) {

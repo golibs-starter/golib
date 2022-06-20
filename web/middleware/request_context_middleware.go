@@ -3,6 +3,7 @@ package middleware
 import (
 	mainContext "context"
 	"errors"
+	"gitlab.com/golibs-starter/golib/config"
 	"gitlab.com/golibs-starter/golib/pubsub"
 	"gitlab.com/golibs-starter/golib/web/context"
 	"gitlab.com/golibs-starter/golib/web/event"
@@ -14,11 +15,12 @@ import (
 // RequestContext middleware responsible to inject attributes to the request's context.
 // This middleware should be run as soon as possible to
 // create a uniform context for the request.
-func RequestContext() func(next http.Handler) http.Handler {
+func RequestContext(props *config.AppProperties) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			requestAttributes := context.GetOrCreateRequestAttributes(r)
+			requestAttributes.ServiceCode = props.Name
 			next.ServeHTTP(w, r)
 			if advancedResponseWriter, err := getAdvancedResponseWriter(w); err != nil {
 				log.Warn(r.Context(), "Cannot detect AdvancedResponseWriter with error [%s]", err.Error())
