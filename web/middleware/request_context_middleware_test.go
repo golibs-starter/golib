@@ -2,6 +2,7 @@ package middleware
 
 import (
 	assert "github.com/stretchr/testify/require"
+	"gitlab.com/golibs-starter/golib/config"
 	"gitlab.com/golibs-starter/golib/pubsub"
 	"gitlab.com/golibs-starter/golib/web/constant"
 	"gitlab.com/golibs-starter/golib/web/context"
@@ -49,7 +50,9 @@ func TestRequestContext_ShouldAttachAttributesToTheRequest(t *testing.T) {
 	pubsub.ReplaceGlobal(publisher)
 
 	next := dummyTestRequestContextHandler{responseStatus: http.StatusOK}
-	handler := RequestContext()
+	handler := RequestContext(&config.AppProperties{
+		Name: "Test App",
+	})
 	assert.NotNil(t, handler)
 
 	internalHandler := handler(&next)
@@ -71,6 +74,7 @@ func TestRequestContext_ShouldAttachAttributesToTheRequest(t *testing.T) {
 	assert.IsType(t, &context.RequestAttributes{}, val)
 
 	requestAttr := val.(*context.RequestAttributes)
+	assert.Equal(t, "Test App", requestAttr.ServiceCode)
 	assert.Equal(t, http.StatusOK, requestAttr.StatusCode)
 	assert.Equal(t, "GET", requestAttr.Method)
 	assert.Equal(t, "/test", requestAttr.Uri)
@@ -109,7 +113,9 @@ func TestRequestContext_WhenReturnBadRequest_ShouldAttachRequestAttributesCorrec
 	pubsub.ReplaceGlobal(publisher)
 
 	next := dummyTestRequestContextHandler{responseStatus: http.StatusBadRequest}
-	handler := RequestContext()
+	handler := RequestContext(&config.AppProperties{
+		Name: "Test App",
+	})
 	assert.NotNil(t, handler)
 
 	internalHandler := handler(&next)
