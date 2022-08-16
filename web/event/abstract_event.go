@@ -13,10 +13,10 @@ type AbstractEventWrapper interface {
 
 type AbstractEvent struct {
 	*event.ApplicationEvent
+	ctx               context.Context
 	RequestId         string `json:"request_id,omitempty"`
 	UserId            string `json:"user_id,omitempty"`
 	TechnicalUsername string `json:"technical_username,omitempty"`
-	ctx               context.Context
 }
 
 func NewAbstractEvent(ctx context.Context, name string, options ...event.AppEventOpt) *AbstractEvent {

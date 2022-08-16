@@ -33,6 +33,7 @@ type ApplicationEvent struct {
 	Source         string                 `json:"source"`
 	ServiceCode    string                 `json:"service_code"`
 	AdditionalData map[string]interface{} `json:"additional_data,omitempty"`
+	PayloadData    interface{}            `json:"payload"`
 	Timestamp      int64                  `json:"timestamp"`
 }
 
@@ -45,7 +46,7 @@ func (a ApplicationEvent) Name() string {
 }
 
 func (a ApplicationEvent) Payload() interface{} {
-	return nil
+	return a.PayloadData
 }
 
 func (a *ApplicationEvent) AddAdditionData(key string, value interface{}) {

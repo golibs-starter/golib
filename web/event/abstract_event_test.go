@@ -63,6 +63,7 @@ func TestNewAbstractEvent_GivenANameAndRequestAttribute_ShouldInitCorrectly(t *t
 
 func TestNewAbstractEvent_GivenANameAndOptions_ShouldRunOptionsCorrectly(t *testing.T) {
 	eventName := "TestEvent"
+	payload := map[string]string{"a": "a"}
 	e := NewAbstractEvent(context.Background(), eventName,
 		event.WithId("test-id"),
 		event.WithServiceCode("test-service-code"),
@@ -70,6 +71,7 @@ func TestNewAbstractEvent_GivenANameAndOptions_ShouldRunOptionsCorrectly(t *test
 		event.WithAdditionalData(map[string]interface{}{
 			"key1": "val1",
 		}),
+		event.WithPayload(payload),
 	)
 	assert.NotNil(t, e.GetAbstractEvent())
 	assert.NotNil(t, e.ApplicationEvent)
@@ -85,6 +87,8 @@ func TestNewAbstractEvent_GivenANameAndOptions_ShouldRunOptionsCorrectly(t *test
 	assert.Equal(t, map[string]interface{}{
 		"key1": "val1",
 	}, e.AdditionalData)
+	assert.Equal(t, payload, e.PayloadData)
+	assert.Equal(t, payload, e.Payload())
 }
 
 func TestNewAbstractEvent_GivenANameAndCustomAdditionalData_ShouldMergeAdditionalDataCorrectly(t *testing.T) {

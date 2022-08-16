@@ -25,3 +25,9 @@ func WithAdditionalData(additionalData map[string]interface{}) AppEventOpt {
 		event.AdditionalData = additionalData
 	}
 }
+
+func WithPayload(payload interface{}) AppEventOpt {
+	return func(event *ApplicationEvent) {
+		event.PayloadData = payload
+	}
+}

@@ -2,23 +2,18 @@ package event
 
 import (
 	"context"
+	"gitlab.com/golibs-starter/golib/event"
 	"time"
 )
 
 func NewRequestCompletedEvent(ctx context.Context, payload *RequestCompletedMessage) *RequestCompletedEvent {
 	return &RequestCompletedEvent{
-		AbstractEvent: NewAbstractEvent(ctx, "RequestCompletedEvent"),
-		PayloadData:   payload,
+		NewAbstractEvent(ctx, "RequestCompletedEvent", event.WithPayload(payload)),
 	}
 }
 
 type RequestCompletedEvent struct {
 	*AbstractEvent
-	PayloadData *RequestCompletedMessage `json:"payload"`
-}
-
-func (a RequestCompletedEvent) Payload() interface{} {
-	return a.PayloadData
 }
 
 func (a RequestCompletedEvent) String() string {
