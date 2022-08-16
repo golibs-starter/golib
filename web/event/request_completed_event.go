@@ -30,7 +30,7 @@ type RequestCompletedMessage struct {
 	ExecutionTime     time.Duration `json:"duration_ms"`
 	Uri               string        `json:"uri"`
 	Query             string        `json:"query,omitempty"`
-	Mapping           string        `json:"mapping"`
+	Mapping           string        `json:"mapping,omitempty"`
 	Url               string        `json:"url"`
 	Method            string        `json:"method"`
 	CorrelationId     string        `json:"correlation_id,omitempty"`
