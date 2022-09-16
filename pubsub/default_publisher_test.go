@@ -48,7 +48,7 @@ func TestDefaultPublisher_WhenPublishEvent_ShouldPublishCorrectly(t *testing.T) 
 	pub.Publish(&DummyEvent{name: "event-1"})
 	pub.Publish(&DummyEvent{name: "event-2"})
 
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
 	assert.Len(t, s1.eventRun, 2)
 	assert.True(t, s1.eventRun["event-1"])

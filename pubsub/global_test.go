@@ -22,6 +22,10 @@ func TestReplaceGlobal(t *testing.T) {
 }
 
 func TestGlobalRegister(t *testing.T) {
+	newBus := NewDefaultEventBus()
+	newPub := NewDefaultPublisher(newBus)
+	ReplaceGlobal(newBus, newPub)
+
 	s1 := DummySubscriber1{}
 	s2 := DummySubscriber2{}
 	Register(&s1, &s2)
@@ -34,6 +38,10 @@ func TestGlobalRegister(t *testing.T) {
 }
 
 func TestGlobalPublish(t *testing.T) {
+	newBus := NewDefaultEventBus()
+	newPub := NewDefaultPublisher(newBus)
+	ReplaceGlobal(newBus, newPub)
+
 	s1 := DummySubscriber1{}
 	Register(&s1)
 	go Run()
@@ -41,7 +49,7 @@ func TestGlobalPublish(t *testing.T) {
 	Publish(&DummyEvent{name: "event-1"})
 	Publish(&DummyEvent{name: "event-2"})
 
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
 	assert.Len(t, s1.eventRun, 2)
 	assert.True(t, s1.eventRun["event-1"])
