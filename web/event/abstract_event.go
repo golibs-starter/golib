@@ -33,11 +33,9 @@ func NewAbstractEvent(ctx context.Context, name string, options ...event.AppEven
 		}
 		if len(requestAttributes.DeviceId) > 0 {
 			evt.AddAdditionData(constant.HeaderDeviceId, requestAttributes.DeviceId)
-			evt.AddAdditionData(constant.HeaderOldDeviceId, requestAttributes.DeviceId)
 		}
 		if len(requestAttributes.DeviceSessionId) > 0 {
 			evt.AddAdditionData(constant.HeaderDeviceSessionId, requestAttributes.DeviceSessionId)
-			evt.AddAdditionData(constant.HeaderOldDeviceSessionId, requestAttributes.DeviceSessionId)
 		}
 	}
 	evt.generateContext(ctx)

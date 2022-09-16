@@ -17,6 +17,7 @@ func TestNewAbstractEvent_GivenAName_ShouldInitCorrectly(t *testing.T) {
 	assert.Equal(t, eventName, e.Name())
 	assert.Equal(t, eventName, e.Event)
 	assert.NotEmpty(t, e.Id)
+	assert.Equal(t, e.Id, e.Identifier())
 	assert.Greater(t, e.Timestamp, int64(0))
 	assert.Equal(t, event.DefaultEventSource, e.Source)
 	assert.Empty(t, e.ServiceCode)
@@ -46,6 +47,7 @@ func TestNewAbstractEvent_GivenANameAndRequestAttribute_ShouldInitCorrectly(t *t
 	assert.Equal(t, eventName, e.Name())
 	assert.Equal(t, eventName, e.Event)
 	assert.NotEmpty(t, e.Id)
+	assert.Equal(t, e.Id, e.Identifier())
 	assert.Greater(t, e.Timestamp, int64(0))
 	assert.Equal(t, event.DefaultEventSource, e.Source)
 	assert.Equal(t, attr.ServiceCode, e.ServiceCode)
@@ -53,11 +55,9 @@ func TestNewAbstractEvent_GivenANameAndRequestAttribute_ShouldInitCorrectly(t *t
 	assert.Equal(t, attr.SecurityAttributes.UserId, e.UserId)
 	assert.Equal(t, attr.SecurityAttributes.TechnicalUsername, e.TechnicalUsername)
 	assert.Equal(t, map[string]interface{}{
-		constant.HeaderClientIpAddress:    attr.ClientIpAddress,
-		constant.HeaderDeviceId:           attr.DeviceId,
-		constant.HeaderDeviceSessionId:    attr.DeviceSessionId,
-		constant.HeaderOldDeviceId:        attr.DeviceId,
-		constant.HeaderOldDeviceSessionId: attr.DeviceSessionId,
+		constant.HeaderClientIpAddress: attr.ClientIpAddress,
+		constant.HeaderDeviceId:        attr.DeviceId,
+		constant.HeaderDeviceSessionId: attr.DeviceSessionId,
 	}, e.AdditionalData)
 }
 
@@ -78,6 +78,7 @@ func TestNewAbstractEvent_GivenANameAndOptions_ShouldRunOptionsCorrectly(t *test
 	assert.Equal(t, eventName, e.Name())
 	assert.Equal(t, eventName, e.Event)
 	assert.Equal(t, "test-id", e.Id)
+	assert.Equal(t, "test-id", e.Identifier())
 	assert.Greater(t, e.Timestamp, int64(0))
 	assert.Equal(t, "test-source", e.Source)
 	assert.Equal(t, "test-service-code", e.ServiceCode)
@@ -105,6 +106,7 @@ func TestNewAbstractEvent_GivenANameAndCustomAdditionalData_ShouldMergeAdditiona
 	assert.Equal(t, eventName, e.Name())
 	assert.Equal(t, eventName, e.Event)
 	assert.NotEmpty(t, e.Id)
+	assert.Equal(t, e.Id, e.Identifier())
 	assert.Greater(t, e.Timestamp, int64(0))
 	assert.Equal(t, event.DefaultEventSource, e.Source)
 	assert.Empty(t, e.ServiceCode)
