@@ -41,7 +41,7 @@ func TestGlobalPublish(t *testing.T) {
 	Publish(&DummyEvent{name: "event-1"})
 	Publish(&DummyEvent{name: "event-2"})
 
-	time.Sleep(20 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	assert.Len(t, s1.eventRun, 2)
 	assert.True(t, s1.eventRun["event-1"])
