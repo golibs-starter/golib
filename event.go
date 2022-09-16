@@ -30,10 +30,11 @@ func ProvideEventListener(listener interface{}) fx.Option {
 }
 
 func SupplyEventBusOpt(opt pubsub.EventBusOpt) fx.Option {
-	return fx.Provide(fx.Annotated{Group: "event_bus_opt", Target: fx.Supply(opt)})
+	return fx.Supply(fx.Annotated{Group: "event_bus_opt", Target: opt})
 }
 
 type EventBusIn struct {
+	fx.In
 	Options []pubsub.EventBusOpt `group:"event_bus_opt"`
 }
 
@@ -42,7 +43,7 @@ func NewDefaultEventBus(in EventBusIn) pubsub.EventBus {
 }
 
 func SupplyEventPublisherOpt(opt pubsub.PublisherOpt) fx.Option {
-	return fx.Provide(fx.Annotated{Group: "event_publisher_opt", Target: fx.Supply(opt)})
+	return fx.Supply(fx.Annotated{Group: "event_publisher_opt", Target: opt})
 }
 
 func ProvideEventPublisherOpt(optConstructor interface{}) fx.Option {
