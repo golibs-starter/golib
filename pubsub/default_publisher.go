@@ -23,6 +23,6 @@ func (p *DefaultPublisher) Publish(event Event) {
 		p.debugLog(event, "Event [%s] was fired with id [%s]", event.Name(), event.Identifier())
 	} else {
 		p.debugLog(event, "Event [%s] was fired with id [%s], payload [%s]",
-			event.Name(), event.Identifier(), event.String())
+			event.Name(), event.Identifier(), event.Payload())
 	}
 }

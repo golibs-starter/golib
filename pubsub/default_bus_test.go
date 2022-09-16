@@ -78,7 +78,9 @@ func (d DummyEvent) Name() string {
 }
 
 func (d DummyEvent) Payload() interface{} {
-	return nil
+	return map[string]string{
+		"a": "b",
+	}
 }
 
 func (d DummyEvent) String() string {
