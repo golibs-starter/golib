@@ -10,7 +10,16 @@ import (
 func EventOpt() fx.Option {
 	return fx.Options(
 		ProvideProps(event.NewProperties),
-		fx.Provide(NewEventPublisher),
+
+		SupplyEventBusOpt(pubsub.WithEventBusDebugLog(log.Debuge)),
+		fx.Provide(NewDefaultEventBus),
+
+		SupplyEventPublisherOpt(pubsub.WithPublisherDebugLog(log.Debuge)),
+		ProvideEventPublisherOpt(func(props *event.Properties) pubsub.PublisherOpt {
+			return pubsub.WithPublisherNotLogPayload(props.Log.NotLogPayloadForEvents)
+		}),
+		fx.Provide(NewDefaultEventPublisher),
+
 		fx.Invoke(RegisterEventPublisher),
 		fx.Invoke(RunEventBus),
 	)
@@ -20,36 +29,48 @@ func ProvideEventListener(listener interface{}) fx.Option {
 	return fx.Provide(fx.Annotated{Group: "event_listener", Target: listener})
 }
 
-type EventPublisherOut struct {
-	fx.Out
-	Publisher pubsub.Publisher
-	EventBus  *pubsub.EventBus
+func SupplyEventBusOpt(opt pubsub.EventBusOpt) fx.Option {
+	return fx.Provide(fx.Annotated{Group: "event_bus_opt", Target: fx.Supply(opt)})
 }
 
-func NewEventPublisher(props *event.Properties) EventPublisherOut {
-	publisher := pubsub.NewPublisher(
-		pubsub.WithPublisherDebugLog(log.Debuge),
-		pubsub.WithPublisherNotLogPayload(props.Log.NotLogPayloadForEvents),
-	)
-	eventBus := pubsub.NewEventBus(publisher, pubsub.WithEventBusDebugLog(log.Debuge))
-	return EventPublisherOut{
-		EventBus:  eventBus,
-		Publisher: publisher,
-	}
+type EventBusIn struct {
+	Options []pubsub.EventBusOpt `group:"event_bus_opt"`
 }
 
-type RegisterEventAutoConfigIn struct {
+func NewDefaultEventBus(in EventBusIn) pubsub.EventBus {
+	return pubsub.NewDefaultEventBus(in.Options...)
+}
+
+func SupplyEventPublisherOpt(opt pubsub.PublisherOpt) fx.Option {
+	return fx.Provide(fx.Annotated{Group: "event_publisher_opt", Target: fx.Supply(opt)})
+}
+
+func ProvideEventPublisherOpt(optConstructor interface{}) fx.Option {
+	return fx.Provide(fx.Annotated{Group: "event_publisher_opt", Target: optConstructor})
+}
+
+type EventPublisherIn struct {
 	fx.In
-	EventBus    *pubsub.EventBus
+	Bus     pubsub.EventBus
+	Options []pubsub.PublisherOpt `group:"event_publisher_opt"`
+}
+
+func NewDefaultEventPublisher(in EventPublisherIn) pubsub.Publisher {
+	return pubsub.NewDefaultPublisher(in.Bus, in.Options...)
+}
+
+type RegisterEventPublisherIn struct {
+	fx.In
+	Bus         pubsub.EventBus
 	Publisher   pubsub.Publisher
 	Subscribers []pubsub.Subscriber `group:"event_listener"`
 }
 
-func RegisterEventPublisher(in RegisterEventAutoConfigIn) {
-	pubsub.ReplaceGlobal(in.Publisher)
-	in.EventBus.Register(in.Subscribers...)
+func RegisterEventPublisher(in RegisterEventPublisherIn) {
+	pubsub.ReplaceGlobal(in.Bus, in.Publisher)
+	in.Bus.Register(in.Subscribers...)
 }
 
-func RunEventBus(eventBus *pubsub.EventBus) {
-	go eventBus.Run()
+func RunEventBus(bus pubsub.EventBus) {
+	go bus.Run()
 }

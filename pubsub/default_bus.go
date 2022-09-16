@@ -1,0 +1,63 @@
+package pubsub
+
+import (
+	"gitlab.com/golibs-starter/golib/pubsub/executor"
+	"reflect"
+)
+
+type DefaultEventBus struct {
+	debugLog       DebugLog
+	subscribers    []Subscriber
+	mapSubscribers map[string]bool
+	eventCh        chan Event
+	executor       Executor
+}
+
+func NewDefaultEventBus(opts ...EventBusOpt) *DefaultEventBus {
+	bus := &DefaultEventBus{
+		subscribers:    make([]Subscriber, 0),
+		mapSubscribers: make(map[string]bool),
+		eventCh:        make(chan Event),
+	}
+	for _, opt := range opts {
+		opt(bus)
+	}
+	if bus.debugLog == nil {
+		bus.debugLog = defaultDebugLog
+	}
+	if bus.executor == nil {
+		bus.executor = executor.NewAsyncExecutor()
+	}
+	return bus
+}
+
+func (b *DefaultEventBus) Register(subscribers ...Subscriber) {
+	for _, subscriber := range subscribers {
+		subscriberId := reflect.TypeOf(subscriber).String()
+		if _, exists := b.mapSubscribers[subscriberId]; exists {
+			b.debugLog(nil, "Subscriber [%s] already registered", subscriberId)
+			continue
+		}
+		b.mapSubscribers[subscriberId] = true
+		b.subscribers = append(b.subscribers, subscriber)
+		b.debugLog(nil, "Register subscriber [%s] successful", subscriberId)
+	}
+}
+
+func (b *DefaultEventBus) Deliver(event Event) {
+	b.eventCh <- event
+}
+
+func (b *DefaultEventBus) Run() {
+	for {
+		event := <-b.eventCh
+		for _, subscriber := range b.subscribers {
+			if subscriber.Supports(event) {
+				subscriber := subscriber
+				b.executor.Execute(func() {
+					subscriber.Handle(event)
+				})
+			}
+		}
+	}
+}
