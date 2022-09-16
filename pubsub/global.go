@@ -27,7 +27,3 @@ func ReplaceGlobal(bus EventBus, publisher Publisher) {
 	_bus = bus
 	_publisher = publisher
 }
-
-func ReplaceGlobalPublisher(publisher Publisher) {
-	_publisher = publisher
-}
