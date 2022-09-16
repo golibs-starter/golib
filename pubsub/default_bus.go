@@ -2,7 +2,7 @@ package pubsub
 
 import (
 	"gitlab.com/golibs-starter/golib/pubsub/executor"
-	"reflect"
+	"gitlab.com/golibs-starter/golib/utils"
 )
 
 type DefaultEventBus struct {
@@ -33,7 +33,7 @@ func NewDefaultEventBus(opts ...EventBusOpt) *DefaultEventBus {
 
 func (b *DefaultEventBus) Register(subscribers ...Subscriber) {
 	for _, subscriber := range subscribers {
-		subscriberId := reflect.TypeOf(subscriber).String()
+		subscriberId := utils.GetStructFullname(subscriber)
 		if _, exists := b.mapSubscribers[subscriberId]; exists {
 			b.debugLog(nil, "Subscriber [%s] already registered", subscriberId)
 			continue
