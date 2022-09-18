@@ -33,6 +33,10 @@ func SupplyEventBusOpt(opt pubsub.EventBusOpt) fx.Option {
 	return fx.Supply(fx.Annotated{Group: "event_bus_opt", Target: opt})
 }
 
+func ProvideEventBusOpt(optConstructor interface{}) fx.Option {
+	return fx.Provide(fx.Annotated{Group: "event_bus_opt", Target: optConstructor})
+}
+
 type EventBusIn struct {
 	fx.In
 	Options []pubsub.EventBusOpt `group:"event_bus_opt"`
