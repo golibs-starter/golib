@@ -49,9 +49,6 @@ func (t *TraceableHttpClient) Request(ctx context.Context, method string, url st
 	result interface{}, options ...RequestOption) (*HttpResponse, error) {
 	httpOpts := []RequestOption{
 		WithHeader(constant.HeaderServiceClientName, t.appProps.Name),
-
-		// Set header with old format for backward compatible
-		WithHeader(constant.HeaderOldServiceClientName, t.appProps.Name),
 	}
 	if reqAttrs := webContext.GetRequestAttributes(ctx); reqAttrs != nil {
 		httpOpts = append(httpOpts,
@@ -59,11 +56,6 @@ func (t *TraceableHttpClient) Request(ctx context.Context, method string, url st
 			WithHeader(constant.HeaderDeviceId, reqAttrs.DeviceId),
 			WithHeader(constant.HeaderDeviceSessionId, reqAttrs.DeviceSessionId),
 			WithHeader(constant.HeaderClientIpAddress, reqAttrs.ClientIpAddress),
-
-			// Set header with old format for backward compatible
-			WithHeader(constant.HeaderOldDeviceId, reqAttrs.DeviceId),
-			WithHeader(constant.HeaderOldDeviceSessionId, reqAttrs.DeviceSessionId),
-			WithHeader(constant.HeaderOldClientIpAddress, reqAttrs.ClientIpAddress),
 		)
 	}
 	httpOpts = append(httpOpts, options...)

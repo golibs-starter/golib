@@ -51,9 +51,6 @@ func getClientIpAddress(r *http.Request) string {
 	if clientIpAddress := r.Header.Get(constant.HeaderClientIpAddress); len(clientIpAddress) > 0 {
 		return clientIpAddress
 	}
-	if clientIpAddress := r.Header.Get(constant.HeaderOldClientIpAddress); len(clientIpAddress) > 0 {
-		return clientIpAddress
-	}
 	return r.RemoteAddr
 }
 
@@ -62,5 +59,5 @@ func getServiceClientName(r *http.Request) string {
 	if len(serviceName) > 0 {
 		return serviceName
 	}
-	return r.Header.Get(constant.HeaderOldServiceClientName)
+	return ""
 }

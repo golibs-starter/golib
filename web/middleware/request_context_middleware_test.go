@@ -47,7 +47,7 @@ func (d *dummyTestRequestContextHandler) ServeHTTP(w http.ResponseWriter, r *htt
 
 func TestRequestContext_ShouldAttachAttributesToTheRequest(t *testing.T) {
 	publisher := &mockEventPublisher{}
-	pubsub.ReplaceGlobal(publisher)
+	pubsub.ReplaceGlobal(pubsub.GetEventBus(), publisher)
 
 	next := dummyTestRequestContextHandler{responseStatus: http.StatusOK}
 	handler := RequestContext(&config.AppProperties{
@@ -110,7 +110,7 @@ func TestRequestContext_ShouldAttachAttributesToTheRequest(t *testing.T) {
 
 func TestRequestContext_WhenReturnBadRequest_ShouldAttachRequestAttributesCorrectly(t *testing.T) {
 	publisher := &mockEventPublisher{}
-	pubsub.ReplaceGlobal(publisher)
+	pubsub.ReplaceGlobal(pubsub.GetEventBus(), publisher)
 
 	next := dummyTestRequestContextHandler{responseStatus: http.StatusBadRequest}
 	handler := RequestContext(&config.AppProperties{
