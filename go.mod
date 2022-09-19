@@ -10,9 +10,9 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/viper v1.8.1
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.8.0
 	github.com/zenthangplus/defaults v1.6.2-beta
 	go.uber.org/fx v1.18.1
-	go.uber.org/zap v1.18.1
+	go.uber.org/zap v1.23.0
 	gopkg.in/yaml.v2 v2.4.0
 )
