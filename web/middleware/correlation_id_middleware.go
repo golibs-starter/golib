@@ -4,7 +4,6 @@ import (
 	"github.com/google/uuid"
 	"gitlab.com/golibs-starter/golib/web/constant"
 	"gitlab.com/golibs-starter/golib/web/context"
-	"gitlab.com/golibs-starter/golib/web/log"
 	"net/http"
 )
 
@@ -25,10 +24,6 @@ func getOrNewCorrelationId(r *http.Request) string {
 	if len(correlationId) > 0 {
 		return correlationId
 	}
-	newCorrelationId, err := uuid.NewUUID()
-	if err != nil {
-		log.Error(r.Context(), "Cannot generate new correlation id with error [%v]", err)
-		return ""
-	}
+	newCorrelationId, _ := uuid.NewUUID()
 	return newCorrelationId.String()
 }

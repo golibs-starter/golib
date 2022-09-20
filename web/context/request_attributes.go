@@ -3,6 +3,7 @@ package context
 import "time"
 
 type RequestAttributes struct {
+	ServiceCode        string             `json:"service_code"`
 	StatusCode         int                `json:"status"`
 	ExecutionTime      time.Duration      `json:"duration_ms"`
 	Uri                string             `json:"uri"`

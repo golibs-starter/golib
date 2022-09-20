@@ -6,6 +6,8 @@ package example
 
 import (
 	"gitlab.com/golibs-starter/golib"
+	"gitlab.com/golibs-starter/golib/pubsub"
+	"gitlab.com/golibs-starter/golib/pubsub/executor"
 	"go.uber.org/fx"
 )
 
@@ -22,6 +24,13 @@ func All() []fx.Option {
 
 		// When you want to enable event publisher
 		golib.EventOpt(),
+		// When you want handle event in simple synchronous way
+		golib.SupplyEventBusOpt(pubsub.WithEventExecutor(executor.NewAsyncExecutor())),
+		// Or want a custom executor, such as using worker pool
+		fx.Provide(NewSampleEventExecutor),
+		golib.ProvideEventBusOpt(func(executor *SampleEventExecutor) pubsub.EventBusOpt {
+			return pubsub.WithEventExecutor(executor)
+		}),
 
 		// When you want to enable actuator endpoints.
 		// By default, we provide HealthService and InfoService.

@@ -13,32 +13,33 @@ type AbstractEventWrapper interface {
 
 type AbstractEvent struct {
 	*event.ApplicationEvent
-	RequestId         string `json:"request_id"`
-	UserId            string `json:"user_id"`
-	TechnicalUsername string `json:"technical_username"`
 	ctx               context.Context
+	RequestId         string `json:"request_id,omitempty"`
+	UserId            string `json:"user_id,omitempty"`
+	TechnicalUsername string `json:"technical_username,omitempty"`
 }
 
-func NewAbstractEvent(ctx context.Context, eventName string) *AbstractEvent {
-	absEvent := AbstractEvent{
-		ApplicationEvent: event.NewApplicationEvent(eventName),
-	}
+func NewAbstractEvent(ctx context.Context, name string, options ...event.AppEventOpt) *AbstractEvent {
+	evt := AbstractEvent{}
+	evt.ApplicationEvent = event.NewApplicationEvent(name, options...)
 	requestAttributes := webContext.GetRequestAttributes(ctx)
-	if requestAttributes == nil {
-		return &absEvent
+	if requestAttributes != nil {
+		evt.ServiceCode = requestAttributes.ServiceCode
+		evt.RequestId = requestAttributes.CorrelationId
+		evt.UserId = requestAttributes.SecurityAttributes.UserId
+		evt.TechnicalUsername = requestAttributes.SecurityAttributes.TechnicalUsername
+		if len(requestAttributes.ClientIpAddress) > 0 {
+			evt.AddAdditionData(constant.HeaderClientIpAddress, requestAttributes.ClientIpAddress)
+		}
+		if len(requestAttributes.DeviceId) > 0 {
+			evt.AddAdditionData(constant.HeaderDeviceId, requestAttributes.DeviceId)
+		}
+		if len(requestAttributes.DeviceSessionId) > 0 {
+			evt.AddAdditionData(constant.HeaderDeviceSessionId, requestAttributes.DeviceSessionId)
+		}
 	}
-	absEvent.RequestId = requestAttributes.CorrelationId
-	absEvent.UserId = requestAttributes.SecurityAttributes.UserId
-	absEvent.TechnicalUsername = requestAttributes.SecurityAttributes.TechnicalUsername
-	absEvent.AdditionalData = map[string]interface{}{
-		constant.HeaderClientIpAddress:    requestAttributes.ClientIpAddress,
-		constant.HeaderDeviceId:           requestAttributes.DeviceId,
-		constant.HeaderDeviceSessionId:    requestAttributes.DeviceSessionId,
-		constant.HeaderOldDeviceId:        requestAttributes.DeviceId,
-		constant.HeaderOldDeviceSessionId: requestAttributes.DeviceSessionId,
-	}
-	absEvent.generateContext(ctx)
-	return &absEvent
+	evt.generateContext(ctx)
+	return &evt
 }
 
 func (a *AbstractEvent) generateContext(parent context.Context) {

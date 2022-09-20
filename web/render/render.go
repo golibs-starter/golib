@@ -1,8 +1,10 @@
 package render
 
 import (
+	"errors"
 	"gitlab.com/golibs-starter/golib/log"
 	"net/http"
+	"syscall"
 )
 
 // Renderer interface is to be implemented by JSON, XML, HTML, YAML and so on.
@@ -17,7 +19,9 @@ type Renderer interface {
 // Render writes data with custom http status code
 func Render(w http.ResponseWriter, httpStatus int, r Renderer) {
 	w.WriteHeader(httpStatus)
-	if err := r.Render(w); err != nil {
+	if err := r.Render(w); err != nil &&
+		!errors.Is(err, syscall.EPIPE) &&
+		!errors.Is(err, syscall.ECONNRESET) {
 		log.Errorf("Cannot render response with error [%v]", err)
 	}
 }

@@ -22,7 +22,7 @@ func New(context context.Context, props *config.AppProperties) *App {
 	app := App{context: context, props: props}
 	app.AddHandler(
 		middleware.AdvancedResponseWriter(),
-		middleware.RequestContext(),
+		middleware.RequestContext(props),
 		middleware.CorrelationId(),
 	)
 	return &app

@@ -9,7 +9,7 @@ import (
 )
 
 type LoggingContext struct {
-	CorrelationId     string `json:"request_id"`
+	CorrelationId     string `json:"request_id,omitempty"`
 	UserId            string `json:"jwt_subject,omitempty"`
 	DeviceId          string `json:"device_id,omitempty"`
 	DeviceSessionId   string `json:"device_session_id,omitempty"`

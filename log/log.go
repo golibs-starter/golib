@@ -6,13 +6,13 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type logger struct {
+type DefaultLogger struct {
 	options     *Options
 	coreLogger  *zap.Logger
 	sugarLogger *zap.SugaredLogger
 }
 
-func NewLogger(options *Options) (*logger, error) {
+func NewLogger(options *Options) (*DefaultLogger, error) {
 	var sampling = zap.SamplingConfig{
 		Initial:    100,
 		Thereafter: 100,
@@ -44,14 +44,14 @@ func NewLogger(options *Options) (*logger, error) {
 		return nil, err
 	}
 	coreLogger := zapLogger.WithOptions(zap.AddCallerSkip(options.CallerSkip))
-	return &logger{
+	return &DefaultLogger{
 		options:     options,
 		coreLogger:  coreLogger,
 		sugarLogger: coreLogger.Sugar(),
 	}, nil
 }
 
-func (l *logger) Clone(options ...OptionFunc) Logger {
+func (l *DefaultLogger) Clone(options ...OptionFunc) Logger {
 	cp := *l
 	newOpt := *l.options
 	cp.options = &newOpt
@@ -63,7 +63,7 @@ func (l *logger) Clone(options ...OptionFunc) Logger {
 	return &cp
 }
 
-func (l *logger) logw(level zapcore.Level, keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) logw(level zapcore.Level, keysAndValues []interface{}, msgFormat string, args ...interface{}) {
 	msg := msgFormat
 	if msg != "" && len(args) > 0 {
 		msg = fmt.Sprintf(msgFormat, args...)
@@ -87,62 +87,62 @@ func (l *logger) logw(level zapcore.Level, keysAndValues []interface{}, msgForma
 	}
 }
 
-func (l *logger) Info(args ...interface{}) {
+func (l *DefaultLogger) Info(args ...interface{}) {
 	l.sugarLogger.Info(args...)
 }
 
-func (l *logger) Infof(msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) Infof(msgFormat string, args ...interface{}) {
 	l.sugarLogger.Infof(msgFormat, args...)
 }
 
-func (l *logger) Infow(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) Infow(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
 	l.logw(zapcore.InfoLevel, keysAndValues, msgFormat, args...)
 }
 
-func (l *logger) Debug(args ...interface{}) {
+func (l *DefaultLogger) Debug(args ...interface{}) {
 	l.sugarLogger.Debug(args...)
 }
 
-func (l *logger) Debugf(msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) Debugf(msgFormat string, args ...interface{}) {
 	l.sugarLogger.Debugf(msgFormat, args...)
 }
 
-func (l *logger) Debugw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) Debugw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
 	l.logw(zapcore.DebugLevel, keysAndValues, msgFormat, args...)
 }
 
-func (l *logger) Warn(args ...interface{}) {
+func (l *DefaultLogger) Warn(args ...interface{}) {
 	l.sugarLogger.Warn(args...)
 }
 
-func (l *logger) Warnf(msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) Warnf(msgFormat string, args ...interface{}) {
 	l.sugarLogger.Warnf(msgFormat, args...)
 }
 
-func (l *logger) Warnw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) Warnw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
 	l.logw(zapcore.WarnLevel, keysAndValues, msgFormat, args...)
 }
 
-func (l *logger) Error(args ...interface{}) {
+func (l *DefaultLogger) Error(args ...interface{}) {
 	l.sugarLogger.Error(args...)
 }
 
-func (l *logger) Errorf(msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) Errorf(msgFormat string, args ...interface{}) {
 	l.sugarLogger.Errorf(msgFormat, args...)
 }
 
-func (l *logger) Errorw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) Errorw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
 	l.logw(zapcore.ErrorLevel, keysAndValues, msgFormat, args...)
 }
 
-func (l *logger) Fatal(args ...interface{}) {
+func (l *DefaultLogger) Fatal(args ...interface{}) {
 	l.sugarLogger.Fatal(args...)
 }
 
-func (l *logger) Fatalf(msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) Fatalf(msgFormat string, args ...interface{}) {
 	l.sugarLogger.Fatalf(msgFormat, args...)
 }
 
-func (l *logger) Fatalw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
+func (l *DefaultLogger) Fatalw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
 	l.logw(zapcore.FatalLevel, keysAndValues, msgFormat, args...)
 }

@@ -3,26 +3,28 @@ package event
 import (
 	"encoding/json"
 	"github.com/google/uuid"
-	"gitlab.com/golibs-starter/golib/log"
 	"gitlab.com/golibs-starter/golib/utils"
 	"time"
 )
 
 const DefaultEventSource = "not_used"
 
-func NewApplicationEvent(eventName string) *ApplicationEvent {
-	id := ""
-	if genId, err := uuid.NewUUID(); err != nil {
-		log.Warnf("Cannot create new event due by error [%v]", err)
-	} else {
-		id = genId.String()
+func NewApplicationEvent(name string, options ...AppEventOpt) *ApplicationEvent {
+	e := ApplicationEvent{}
+	for _, opt := range options {
+		opt(&e)
 	}
-	return &ApplicationEvent{
-		Id:        id,
-		Event:     eventName,
-		Source:    DefaultEventSource,
-		Timestamp: utils.Time2Ms(time.Now()),
+	if e.Id == "" {
+		// No error reached, ignored
+		generatedId, _ := uuid.NewUUID()
+		e.Id = generatedId.String()
 	}
+	if e.Source == "" {
+		e.Source = DefaultEventSource
+	}
+	e.Event = name
+	e.Timestamp = utils.Time2Ms(time.Now())
+	return &e
 }
 
 type ApplicationEvent struct {
@@ -30,7 +32,8 @@ type ApplicationEvent struct {
 	Event          string                 `json:"event"`
 	Source         string                 `json:"source"`
 	ServiceCode    string                 `json:"service_code"`
-	AdditionalData map[string]interface{} `json:"additional_data"`
+	AdditionalData map[string]interface{} `json:"additional_data,omitempty"`
+	PayloadData    interface{}            `json:"payload"`
 	Timestamp      int64                  `json:"timestamp"`
 }
 
@@ -43,7 +46,18 @@ func (a ApplicationEvent) Name() string {
 }
 
 func (a ApplicationEvent) Payload() interface{} {
-	return nil
+	return a.PayloadData
+}
+
+func (a *ApplicationEvent) AddAdditionData(key string, value interface{}) {
+	if a.AdditionalData == nil {
+		a.AdditionalData = make(map[string]interface{})
+	}
+	a.AdditionalData[key] = value
+}
+
+func (a *ApplicationEvent) DeleteAdditionData(key string) {
+	delete(a.AdditionalData, key)
 }
 
 func (a ApplicationEvent) String() string {
