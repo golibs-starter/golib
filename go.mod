@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/creasty/defaults v1.5.2 // indirect
-	github.com/emirpasic/gods v1.12.0
+	github.com/emirpasic/gods v1.18.1
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/google/uuid v1.2.0
 	github.com/mitchellh/mapstructure v1.4.1
