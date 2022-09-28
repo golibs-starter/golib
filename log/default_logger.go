@@ -12,7 +12,7 @@ type DefaultLogger struct {
 	sugarLogger *zap.SugaredLogger
 }
 
-func NewLogger(options *Options) (*DefaultLogger, error) {
+func NewDefaultLogger(options *Options) (*DefaultLogger, error) {
 	var sampling = zap.SamplingConfig{
 		Initial:    100,
 		Thereafter: 100,

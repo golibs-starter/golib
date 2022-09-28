@@ -1,7 +1,7 @@
 package golib
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 	"gitlab.com/golibs-starter/golib/log"
 	webLog "gitlab.com/golibs-starter/golib/web/log"
 	"go.uber.org/fx"
@@ -24,13 +24,13 @@ type NewLoggerOut struct {
 func NewLogger(props *log.Properties) (NewLoggerOut, error) {
 	out := NewLoggerOut{}
 	// Create new logger instance
-	logger, err := log.NewLogger(&log.Options{
+	logger, err := log.NewDefaultLogger(&log.Options{
 		Development:    props.Development,
 		JsonOutputMode: props.JsonOutputMode,
 		CallerSkip:     props.CallerSkip,
 	})
 	if err != nil {
-		return out, fmt.Errorf("error when init logger: [%v]", err)
+		return out, errors.WithMessage(err, "init logger failed")
 	}
 	out.Core = logger
 	out.Web = logger.Clone(log.AddCallerSkip(1))
