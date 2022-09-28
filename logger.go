@@ -24,7 +24,7 @@ type NewLoggerOut struct {
 func NewLogger(props *log.Properties) (NewLoggerOut, error) {
 	out := NewLoggerOut{}
 	// Create new logger instance
-	logger, err := log.NewLogger(&log.Options{
+	logger, err := log.NewDefaultLogger(&log.Options{
 		Development:    props.Development,
 		JsonOutputMode: props.JsonOutputMode,
 		CallerSkip:     props.CallerSkip,

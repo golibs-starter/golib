@@ -6,7 +6,7 @@ var global Logger
 
 func init() {
 	var err error
-	if global, err = NewLogger(&Options{CallerSkip: 2}); err != nil {
+	if global, err = NewDefaultLogger(&Options{CallerSkip: 2}); err != nil {
 		panic(fmt.Errorf("init global logger error [%v]", err))
 	}
 }
