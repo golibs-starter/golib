@@ -9,7 +9,7 @@ var global log.Logger
 
 func init() {
 	var err error
-	if global, err = log.NewLogger(&log.Options{}); err != nil {
+	if global, err = log.NewLogger(&log.Options{CallerSkip: 2}); err != nil {
 		panic(fmt.Errorf("init global web logger error [%v]", err))
 	}
 }
