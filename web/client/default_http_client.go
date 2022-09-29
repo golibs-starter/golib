@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/pkg/errors"
 	"gitlab.com/golibs-starter/golib/log"
 	"io"
 	"io/ioutil"
@@ -13,21 +12,11 @@ import (
 )
 
 type DefaultHttpClient struct {
-	client     *http.Client
-	properties *HttpClientProperties
+	client *http.Client
 }
 
-func NewDefaultHttpClient(base *http.Client, properties *HttpClientProperties) (HttpClient, error) {
-	transport, err := setupHttpTransport(properties)
-	if err != nil {
-		return nil, err
-	}
-	base.Timeout = properties.Timeout
-	base.Transport = transport
-	return &DefaultHttpClient{
-		client:     base,
-		properties: properties,
-	}, nil
+func NewDefaultHttpClient(base *http.Client) HttpClient {
+	return &DefaultHttpClient{client: base}
 }
 
 func (d *DefaultHttpClient) Get(url string, result interface{}, options ...RequestOption) (*HttpResponse, error) {
@@ -138,43 +127,4 @@ func (d *DefaultHttpClient) makeRequest(method string, reqUrl string, body inter
 		}
 	}
 	return request, nil
-}
-
-func setupHttpTransport(props *HttpClientProperties) (*http.Transport, error) {
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.MaxIdleConns = props.MaxIdleConns
-	transport.MaxIdleConnsPerHost = props.MaxIdleConnsPerHost
-	transport.MaxConnsPerHost = props.MaxConnsPerHost
-	if err := setupHttpTransportWithProxy(transport, &props.Proxy); err != nil {
-		return nil, errors.WithMessage(err, "cannot setup http transport proxy")
-	}
-	return transport, nil
-}
-
-func setupHttpTransportWithProxy(t *http.Transport, proxyProps *ProxyProperties) error {
-	var enabledProxy = false
-	if len(proxyProps.AppliedUris) > 0 {
-		if len(proxyProps.Url) == 0 {
-			return errors.New("proxy url must be defined")
-		}
-		enabledProxy = true
-	}
-	if !enabledProxy {
-		return nil
-	}
-	proxyUrl, err := url.Parse(proxyProps.Url)
-	if err != nil {
-		return errors.WithMessage(err, "proxy url is not valid")
-	}
-	appliedUrls := proxyProps.AppliedUris
-	t.Proxy = func(r *http.Request) (*url.URL, error) {
-		for _, appliedUrl := range appliedUrls {
-			if strings.HasPrefix(r.URL.String(), appliedUrl) {
-				return proxyUrl, nil
-			}
-		}
-		// No proxy is used
-		return nil, nil
-	}
-	return nil
 }
