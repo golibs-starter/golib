@@ -39,6 +39,7 @@ func TestNewNativeHttpClient_WhenTransportIsError_ShouldReturnError(t *testing.T
 	}
 	_, err := NewNativeHttpClient(props)
 	assert.Error(t, err)
+	assert.ErrorContains(t, err, "proxy url must be defined")
 }
 
 func TestSetupHttpTransport_WhenProvideValidProps_ShouldReturnCorrectValues(t *testing.T) {
@@ -79,7 +80,7 @@ func TestSetupHttpTransportWithProxy_WhenEnabledProxyAndProxyUrlIsEmpty_ShouldRe
 		},
 	})
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "proxy url must be defined")
+	assert.ErrorContains(t, err, "proxy url must be defined")
 }
 
 func TestSetupHttpTransportWithProxy_WhenEnabledProxyAndProxyUrlIsInvalid_ShouldReturnError(t *testing.T) {
@@ -91,7 +92,7 @@ func TestSetupHttpTransportWithProxy_WhenEnabledProxyAndProxyUrlIsInvalid_Should
 		},
 	})
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "proxy url is not valid")
+	assert.ErrorContains(t, err, "proxy url is not valid")
 	assert.NotNil(t, errors.Cause(err))
 }
 
