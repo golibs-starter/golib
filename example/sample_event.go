@@ -6,6 +6,7 @@ package example
 
 import (
 	"context"
+	baseEvent "gitlab.com/golibs-starter/golib/event"
 	"gitlab.com/golibs-starter/golib/web/event"
 )
 
@@ -13,19 +14,11 @@ import (
 // inject the request context to your event.
 // Then using pubsub.Publish(NewSampleEvent(ctx, &SampleEventMessage{})) to publish it
 func NewSampleEvent(ctx context.Context, payload *SampleEventMessage) *SampleEvent {
-	return &SampleEvent{
-		AbstractEvent: event.NewAbstractEvent(ctx, "SampleEvent"),
-		PayloadData:   payload,
-	}
+	return &SampleEvent{event.NewAbstractEvent(ctx, "SampleEvent", baseEvent.WithPayload(payload))}
 }
 
 type SampleEvent struct {
 	*event.AbstractEvent
-	PayloadData *SampleEventMessage `json:"payload"`
-}
-
-func (a SampleEvent) Payload() interface{} {
-	return a.PayloadData
 }
 
 func (a SampleEvent) String() string {

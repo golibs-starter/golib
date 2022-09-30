@@ -11,26 +11,26 @@ import (
 	"go.uber.org/fx"
 )
 
-func All() []fx.Option {
-	return []fx.Option{
+func All() fx.Option {
+	return fx.Options(
 		// Required
 		golib.AppOpt(),
-
-		// Required
 		golib.PropertiesOpt(),
-
-		// When you want to use default logging strategy.
-		golib.LoggingOpt(),
 
 		// When you want to enable event publisher
 		golib.EventOpt(),
 		// When you want handle event in simple synchronous way
-		golib.SupplyEventBusOpt(pubsub.WithEventExecutor(executor.NewAsyncExecutor())),
+		golib.SupplyEventBusOpt(pubsub.WithEventExecutor(executor.NewSyncExecutor())),
 		// Or want a custom executor, such as using worker pool
 		fx.Provide(NewSampleEventExecutor),
 		golib.ProvideEventBusOpt(func(executor *SampleEventExecutor) pubsub.EventBusOpt {
 			return pubsub.WithEventExecutor(executor)
 		}),
+
+		// When you want to use default logging strategy.
+		golib.LoggingOpt(),
+		// When you want to enable http request log
+		golib.HttpRequestLogOpt(),
 
 		// When you want to enable actuator endpoints.
 		// By default, we provide HealthService and InfoService.
@@ -52,5 +52,5 @@ func All() []fx.Option {
 
 		// When you want to register your event listener.
 		golib.ProvideEventListener(NewSampleListener),
-	}
+	)
 }

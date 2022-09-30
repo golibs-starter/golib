@@ -38,7 +38,7 @@ go get gitlab.com/golibs-starter/golib
 
 Using `fx.Option` to include dependencies for injection.
 
-See examples:
+See some simple examples:
 
 - [Bootstrap your application](./example/bootstrap.go)
 - [Declare a properties](./example/sample_properties.go)
@@ -49,7 +49,11 @@ See examples:
 - [Register an informer](./example/sample_informer.go)
 - [Register a health checker](./example/sample_health_checker.go)
 
-> More complex examples in [golib-sample](https://gitlab.com/golibs-starter/golib-sample)
+> Full working examples in [golib-sample](https://gitlab.com/golibs-starter/golib-sample):
+> - [Public API Service (JWT Auth)](https://gitlab.com/golibs-starter/golib-sample/-/tree/develop/src/public)
+> - [Internal API Service (Basic Auth)](https://gitlab.com/golibs-starter/golib-sample/-/tree/develop/src/internal)
+> - [Worker Service](https://gitlab.com/golibs-starter/golib-sample/-/tree/develop/src/worker)
+> - [Migration Job](https://gitlab.com/golibs-starter/golib-sample/-/tree/develop/src/migration)
 
 ### Configuration
 
@@ -108,9 +112,9 @@ app:
         logging:
             disabled: false # Enable/disable all http request log
             predefinedDisabledUrls: # Shouldn't modify it, use disabledUrls instead
-              - { urlPattern: "^/actuator/.*" } # By default, we disable all actuator requests
+                - { urlPattern: "^/actuator/.*" } # By default, we disable all actuator requests
             disabledUrls: # Not log request for urls that matching method & url pattern
-              - { method: "GET", urlPattern: "^/an-url-with-disabled-log/.*" }
-              - { method: "POST", urlPattern: "^/another-url$" }
+                - { method: "GET", urlPattern: "^/an-url-with-disabled-log/.*" }
+                - { method: "POST", urlPattern: "^/another-url$" }
 
 ```
