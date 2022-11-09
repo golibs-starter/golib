@@ -39,7 +39,7 @@ func TestDefaultPublisher_WhenPublishEvent_ShouldPublishCorrectly(t *testing.T) 
 	bus := NewDefaultEventBus()
 	s1 := DummySubscriber1{}
 	bus.Register(&s1)
-	go bus.Run()
+	bus.Run()
 
 	pub := NewDefaultPublisher(bus,
 		WithPublisherDebugLog(logger),

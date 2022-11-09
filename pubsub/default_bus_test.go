@@ -137,7 +137,7 @@ func TestDefaultEventBus_GivenSyncExecutor_WhenDeliverEvent_ShouldRunCorrectly(t
 	bus := NewDefaultEventBus(WithEventExecutor(executor.NewSyncExecutor()))
 	s1 := DummySubscriber1{}
 	bus.Register(&s1)
-	go bus.Run()
+	bus.Run()
 	bus.Deliver(&DummyEvent{name: "event-1"})
 	bus.Deliver(&DummyEvent{name: "event-2"})
 	bus.Deliver(&DummyEvent{name: "event-3"})
