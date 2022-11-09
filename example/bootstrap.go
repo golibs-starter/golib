@@ -52,5 +52,9 @@ func All() fx.Option {
 
 		// When you want to register your event listener.
 		golib.ProvideEventListener(NewSampleListener),
+
+		// Graceful shutdown.
+		// OnStop hooks will run in reverse order.
+		golib.OnStopEventOpt(),
 	)
 }
