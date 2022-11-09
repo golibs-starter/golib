@@ -9,7 +9,8 @@ func NewProperties(loader config.Loader) (*Properties, error) {
 }
 
 type Properties struct {
-	Log LogProperties
+	ChannelSize int `default:"10"`
+	Log         LogProperties
 }
 
 func (p Properties) Prefix() string {

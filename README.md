@@ -93,6 +93,9 @@ app:
 
     # Configuration available for EventOpt()
     event:
+        # Default event channel accept maximum 10 events,
+        # other incoming events will be blocked until the channel has free space.
+        channelSize: 10
         notLogPayloadForEvents:
             - OrderCreatedEvent
             - OrderUpdatedEvent

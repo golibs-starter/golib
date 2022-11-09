@@ -12,10 +12,12 @@ func TestNewDefaultEventBus_WhenNoOpts_ShouldUseDefaultValue(t *testing.T) {
 	bus := NewDefaultEventBus()
 	assert.NotNil(t, bus.subscribers)
 	assert.Len(t, bus.subscribers, 0)
-	assert.NotNil(t, bus.mapSubscribers)
-	assert.Len(t, bus.mapSubscribers, 0)
+	assert.NotNil(t, bus.subscribers)
+	assert.Len(t, bus.subscribers, 0)
+	assert.Equal(t, bus.eventChSize, 0)
 	assert.NotNil(t, bus.eventCh)
 	assert.Len(t, bus.eventCh, 0)
+	assert.Equal(t, cap(bus.eventCh), 0)
 	assert.Equal(t, reflect.ValueOf(defaultDebugLog).Pointer(), reflect.ValueOf(bus.debugLog).Pointer())
 	assert.IsType(t, new(executor.AsyncExecutor), bus.executor)
 }
@@ -24,13 +26,19 @@ func TestNewDefaultEventBus_WhenUseOpts_ShouldSetOptCorrectly(t *testing.T) {
 	var logger DebugLog = func(e Event, msgFormat string, args ...interface{}) {
 	}
 	syncExecutor := executor.NewSyncExecutor()
-	bus := NewDefaultEventBus(WithEventBusDebugLog(logger), WithEventExecutor(syncExecutor))
+	bus := NewDefaultEventBus(
+		WithEventBusDebugLog(logger),
+		WithEventExecutor(syncExecutor),
+		WithEventChannelSize(12),
+	)
 	assert.NotNil(t, bus.subscribers)
 	assert.Len(t, bus.subscribers, 0)
-	assert.NotNil(t, bus.mapSubscribers)
-	assert.Len(t, bus.mapSubscribers, 0)
+	assert.NotNil(t, bus.subscribers)
+	assert.Len(t, bus.subscribers, 0)
+	assert.Equal(t, bus.eventChSize, 12)
 	assert.NotNil(t, bus.eventCh)
 	assert.Len(t, bus.eventCh, 0)
+	assert.Equal(t, cap(bus.eventCh), 12)
 	assert.Equal(t, reflect.ValueOf(logger).Pointer(), reflect.ValueOf(bus.debugLog).Pointer())
 	assert.Equal(t, syncExecutor, bus.executor)
 }
@@ -92,19 +100,22 @@ func TestDefaultEventBus_WhenRegisterSubscribers_ShouldRegisterCorrectly(t *test
 	s1 := DummySubscriber1{}
 	s2 := DummySubscriber2{}
 	bus.Register(&s1, &s2)
-	assert.Len(t, bus.mapSubscribers, 2)
-	assert.True(t, bus.mapSubscribers["pubsub.DummySubscriber1"])
-	assert.True(t, bus.mapSubscribers["pubsub.DummySubscriber2"])
 	assert.Len(t, bus.subscribers, 2)
-	assert.Equal(t, &s1, bus.subscribers[0])
-	assert.Equal(t, &s2, bus.subscribers[1])
+	sub1, s1Exists := bus.subscribers["pubsub.DummySubscriber1"]
+	sub2, s2Exists := bus.subscribers["pubsub.DummySubscriber2"]
+	assert.True(t, s1Exists)
+	assert.True(t, s2Exists)
+	assert.Len(t, bus.subscribers, 2)
+	assert.Equal(t, &s1, sub1)
+	assert.Equal(t, &s2, sub2)
 }
 
 func TestDefaultEventBus_GivenAsyncExecutor_WhenDeliverEvent_ShouldRunCorrectly(t *testing.T) {
 	bus := NewDefaultEventBus()
 	s1 := DummySubscriber1{}
 	bus.Register(&s1)
-	go bus.Run()
+	bus.Run()
+	defer bus.Stop()
 	bus.Deliver(&DummyEvent{name: "event-1"})
 	bus.Deliver(&DummyEvent{name: "event-2"})
 	bus.Deliver(&DummyEvent{name: "event-3"})
@@ -126,7 +137,7 @@ func TestDefaultEventBus_GivenSyncExecutor_WhenDeliverEvent_ShouldRunCorrectly(t
 	bus := NewDefaultEventBus(WithEventExecutor(executor.NewSyncExecutor()))
 	s1 := DummySubscriber1{}
 	bus.Register(&s1)
-	go bus.Run()
+	bus.Run()
 	bus.Deliver(&DummyEvent{name: "event-1"})
 	bus.Deliver(&DummyEvent{name: "event-2"})
 	bus.Deliver(&DummyEvent{name: "event-3"})

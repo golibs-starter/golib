@@ -29,12 +29,14 @@ func TestGlobalRegister(t *testing.T) {
 	s1 := DummySubscriber1{}
 	s2 := DummySubscriber2{}
 	Register(&s1, &s2)
-	assert.Len(t, _bus.(*DefaultEventBus).mapSubscribers, 2)
-	assert.True(t, _bus.(*DefaultEventBus).mapSubscribers["pubsub.DummySubscriber1"])
-	assert.True(t, _bus.(*DefaultEventBus).mapSubscribers["pubsub.DummySubscriber2"])
+	sub1, sub1e := _bus.(*DefaultEventBus).subscribers["pubsub.DummySubscriber1"]
+	sub2, sub2e := _bus.(*DefaultEventBus).subscribers["pubsub.DummySubscriber2"]
 	assert.Len(t, _bus.(*DefaultEventBus).subscribers, 2)
-	assert.Equal(t, &s1, _bus.(*DefaultEventBus).subscribers[0])
-	assert.Equal(t, &s2, _bus.(*DefaultEventBus).subscribers[1])
+	assert.True(t, sub1e)
+	assert.True(t, sub2e)
+	assert.Len(t, _bus.(*DefaultEventBus).subscribers, 2)
+	assert.Equal(t, &s1, sub1)
+	assert.Equal(t, &s2, sub2)
 }
 
 func TestGlobalPublish(t *testing.T) {
@@ -44,7 +46,7 @@ func TestGlobalPublish(t *testing.T) {
 
 	s1 := DummySubscriber1{}
 	Register(&s1)
-	go Run()
+	Run()
 
 	Publish(&DummyEvent{name: "event-1"})
 	Publish(&DummyEvent{name: "event-2"})
