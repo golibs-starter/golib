@@ -96,5 +96,5 @@ func (b *DefaultEventBus) Stop() {
 		}
 	}()
 	b.wg.Wait()
-	b.debugLog(nil, "Default event is stopped")
+	b.debugLog(nil, "Default event bus is stopped")
 }
