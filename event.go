@@ -12,6 +12,9 @@ func EventOpt() fx.Option {
 		ProvideProps(event.NewProperties),
 
 		SupplyEventBusOpt(pubsub.WithEventBusDebugLog(log.Debuge)),
+		ProvideEventBusOpt(func(props *event.Properties) pubsub.EventBusOpt {
+			return pubsub.WithEventChannelSize(props.ChannelSize)
+		}),
 		fx.Provide(NewDefaultEventBus),
 
 		SupplyEventPublisherOpt(pubsub.WithPublisherDebugLog(log.Debuge)),

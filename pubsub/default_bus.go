@@ -9,6 +9,7 @@ type DefaultEventBus struct {
 	debugLog       DebugLog
 	subscribers    []Subscriber
 	mapSubscribers map[string]bool
+	eventChSize    int
 	eventCh        chan Event
 	executor       Executor
 }
@@ -17,13 +18,18 @@ func NewDefaultEventBus(opts ...EventBusOpt) *DefaultEventBus {
 	bus := &DefaultEventBus{
 		subscribers:    make([]Subscriber, 0),
 		mapSubscribers: make(map[string]bool),
-		eventCh:        make(chan Event),
 	}
 	for _, opt := range opts {
 		opt(bus)
 	}
 	if bus.debugLog == nil {
 		bus.debugLog = defaultDebugLog
+	}
+	if bus.eventChSize < 0 {
+		bus.eventChSize = 0
+	}
+	if bus.eventCh == nil {
+		bus.eventCh = make(chan Event, bus.eventChSize)
 	}
 	if bus.executor == nil {
 		bus.executor = executor.NewAsyncExecutor()

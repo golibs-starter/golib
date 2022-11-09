@@ -14,8 +14,10 @@ func TestNewDefaultEventBus_WhenNoOpts_ShouldUseDefaultValue(t *testing.T) {
 	assert.Len(t, bus.subscribers, 0)
 	assert.NotNil(t, bus.mapSubscribers)
 	assert.Len(t, bus.mapSubscribers, 0)
+	assert.Equal(t, bus.eventChSize, 0)
 	assert.NotNil(t, bus.eventCh)
 	assert.Len(t, bus.eventCh, 0)
+	assert.Equal(t, cap(bus.eventCh), 0)
 	assert.Equal(t, reflect.ValueOf(defaultDebugLog).Pointer(), reflect.ValueOf(bus.debugLog).Pointer())
 	assert.IsType(t, new(executor.AsyncExecutor), bus.executor)
 }
@@ -24,13 +26,19 @@ func TestNewDefaultEventBus_WhenUseOpts_ShouldSetOptCorrectly(t *testing.T) {
 	var logger DebugLog = func(e Event, msgFormat string, args ...interface{}) {
 	}
 	syncExecutor := executor.NewSyncExecutor()
-	bus := NewDefaultEventBus(WithEventBusDebugLog(logger), WithEventExecutor(syncExecutor))
+	bus := NewDefaultEventBus(
+		WithEventBusDebugLog(logger),
+		WithEventExecutor(syncExecutor),
+		WithEventChannelSize(12),
+	)
 	assert.NotNil(t, bus.subscribers)
 	assert.Len(t, bus.subscribers, 0)
 	assert.NotNil(t, bus.mapSubscribers)
 	assert.Len(t, bus.mapSubscribers, 0)
+	assert.Equal(t, bus.eventChSize, 12)
 	assert.NotNil(t, bus.eventCh)
 	assert.Len(t, bus.eventCh, 0)
+	assert.Equal(t, cap(bus.eventCh), 12)
 	assert.Equal(t, reflect.ValueOf(logger).Pointer(), reflect.ValueOf(bus.debugLog).Pointer())
 	assert.Equal(t, syncExecutor, bus.executor)
 }
