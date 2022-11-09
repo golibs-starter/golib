@@ -1,6 +1,7 @@
 package golib
 
 import (
+	"context"
 	"gitlab.com/golibs-starter/golib/event"
 	"gitlab.com/golibs-starter/golib/pubsub"
 	"gitlab.com/golibs-starter/golib/web/log"
@@ -26,6 +27,17 @@ func EventOpt() fx.Option {
 		fx.Invoke(RegisterEventPublisher),
 		fx.Invoke(RunEventBus),
 	)
+}
+
+func OnStopEventOpt() fx.Option {
+	return fx.Invoke(func(lc fx.Lifecycle, bus pubsub.EventBus) {
+		lc.Append(fx.Hook{
+			OnStop: func(ctx context.Context) error {
+				bus.Stop()
+				return nil
+			},
+		})
+	})
 }
 
 func ProvideEventListener(listener interface{}) fx.Option {
@@ -80,5 +92,5 @@ func RegisterEventPublisher(in RegisterEventPublisherIn) {
 }
 
 func RunEventBus(bus pubsub.EventBus) {
-	go bus.Run()
+	bus.Run()
 }

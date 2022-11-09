@@ -10,4 +10,7 @@ type EventBus interface {
 
 	// Run the bus
 	Run()
+
+	// Stop the bus
+	Stop()
 }

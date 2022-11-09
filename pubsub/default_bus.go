@@ -3,21 +3,22 @@ package pubsub
 import (
 	"gitlab.com/golibs-starter/golib/pubsub/executor"
 	"gitlab.com/golibs-starter/golib/utils"
+	"sync"
 )
 
 type DefaultEventBus struct {
-	debugLog       DebugLog
-	subscribers    []Subscriber
-	mapSubscribers map[string]bool
-	eventChSize    int
-	eventCh        chan Event
-	executor       Executor
+	debugLog    DebugLog
+	subscribers map[string]Subscriber
+	eventChSize int
+	eventCh     chan Event
+	stopCh      chan bool
+	executor    Executor
+	wg          sync.WaitGroup
 }
 
 func NewDefaultEventBus(opts ...EventBusOpt) *DefaultEventBus {
 	bus := &DefaultEventBus{
-		subscribers:    make([]Subscriber, 0),
-		mapSubscribers: make(map[string]bool),
+		subscribers: make(map[string]Subscriber, 0),
 	}
 	for _, opt := range opts {
 		opt(bus)
@@ -34,18 +35,18 @@ func NewDefaultEventBus(opts ...EventBusOpt) *DefaultEventBus {
 	if bus.executor == nil {
 		bus.executor = executor.NewAsyncExecutor()
 	}
+	bus.stopCh = make(chan bool)
 	return bus
 }
 
 func (b *DefaultEventBus) Register(subscribers ...Subscriber) {
 	for _, subscriber := range subscribers {
 		subscriberId := utils.GetStructFullname(subscriber)
-		if _, exists := b.mapSubscribers[subscriberId]; exists {
+		if _, exists := b.subscribers[subscriberId]; exists {
 			b.debugLog(nil, "Subscriber [%s] already registered", subscriberId)
 			continue
 		}
-		b.mapSubscribers[subscriberId] = true
-		b.subscribers = append(b.subscribers, subscriber)
+		b.subscribers[subscriberId] = subscriber
 		b.debugLog(nil, "Register subscriber [%s] successful", subscriberId)
 	}
 }
@@ -55,15 +56,45 @@ func (b *DefaultEventBus) Deliver(event Event) {
 }
 
 func (b *DefaultEventBus) Run() {
-	for {
-		event := <-b.eventCh
-		for _, subscriber := range b.subscribers {
-			if subscriber.Supports(event) {
-				subscriber := subscriber
-				b.executor.Execute(func() {
-					subscriber.Handle(event)
-				})
+	b.debugLog(nil, "Default event bus is starting")
+	b.wg.Add(1)
+	go func() {
+		defer b.wg.Done()
+		for {
+			select {
+			case event := <-b.eventCh:
+				for _, subscriber := range b.subscribers {
+					if subscriber.Supports(event) {
+						subscriber := subscriber
+						b.executor.Execute(func() {
+							subscriber.Handle(event)
+						})
+					}
+				}
+				break
+			case isStop := <-b.stopCh:
+				if isStop {
+					return
+				}
+				break
 			}
 		}
-	}
+	}()
+	b.debugLog(nil, "Default event bus is started")
+}
+
+func (b *DefaultEventBus) Stop() {
+	b.debugLog(nil, "Default event bus is stopping")
+	b.wg.Add(1)
+	go func() {
+		defer b.wg.Done()
+		for {
+			if len(b.eventCh) == 0 {
+				b.stopCh <- true
+				return
+			}
+		}
+	}()
+	b.wg.Wait()
+	b.debugLog(nil, "Default event is stopped")
 }
