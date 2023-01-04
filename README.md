@@ -2,30 +2,6 @@
 
 Common core for Golang project.
 
-### ⚠️ **Notice** ⚠️
-
-Our modules are in private repo, so you need to config something bellow before start your develop.
-
-#### 1. Setup `GOPRIVATE`
-
-Run the command `export GOPRIVATE="gitlab.com"` to add `gitlab.com` as private repo.
-
-For future usage, you might add above command to `.bashrc` or `.zshrc`.
-
-#### 2. Add credentials to private host
-
-Run the following command line to load `https://gitlab.com/` using SSH:
-
-```shell
-git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
-```
-
-Or with access token in URL:
-
-```shell
-git config --global url."https://oath2:{your_access_token}@gitlab.com/".insteadOf https://gitlab.com/
-```
-
 ### Setup instruction
 
 Both `go get` and `go mod` are supported.
