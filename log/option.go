@@ -1,5 +1,7 @@
 package log
 
+import "context"
+
 const (
 	OutputModeJson    = "json"
 	OutputModeConsole = "console"
@@ -15,6 +17,8 @@ type Options struct {
 
 	// Skip number of callers before show caller
 	CallerSkip int
+
+	ContextExtractor func(ctx context.Context) []Field
 }
 
 type OptionFunc func(opt *Options)

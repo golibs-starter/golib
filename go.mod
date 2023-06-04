@@ -13,6 +13,6 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/zenthangplus/defaults v1.6.2-beta
 	go.uber.org/fx v1.18.2
-	go.uber.org/zap v1.21.0
+	go.uber.org/zap v1.24.0
 	gopkg.in/yaml.v2 v2.4.0
 )

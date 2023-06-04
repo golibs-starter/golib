@@ -13,7 +13,7 @@ func NewProperties(loader config.Loader) (*Properties, error) {
 type Properties struct {
 	Development    bool `default:"false"`
 	JsonOutputMode bool `default:"true"`
-	CallerSkip     int  `default:"2"`
+	CallerSkip     int  `default:"1"`
 }
 
 func (l Properties) Prefix() string {
