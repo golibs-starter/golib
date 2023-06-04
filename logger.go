@@ -24,16 +24,17 @@ type NewLoggerOut struct {
 func NewLogger(props *log.Properties) (NewLoggerOut, error) {
 	out := NewLoggerOut{}
 	// Create new logger instance
-	logger, err := log.NewDefaultLogger(&log.Options{
-		Development:    props.Development,
-		JsonOutputMode: props.JsonOutputMode,
-		CallerSkip:     props.CallerSkip,
+	logger, err := log.NewZapLogger(&log.Options{
+		Development:      props.Development,
+		JsonOutputMode:   props.JsonOutputMode,
+		CallerSkip:       props.CallerSkip,
+		ContextExtractor: webLog.ContextExtractor,
 	})
 	if err != nil {
 		return out, errors.WithMessage(err, "init logger failed")
 	}
 	out.Core = logger
-	out.Web = logger.Clone(log.AddCallerSkip(1))
+	out.Web = logger.Clone(1)
 	return out, nil
 }
 
