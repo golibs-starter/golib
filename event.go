@@ -3,8 +3,8 @@ package golib
 import (
 	"context"
 	"gitlab.com/golibs-starter/golib/event"
+	"gitlab.com/golibs-starter/golib/log"
 	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/web/log"
 	"go.uber.org/fx"
 )
 
@@ -12,14 +12,18 @@ func EventOpt() fx.Option {
 	return fx.Options(
 		ProvideProps(event.NewProperties),
 
-		SupplyEventBusOpt(pubsub.WithEventBusDebugLog(log.Debuge)),
+		SupplyEventBusOpt(pubsub.WithEventBusDebugLog(func(ctx context.Context, msgFormat string, args ...interface{}) {
+			log.WithCtx(ctx).Debugf(msgFormat, args...)
+		})),
 		ProvideEventBusOpt(func(props *event.Properties) pubsub.EventBusOpt {
 			return pubsub.WithEventChannelSize(props.ChannelSize)
 		}),
 		fx.Provide(NewDefaultEventBus),
 		ProvideInformer(pubsub.NewDefaultBusInformer),
 
-		SupplyEventPublisherOpt(pubsub.WithPublisherDebugLog(log.Debuge)),
+		SupplyEventPublisherOpt(pubsub.WithPublisherDebugLog(func(ctx context.Context, msgFormat string, args ...interface{}) {
+			log.WithCtx(ctx).Debugf(msgFormat, args...)
+		})),
 		ProvideEventPublisherOpt(func(props *event.Properties) pubsub.PublisherOpt {
 			return pubsub.WithPublisherNotLogPayload(props.Log.NotLogPayloadForEvents)
 		}),

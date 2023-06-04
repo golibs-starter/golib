@@ -56,7 +56,7 @@ func (a *AbstractEvent) Context() context.Context {
 	return a.ctx
 }
 
-func (a AbstractEvent) String() string {
+func (a *AbstractEvent) String() string {
 	return a.ToString(a)
 }
 
