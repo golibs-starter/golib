@@ -3,6 +3,7 @@ package listener
 import (
 	"gitlab.com/golibs-starter/golib/config"
 	"gitlab.com/golibs-starter/golib/log"
+	"gitlab.com/golibs-starter/golib/log/field"
 	"gitlab.com/golibs-starter/golib/pubsub"
 	"gitlab.com/golibs-starter/golib/web/constant"
 	"gitlab.com/golibs-starter/golib/web/event"
@@ -41,7 +42,7 @@ func (r RequestCompletedLogListener) Handle(e pubsub.Event) {
 		if r.isDisabled(payload.Method, r.removeContextPath(payload.Uri, r.appProps.Path)) {
 			return
 		}
-		log.WithField(log.Object(constant.ContextReqMeta, r.makeHttpRequestLog(payload))).Infof("finish router")
+		log.WithField(field.Object(constant.ContextReqMeta, r.makeHttpRequestLog(payload))).Infof("finish router")
 	}
 }
 

@@ -1,7 +1,7 @@
 package log
 
 import (
-	"gitlab.com/golibs-starter/golib/log"
+	"gitlab.com/golibs-starter/golib/log/field"
 	webContext "gitlab.com/golibs-starter/golib/web/context"
 	"gitlab.com/golibs-starter/golib/web/event"
 )
@@ -14,7 +14,7 @@ type ContextAttributes struct {
 	TechnicalUsername string `json:"technical_username,omitempty"`
 }
 
-func (c ContextAttributes) MarshalLogObject(encoder log.ObjectEncoder) error {
+func (c ContextAttributes) MarshalLogObject(encoder field.ObjectEncoder) error {
 	encoder.AddString("request_id", c.CorrelationId)
 	encoder.AddString("user_id", c.UserId)
 	encoder.AddString("device_id", c.DeviceId)

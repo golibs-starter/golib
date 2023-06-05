@@ -1,7 +1,7 @@
 package listener
 
 import (
-	"gitlab.com/golibs-starter/golib/log"
+	"gitlab.com/golibs-starter/golib/log/field"
 	webLog "gitlab.com/golibs-starter/golib/web/log"
 )
 
@@ -20,7 +20,7 @@ type HttpRequestLog struct {
 	UserAgent      string `json:"user_agent,omitempty"`
 }
 
-func (h HttpRequestLog) MarshalLogObject(encoder log.ObjectEncoder) error {
+func (h HttpRequestLog) MarshalLogObject(encoder field.ObjectEncoder) error {
 	err := h.ContextAttributes.MarshalLogObject(encoder)
 	if err != nil {
 		return err

@@ -17,6 +17,9 @@ func All() fx.Option {
 		golib.AppOpt(),
 		golib.PropertiesOpt(),
 
+		// When you want to use default logging strategy.
+		golib.LoggingOpt(),
+
 		// When you want to enable event publisher
 		golib.EventOpt(),
 		// When you want handle event in simple synchronous way
@@ -27,8 +30,6 @@ func All() fx.Option {
 			return pubsub.WithEventExecutor(executor)
 		}),
 
-		// When you want to use default logging strategy.
-		golib.LoggingOpt(),
 		// When you want to enable http request log
 		golib.HttpRequestLogOpt(),
 

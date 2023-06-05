@@ -1,6 +1,9 @@
 package log
 
-import "context"
+import (
+	"context"
+	"gitlab.com/golibs-starter/golib/log/field"
+)
 
 const (
 	OutputModeJson    = "json"
@@ -18,7 +21,7 @@ type Options struct {
 	// Skip number of callers before show caller
 	CallerSkip int
 
-	ContextExtractor func(ctx context.Context) []Field
+	ContextExtractor func(ctx context.Context) []field.Field
 }
 
 type OptionFunc func(opt *Options)

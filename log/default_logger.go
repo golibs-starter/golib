@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"gitlab.com/golibs-starter/golib/log/field"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -66,7 +67,7 @@ func (l *ZapLogger) WithCtx(ctx context.Context) Logger {
 	return l.WithField(fields...)
 }
 
-func (l *ZapLogger) WithField(fields ...Field) Logger {
+func (l *ZapLogger) WithField(fields ...field.Field) Logger {
 	cp := *l
 	cp.core = cp.core.With(fields...)
 	cp.sugar = cp.core.Sugar()

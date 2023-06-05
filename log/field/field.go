@@ -1,4 +1,4 @@
-package log
+package field
 
 import (
 	"fmt"
@@ -9,7 +9,9 @@ import (
 
 type Field = zap.Field
 type ObjectEncoder = zapcore.ObjectEncoder
-type ObjectMarshaler = zapcore.ObjectMarshaler
+type ObjectMarshaler interface {
+	MarshalLogObject(ObjectEncoder) error
+}
 
 // Binary constructs a field that carries an opaque binary blob.
 func Binary(key string, val []byte) Field {
@@ -293,24 +295,24 @@ func Object(key string, val ObjectMarshaler) Field {
 // Inline constructs a Field that is similar to Object, but it
 // will add the elements of the provided ObjectMarshaler to the
 // current namespace.
-func Inline(val zapcore.ObjectMarshaler) Field {
+func Inline(val ObjectMarshaler) Field {
 	return zap.Inline(val)
 }
 
-// Err constructs a field that lazily stores err.Error() under the
+// Error is shorthand for the common idiom NamedError("error", err).
+func Error(err error) Field {
+	return zap.Error(err)
+}
+
+// NamedError constructs a field that lazily stores err.Error() under the
 // provided key. Errors which also implement fmt.Formatter (like those produced
 // by github.com/pkg/errors) will also have their verbose representation stored
 // under key+"Verbose". If passed a nil error, the field is a no-op.
 //
 // For the common case in which the key is simply "error", the Error function
 // is shorter and less repetitive.
-func Err(key string, err error) Field {
+func NamedError(key string, err error) Field {
 	return zap.NamedError(key, err)
-}
-
-// Errs constructs a field that carries a slice of errors.
-func Errs(key string, errs []error) Field {
-	return zap.Errors(key, errs)
 }
 
 // Any takes a key and an arbitrary value and chooses the best way to represent

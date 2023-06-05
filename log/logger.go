@@ -1,10 +1,13 @@
 package log
 
-import "context"
+import (
+	"context"
+	"gitlab.com/golibs-starter/golib/log/field"
+)
 
 type Logger interface {
 	StdLogger
 
 	WithCtx(ctx context.Context) Logger
-	WithField(fields ...Field) Logger
+	WithField(fields ...field.Field) Logger
 }

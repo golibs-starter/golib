@@ -10,7 +10,7 @@ import (
 func LoggingOpt() fx.Option {
 	return fx.Options(
 		ProvideProps(log.NewProperties),
-		fx.Provide(NewLogger),
+		fx.Provide(NewZapLogger),
 		fx.Invoke(RegisterLogger),
 	)
 }
@@ -21,7 +21,7 @@ type NewLoggerOut struct {
 	Web  log.Logger `name:"web_logger"`
 }
 
-func NewLogger(props *log.Properties) (NewLoggerOut, error) {
+func NewZapLogger(props *log.Properties) (NewLoggerOut, error) {
 	out := NewLoggerOut{}
 	// Create new logger instance
 	logger, err := log.NewZapLogger(&log.Options{
@@ -34,7 +34,9 @@ func NewLogger(props *log.Properties) (NewLoggerOut, error) {
 		return out, errors.WithMessage(err, "init logger failed")
 	}
 	out.Core = logger
+	log.ReplaceGlobal(out.Core)
 	out.Web = logger.Clone(1)
+	webLog.ReplaceGlobal(out.Web)
 	return out, nil
 }
 
@@ -45,6 +47,5 @@ type RegisterLoggerIn struct {
 }
 
 func RegisterLogger(in RegisterLoggerIn) {
-	log.ReplaceGlobal(in.Core)
-	webLog.ReplaceGlobal(in.Web)
+	// This is dummy invoker to make sure logger are produced by fx
 }

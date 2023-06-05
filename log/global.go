@@ -3,13 +3,14 @@ package log
 import (
 	"context"
 	"fmt"
+	"gitlab.com/golibs-starter/golib/log/field"
 )
 
 var global Logger
 
 func init() {
 	var err error
-	if global, err = NewZapLogger(&Options{CallerSkip: 2}); err != nil {
+	if global, err = NewZapLogger(&Options{CallerSkip: 1, Development: true}); err != nil {
 		panic(fmt.Errorf("init global logger error [%v]", err))
 	}
 }
@@ -28,7 +29,7 @@ func WithCtx(ctx context.Context) Logger {
 	return global.WithCtx(ctx)
 }
 
-func WithField(fields ...Field) Logger {
+func WithField(fields ...field.Field) Logger {
 	return global.WithField(fields...)
 }
 
