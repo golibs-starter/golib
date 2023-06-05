@@ -7,5 +7,7 @@ test:
   except:
     refs:
       - tags
+  before_script:
+    - apk update && apk add build-base
   script:
     - go test ./...
