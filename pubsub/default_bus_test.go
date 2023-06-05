@@ -1,6 +1,7 @@
 package pubsub
 
 import (
+	"context"
 	assert "github.com/stretchr/testify/require"
 	"gitlab.com/golibs-starter/golib/pubsub/executor"
 	"reflect"
@@ -23,7 +24,7 @@ func TestNewDefaultEventBus_WhenNoOpts_ShouldUseDefaultValue(t *testing.T) {
 }
 
 func TestNewDefaultEventBus_WhenUseOpts_ShouldSetOptCorrectly(t *testing.T) {
-	var logger DebugLog = func(e Event, msgFormat string, args ...interface{}) {
+	var logger DebugLog = func(ctx context.Context, msgFormat string, args ...interface{}) {
 	}
 	syncExecutor := executor.NewSyncExecutor()
 	bus := NewDefaultEventBus(
@@ -75,10 +76,15 @@ func (d DummySubscriber2) Handle(event Event) {
 
 type DummyEvent struct {
 	name string
+	ctx  context.Context
 }
 
 func (d DummyEvent) Identifier() string {
 	return "dummy-event-id"
+}
+
+func (d DummyEvent) Context() context.Context {
+	return d.ctx
 }
 
 func (d DummyEvent) Name() string {
