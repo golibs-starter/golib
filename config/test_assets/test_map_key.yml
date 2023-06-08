@@ -1,14 +1,15 @@
-org.store:
-  staffs:
-    Manager:
-      name: Sam
-      email: sam@example.com
-      enabled: false
-    Sale:
-      name: Alex
-      email: alex@example.com
-      enabled: true
-    Support:
-      name: Jam
-      email: jam@example.com
-      enabled: true
+org:
+  store:
+    staffs:
+      Manager:
+        name: Sam
+        email: sam@example.com
+        enabled: false
+      Sale:
+        name: Alex
+        email: alex@example.com
+        enabled: true
+      Support:
+        name: Jam
+        email: jam@example.com
+        enabled: true
