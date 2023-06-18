@@ -15,11 +15,21 @@ type ContextAttributes struct {
 }
 
 func (c ContextAttributes) MarshalLogObject(encoder field.ObjectEncoder) error {
-	encoder.AddString("request_id", c.CorrelationId)
-	encoder.AddString("user_id", c.UserId)
-	encoder.AddString("device_id", c.DeviceId)
-	encoder.AddString("device_session_id", c.DeviceSessionId)
-	encoder.AddString("technical_username", c.TechnicalUsername)
+	if c.CorrelationId != "" {
+		encoder.AddString("request_id", c.CorrelationId)
+	}
+	if c.UserId != "" {
+		encoder.AddString("user_id", c.UserId)
+	}
+	if c.DeviceId != "" {
+		encoder.AddString("device_id", c.DeviceId)
+	}
+	if c.DeviceSessionId != "" {
+		encoder.AddString("device_session_id", c.DeviceSessionId)
+	}
+	if c.TechnicalUsername != "" {
+		encoder.AddString("technical_username", c.TechnicalUsername)
+	}
 	return nil
 }
 
