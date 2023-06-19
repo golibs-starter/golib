@@ -6,7 +6,7 @@ import (
 	"gitlab.com/golibs-starter/golib/log/field"
 )
 
-var global Logger
+var global *ZapLogger
 
 func init() {
 	var err error
@@ -16,8 +16,9 @@ func init() {
 }
 
 // ReplaceGlobal Register a logger instance as global
-func ReplaceGlobal(logger Logger) {
-	global = logger
+func ReplaceGlobal(logger *ZapLogger) {
+	logger.Info("global replaced")
+	global = logger.Clone(1)
 }
 
 // GetGlobal Get global logger instance
@@ -25,12 +26,12 @@ func GetGlobal() Logger {
 	return global
 }
 
-func WithCtx(ctx context.Context) Logger {
-	return global.WithCtx(ctx)
+func WithCtx(ctx context.Context, additionalFields ...field.Field) Logger {
+	return global.Clone(-1).WithCtx(ctx, additionalFields...)
 }
 
 func WithField(fields ...field.Field) Logger {
-	return global.WithField(fields...)
+	return global.Clone(-1).WithField(fields...)
 }
 
 // Info uses fmt.Sprint to construct and log a message.

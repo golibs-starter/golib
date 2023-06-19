@@ -44,38 +44,46 @@ func NewZapLogger(opts *Options) (*ZapLogger, error) {
 	if err != nil {
 		return nil, err
 	}
-	coreLogger := zapLogger.WithOptions(zap.AddCallerSkip(opts.CallerSkip))
+	core := zapLogger.WithOptions(zap.AddCallerSkip(opts.CallerSkip))
 	return &ZapLogger{
 		opts:  opts,
-		core:  coreLogger,
-		sugar: coreLogger.Sugar(),
+		core:  core,
+		sugar: core.Sugar(),
 	}, nil
 }
 
-func (l *ZapLogger) Clone(addedCallerSkip int) Logger {
+func (l *ZapLogger) Clone(addedCallerSkip int, fields ...field.Field) *ZapLogger {
 	cp := *l
-	cp.core = l.core.WithOptions(zap.AddCallerSkip(addedCallerSkip))
+	cp.core = l.core.WithOptions(zap.AddCallerSkip(addedCallerSkip), zap.Fields(fields...))
 	cp.sugar = cp.core.Sugar()
 	return &cp
 }
 
-func (l *ZapLogger) WithCtx(ctx context.Context) Logger {
-	if l.opts.ContextExtractor == nil {
-		return l
+func (l *ZapLogger) WithCtx(ctx context.Context, additionalFields ...field.Field) Logger {
+	fields := additionalFields
+	if l.opts.ContextExtractor != nil {
+		fields = append(fields, l.opts.ContextExtractor(ctx)...)
 	}
-	fields := l.opts.ContextExtractor(ctx)
-	return l.WithField(fields...)
+	return l.Clone(0, fields...)
 }
 
 func (l *ZapLogger) WithField(fields ...field.Field) Logger {
-	cp := *l
-	cp.core = cp.core.With(fields...)
-	cp.sugar = cp.core.Sugar()
-	return &cp
+	cp := l.Clone(0, fields...)
+	return cp
+}
+
+func (l *ZapLogger) prepareArgs(args ...interface{}) (StdLogger, []interface{}) {
+	if len(args) > 0 {
+		if ctx, ok := args[0].(context.Context); ok {
+			return l.Clone(1).WithCtx(ctx), args[1:]
+		}
+	}
+	return l.sugar, args
 }
 
 func (l *ZapLogger) Info(args ...interface{}) {
-	l.sugar.Info(args...)
+	stdLogger, args := l.prepareArgs(args...)
+	stdLogger.Info(args...)
 }
 
 func (l *ZapLogger) Infof(template string, args ...interface{}) {
@@ -83,7 +91,8 @@ func (l *ZapLogger) Infof(template string, args ...interface{}) {
 }
 
 func (l *ZapLogger) Debug(args ...interface{}) {
-	l.sugar.Debug(args...)
+	stdLogger, args := l.prepareArgs(args...)
+	stdLogger.Debug(args...)
 }
 
 func (l *ZapLogger) Debugf(template string, args ...interface{}) {
@@ -91,7 +100,8 @@ func (l *ZapLogger) Debugf(template string, args ...interface{}) {
 }
 
 func (l *ZapLogger) Warn(args ...interface{}) {
-	l.sugar.Warn(args...)
+	stdLogger, args := l.prepareArgs(args...)
+	stdLogger.Warn(args...)
 }
 
 func (l *ZapLogger) Warnf(template string, args ...interface{}) {
@@ -99,7 +109,8 @@ func (l *ZapLogger) Warnf(template string, args ...interface{}) {
 }
 
 func (l *ZapLogger) Error(args ...interface{}) {
-	l.sugar.Error(args...)
+	stdLogger, args := l.prepareArgs(args...)
+	stdLogger.Error(args...)
 }
 
 func (l *ZapLogger) Errorf(template string, args ...interface{}) {
@@ -107,7 +118,8 @@ func (l *ZapLogger) Errorf(template string, args ...interface{}) {
 }
 
 func (l *ZapLogger) Fatal(args ...interface{}) {
-	l.sugar.Fatal(args...)
+	stdLogger, args := l.prepareArgs(args...)
+	stdLogger.Fatal(args...)
 }
 
 func (l *ZapLogger) Fatalf(template string, args ...interface{}) {
@@ -115,7 +127,8 @@ func (l *ZapLogger) Fatalf(template string, args ...interface{}) {
 }
 
 func (l *ZapLogger) Panic(args ...interface{}) {
-	l.sugar.Panic(args...)
+	stdLogger, args := l.prepareArgs(args...)
+	stdLogger.Panic(args...)
 }
 
 func (l *ZapLogger) Panicf(template string, args ...interface{}) {

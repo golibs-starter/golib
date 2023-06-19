@@ -8,6 +8,6 @@ import (
 type Logger interface {
 	StdLogger
 
-	WithCtx(ctx context.Context) Logger
+	WithCtx(ctx context.Context, additionalFields ...field.Field) Logger
 	WithField(fields ...field.Field) Logger
 }
