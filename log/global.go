@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"gitlab.com/golibs-starter/golib/log/field"
+	"sync"
 )
 
 var global *ZapLogger
+var globalLoggerLock = &sync.RWMutex{}
 
 func init() {
 	var err error
@@ -17,6 +19,8 @@ func init() {
 
 // ReplaceGlobal Register a logger instance as global
 func ReplaceGlobal(logger *ZapLogger) {
+	globalLoggerLock.Lock()
+	defer globalLoggerLock.Unlock()
 	logger.Info("global replaced")
 	global = logger.Clone(1)
 }

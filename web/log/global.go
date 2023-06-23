@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"gitlab.com/golibs-starter/golib/log"
 	"gitlab.com/golibs-starter/golib/pubsub"
+	"sync"
 )
 
 var global log.Logger
+var globalLoggerLock = &sync.RWMutex{}
 
 func init() {
 	var err error
@@ -18,6 +20,8 @@ func init() {
 
 // ReplaceGlobal Register a logger instance as global
 func ReplaceGlobal(logger log.Logger) {
+	globalLoggerLock.Lock()
+	defer globalLoggerLock.Unlock()
 	global = logger
 }
 
