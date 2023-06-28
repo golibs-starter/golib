@@ -10,6 +10,16 @@ const (
 	OutputModeConsole = "console"
 )
 
+type FiledKey int
+
+const (
+	FieldKeyErr FiledKey = iota
+)
+
+var defaultFieldKeyMap = map[FiledKey]string{
+	FieldKeyErr: "error",
+}
+
 type Options struct {
 	// Development puts the logger in development mode, which changes the
 	// behavior of DPanicLevel and takes stack traces more liberally.
@@ -20,6 +30,8 @@ type Options struct {
 
 	// Skip number of callers before show caller
 	CallerSkip int
+
+	FieldKeyMap map[FiledKey]string
 
 	ContextExtractor func(ctx context.Context) []field.Field
 }

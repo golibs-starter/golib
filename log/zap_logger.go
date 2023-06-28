@@ -2,9 +2,9 @@ package log
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"gitlab.com/golibs-starter/golib/log/field"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 type ZapLogger struct {
@@ -14,35 +14,12 @@ type ZapLogger struct {
 }
 
 func NewZapLogger(opts *Options) (*ZapLogger, error) {
-	var sampling = zap.SamplingConfig{
-		Initial:    100,
-		Thereafter: 100,
+	if opts.FieldKeyMap == nil || len(opts.FieldKeyMap) == 0 {
+		opts.FieldKeyMap = defaultFieldKeyMap
 	}
-
-	var level = zap.InfoLevel
-	if opts.Development == true {
-		level = zap.DebugLevel
-	}
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
-
-	encoding := OutputModeConsole
-	if opts.JsonOutputMode {
-		encoding = OutputModeJson
-	}
-
-	// Build the zap logger
-	zapLogger, err := zap.Config{
-		Level:            zap.NewAtomicLevelAt(level),
-		Development:      opts.Development,
-		Sampling:         &sampling,
-		Encoding:         encoding,
-		EncoderConfig:    encoderConfig,
-		OutputPaths:      []string{"stderr"},
-		ErrorOutputPaths: []string{"stderr"},
-	}.Build()
+	zapLogger, err := buildZapLoggerConfig(opts).Build()
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "build zap logger failed")
 	}
 	core := zapLogger.WithOptions(zap.AddCallerSkip(opts.CallerSkip))
 	return &ZapLogger{
@@ -69,6 +46,11 @@ func (l *ZapLogger) WithCtx(ctx context.Context, additionalFields ...field.Field
 
 func (l *ZapLogger) WithField(fields ...field.Field) Logger {
 	cp := l.Clone(0, fields...)
+	return cp
+}
+
+func (l *ZapLogger) WithErrors(errs ...error) Logger {
+	cp := l.Clone(0, field.Errors(l.opts.FieldKeyMap[FieldKeyErr], errs))
 	return cp
 }
 

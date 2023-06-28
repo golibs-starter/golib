@@ -10,4 +10,5 @@ type Logger interface {
 
 	WithCtx(ctx context.Context, additionalFields ...field.Field) Logger
 	WithField(fields ...field.Field) Logger
+	WithErrors(errs ...error) Logger
 }
