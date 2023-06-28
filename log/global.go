@@ -37,6 +37,10 @@ func WithField(fields ...field.Field) Logger {
 	return _global.Clone(-1).WithField(fields...)
 }
 
+func WithErrors(errs ...error) Logger {
+	return _global.Clone(-1).WithErrors(errs...)
+}
+
 // Info uses fmt.Sprint to construct and log a message.
 func Info(args ...interface{}) {
 	_global.Info(args...)
