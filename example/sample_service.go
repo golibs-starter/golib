@@ -2,9 +2,9 @@ package example
 
 import (
 	"context"
+	"gitlab.com/golibs-starter/golib/log"
 	"gitlab.com/golibs-starter/golib/pubsub"
 	"gitlab.com/golibs-starter/golib/web/client"
-	"gitlab.com/golibs-starter/golib/web/log"
 )
 
 // ==================================================
@@ -23,13 +23,13 @@ type SampleService struct {
 
 func (s SampleService) DoSomething(ctx context.Context) error {
 	// You can write log with current context
-	log.Info(ctx, "Write something to log with context")
+	log.WithCtx(ctx).Info("Write something to log with context")
 
 	// Then pass the context to ContextualHttpClient's call
 	var result struct{}
 	_, err := s.httpClient.Get(ctx, "https://example", &result)
 	if err != nil {
-		log.Error(ctx, "Http client call with error [%s]", err)
+		log.WithCtx(ctx).WithErrors(err).Error("Http client call failed")
 		return err
 	}
 
