@@ -34,7 +34,7 @@ func NewZapLogger(props *log.Properties) (NewLoggerOut, error) {
 		return out, errors.WithMessage(err, "init logger failed")
 	}
 	out.Core = logger
-	log.ReplaceGlobal(out.Core)
+	log.ReplaceGlobal(logger)
 	out.Web = logger.Clone(1)
 	webLog.ReplaceGlobal(out.Web)
 	return out, nil

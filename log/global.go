@@ -21,7 +21,6 @@ func init() {
 func ReplaceGlobal(logger *ZapLogger) {
 	globalLoggerLock.Lock()
 	defer globalLoggerLock.Unlock()
-	logger.Info("global replaced")
 	global = logger.Clone(1)
 }
 
