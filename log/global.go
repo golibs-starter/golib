@@ -7,92 +7,92 @@ import (
 	"sync"
 )
 
-var global *ZapLogger
-var globalLoggerLock = &sync.RWMutex{}
+var _global *ZapLogger
+var _globalLoggerLock = &sync.RWMutex{}
 
 func init() {
 	var err error
-	if global, err = NewZapLogger(&Options{CallerSkip: 1, Development: true}); err != nil {
+	if _global, err = NewZapLogger(&Options{CallerSkip: 1, Development: true}); err != nil {
 		panic(fmt.Errorf("init global logger error [%v]", err))
 	}
 }
 
 // ReplaceGlobal Register a logger instance as global
 func ReplaceGlobal(logger *ZapLogger) {
-	globalLoggerLock.Lock()
-	defer globalLoggerLock.Unlock()
-	global = logger.Clone(1)
+	_globalLoggerLock.Lock()
+	defer _globalLoggerLock.Unlock()
+	_global = logger.Clone(1)
 }
 
 // GetGlobal Get global logger instance
 func GetGlobal() Logger {
-	return global
+	return _global
 }
 
 func WithCtx(ctx context.Context, additionalFields ...field.Field) Logger {
-	return global.Clone(-1).WithCtx(ctx, additionalFields...)
+	return _global.Clone(-1).WithCtx(ctx, additionalFields...)
 }
 
 func WithField(fields ...field.Field) Logger {
-	return global.Clone(-1).WithField(fields...)
+	return _global.Clone(-1).WithField(fields...)
 }
 
 // Info uses fmt.Sprint to construct and log a message.
 func Info(args ...interface{}) {
-	global.Info(args...)
+	_global.Info(args...)
 }
 
 // Infof uses fmt.Sprintf to log a template message.
 func Infof(msgFormat string, args ...interface{}) {
-	global.Infof(msgFormat, args...)
+	_global.Infof(msgFormat, args...)
 }
 
 // Debug uses fmt.Sprint to construct and log a message.
 func Debug(args ...interface{}) {
-	global.Debug(args...)
+	_global.Debug(args...)
 }
 
 // Debugf uses fmt.Sprintf to log a template message.
 func Debugf(msgFormat string, args ...interface{}) {
-	global.Debugf(msgFormat, args...)
+	_global.Debugf(msgFormat, args...)
 }
 
 // Warn uses fmt.Sprint to construct and log a message.
 func Warn(args ...interface{}) {
-	global.Warn(args...)
+	_global.Warn(args...)
 }
 
 // Warnf uses fmt.Sprintf to log a template message.
 func Warnf(msgFormat string, args ...interface{}) {
-	global.Warnf(msgFormat, args...)
+	_global.Warnf(msgFormat, args...)
 }
 
 // Error uses fmt.Sprint to construct and log a message.
 func Error(args ...interface{}) {
-	global.Error(args...)
+	_global.Error(args...)
 }
 
 // Errorf uses fmt.Sprintf to log a template message.
 func Errorf(msgFormat string, args ...interface{}) {
-	global.Errorf(msgFormat, args...)
+	_global.Errorf(msgFormat, args...)
 }
 
 // Fatal uses fmt.Sprint to construct and log a message, then calls os.Exit.
 func Fatal(args ...interface{}) {
-	global.Fatal(args...)
+	_global.Fatal(args...)
 }
 
 // Fatalf uses fmt.Sprintf to log a template message, then calls os.Exit.
 func Fatalf(msgFormat string, args ...interface{}) {
-	global.Fatalf(msgFormat, args...)
+	_global.Fatalf(msgFormat, args...)
 }
 
 // Panic uses fmt.Sprint to construct and log a message, then panics.
 func Panic(args ...interface{}) {
-	global.Panic(args...)
+	_global.Panic(args...)
 }
 
 // Panicf uses fmt.Sprintf to log a templated message, then panics.
 func Panicf(msgFormat string, args ...interface{}) {
-	global.Panicf(msgFormat, args...)
+	_global.Panicf(msgFormat, args...)
 }
