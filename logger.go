@@ -15,14 +15,7 @@ func LoggingOpt() fx.Option {
 	)
 }
 
-type NewLoggerOut struct {
-	fx.Out
-	Core log.Logger
-	Web  log.Logger `name:"web_logger"`
-}
-
-func NewZapLogger(props *log.Properties) (NewLoggerOut, error) {
-	out := NewLoggerOut{}
+func NewZapLogger(props *log.Properties) (log.Logger, error) {
 	// Create new logger instance
 	logger, err := log.NewZapLogger(&log.Options{
 		Development:      props.Development,
@@ -31,19 +24,16 @@ func NewZapLogger(props *log.Properties) (NewLoggerOut, error) {
 		ContextExtractor: webLog.ContextExtractor,
 	})
 	if err != nil {
-		return out, errors.WithMessage(err, "init logger failed")
+		return nil, errors.WithMessage(err, "init logger failed")
 	}
-	out.Core = logger
 	log.ReplaceGlobal(logger)
-	out.Web = logger.Clone(1)
-	webLog.ReplaceGlobal(out.Web)
-	return out, nil
+	webLog.ReplaceGlobal(logger.Clone(1))
+	return logger, nil
 }
 
 type RegisterLoggerIn struct {
 	fx.In
 	Core log.Logger
-	Web  log.Logger `name:"web_logger"`
 }
 
 func RegisterLogger(in RegisterLoggerIn) {
