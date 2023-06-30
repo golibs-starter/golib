@@ -38,8 +38,8 @@ func (l *ZapLogger) Clone(addedCallerSkip int, fields ...field.Field) *ZapLogger
 
 func (l *ZapLogger) WithCtx(ctx context.Context, additionalFields ...field.Field) Logger {
 	fields := additionalFields
-	if l.opts.ContextExtractor != nil {
-		fields = append(fields, l.opts.ContextExtractor(ctx)...)
+	if l.opts.ContextExtractors != nil && l.opts.ContextExtractors.IsExtractable() {
+		fields = append(fields, l.opts.ContextExtractors.Extract(ctx)...)
 	}
 	return l.Clone(0, fields...)
 }

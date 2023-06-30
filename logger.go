@@ -18,10 +18,12 @@ func LoggingOpt() fx.Option {
 func NewZapLogger(props *log.Properties) (log.Logger, error) {
 	// Create new logger instance
 	logger, err := log.NewZapLogger(&log.Options{
-		Development:      props.Development,
-		JsonOutputMode:   props.JsonOutputMode,
-		CallerSkip:       props.CallerSkip,
-		ContextExtractor: webLog.ContextExtractor,
+		Development:    props.Development,
+		JsonOutputMode: props.JsonOutputMode,
+		CallerSkip:     props.CallerSkip,
+		ContextExtractors: log.ContextExtractors{
+			webLog.ContextExtractor,
+		},
 	})
 	if err != nil {
 		return nil, errors.WithMessage(err, "init logger failed")
@@ -31,11 +33,6 @@ func NewZapLogger(props *log.Properties) (log.Logger, error) {
 	return logger, nil
 }
 
-type RegisterLoggerIn struct {
-	fx.In
-	Core log.Logger
-}
-
-func RegisterLogger(in RegisterLoggerIn) {
+func RegisterLogger(logger log.Logger) {
 	// This is dummy invoker to make sure logger are produced by fx
 }

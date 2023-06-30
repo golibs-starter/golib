@@ -1,10 +1,5 @@
 package log
 
-import (
-	"context"
-	"gitlab.com/golibs-starter/golib/log/field"
-)
-
 const (
 	OutputModeJson    = "json"
 	OutputModeConsole = "console"
@@ -33,7 +28,7 @@ type Options struct {
 
 	FieldKeyMap map[FiledKey]string
 
-	ContextExtractor func(ctx context.Context) []field.Field
+	ContextExtractors ContextExtractors
 }
 
 type OptionFunc func(opt *Options)
