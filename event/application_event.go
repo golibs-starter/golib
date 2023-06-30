@@ -37,15 +37,15 @@ type ApplicationEvent struct {
 	Timestamp      int64                  `json:"timestamp"`
 }
 
-func (a ApplicationEvent) Identifier() string {
+func (a *ApplicationEvent) Identifier() string {
 	return a.Id
 }
 
-func (a ApplicationEvent) Name() string {
+func (a *ApplicationEvent) Name() string {
 	return a.Event
 }
 
-func (a ApplicationEvent) Payload() interface{} {
+func (a *ApplicationEvent) Payload() interface{} {
 	return a.PayloadData
 }
 
@@ -60,11 +60,11 @@ func (a *ApplicationEvent) DeleteAdditionData(key string) {
 	delete(a.AdditionalData, key)
 }
 
-func (a ApplicationEvent) String() string {
+func (a *ApplicationEvent) String() string {
 	return a.ToString(a)
 }
 
-func (a ApplicationEvent) ToString(obj interface{}) string {
+func (a *ApplicationEvent) ToString(obj interface{}) string {
 	data, _ := json.Marshal(obj)
 	return string(data)
 }
