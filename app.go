@@ -34,23 +34,23 @@ type App struct {
 	handlers []func(next http.Handler) http.Handler
 }
 
-func (a App) Name() string {
+func (a *App) Name() string {
 	return a.props.Name
 }
 
-func (a App) Port() int {
+func (a *App) Port() int {
 	return a.props.Port
 }
 
-func (a App) Path() string {
+func (a *App) Path() string {
 	return a.props.Path
 }
 
-func (a App) Context() context.Context {
+func (a *App) Context() context.Context {
 	return a.context
 }
 
-func (a App) Handlers() []func(next http.Handler) http.Handler {
+func (a *App) Handlers() []func(next http.Handler) http.Handler {
 	return a.handlers
 }
 
