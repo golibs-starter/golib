@@ -1,6 +1,7 @@
 package event
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/google/uuid"
 	"gitlab.com/golibs-starter/golib/utils"
@@ -9,8 +10,10 @@ import (
 
 const DefaultEventSource = "not_used"
 
-func NewApplicationEvent(name string, options ...AppEventOpt) *ApplicationEvent {
-	e := ApplicationEvent{}
+func NewApplicationEvent(ctx context.Context, name string, options ...AppEventOpt) *ApplicationEvent {
+	e := ApplicationEvent{
+		Ctx: ctx,
+	}
 	for _, opt := range options {
 		opt(&e)
 	}
@@ -28,6 +31,7 @@ func NewApplicationEvent(name string, options ...AppEventOpt) *ApplicationEvent 
 }
 
 type ApplicationEvent struct {
+	Ctx            context.Context        `json:"-"`
 	Id             string                 `json:"id"`
 	Event          string                 `json:"event"`
 	Source         string                 `json:"source"`
@@ -35,6 +39,10 @@ type ApplicationEvent struct {
 	AdditionalData map[string]interface{} `json:"additional_data,omitempty"`
 	PayloadData    interface{}            `json:"payload"`
 	Timestamp      int64                  `json:"timestamp"`
+}
+
+func (a *ApplicationEvent) Context() context.Context {
+	return a.Ctx
 }
 
 func (a *ApplicationEvent) Identifier() string {

@@ -1,13 +1,17 @@
 package event
 
 import (
+	"context"
 	assert "github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestNewApplicationEvent_WhenNoOpts_ShouldInitCorrectly(t *testing.T) {
 	eventName := "TestEvent"
-	e := NewApplicationEvent(eventName)
+	ctx := context.Background()
+	e := NewApplicationEvent(ctx, eventName)
+	assert.Equal(t, ctx, e.Context())
+	assert.Equal(t, ctx, e.Ctx)
 	assert.Equal(t, eventName, e.Name())
 	assert.Equal(t, eventName, e.Event)
 	assert.NotEmpty(t, e.Id)
@@ -21,9 +25,12 @@ func TestNewApplicationEvent_WhenNoOpts_ShouldInitCorrectly(t *testing.T) {
 }
 
 func TestNewApplicationEvent_WhenHasOpts_ShouldInitCorrectly(t *testing.T) {
+	ctx := context.Background()
 	eventName := "TestEvent"
 	payload := map[string]string{"a": "a"}
-	e := NewApplicationEvent(eventName,
+	e := NewApplicationEvent(
+		ctx,
+		eventName,
 		WithId("test-id"),
 		WithServiceCode("test-service-code"),
 		WithSource("test-source"),
@@ -32,6 +39,8 @@ func TestNewApplicationEvent_WhenHasOpts_ShouldInitCorrectly(t *testing.T) {
 		}),
 		WithPayload(payload),
 	)
+	assert.Equal(t, ctx, e.Context())
+	assert.Equal(t, ctx, e.Ctx)
 	assert.Equal(t, eventName, e.Name())
 	assert.Equal(t, eventName, e.Event)
 	assert.Equal(t, "test-id", e.Identifier())
@@ -71,8 +80,11 @@ func TestApplicationEvent_ToString(t *testing.T) {
 }
 
 func TestApplicationEvent_WhenAddAdditionalData_ShouldAddCorrectly(t *testing.T) {
+	ctx := context.Background()
 	eventName := "TestEvent"
-	e := NewApplicationEvent(eventName,
+	e := NewApplicationEvent(
+		ctx,
+		eventName,
 		WithAdditionalData(map[string]interface{}{
 			"key1": "val1",
 		}),
@@ -88,8 +100,11 @@ func TestApplicationEvent_WhenAddAdditionalData_ShouldAddCorrectly(t *testing.T)
 }
 
 func TestApplicationEvent_WhenDeleteAdditionalData_ShouldDeleteCorrectly(t *testing.T) {
+	ctx := context.Background()
 	eventName := "TestEvent"
-	e := NewApplicationEvent(eventName,
+	e := NewApplicationEvent(
+		ctx,
+		eventName,
 		WithAdditionalData(map[string]interface{}{
 			"key1": "val1",
 			"key2": "val2",
