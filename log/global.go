@@ -11,10 +11,11 @@ var _global *ZapLogger
 var _globalLoggerLock = &sync.RWMutex{}
 
 func init() {
-	var err error
-	if _global, err = NewZapLogger(&Options{CallerSkip: 1, Development: true}); err != nil {
+	zapLogger, err := NewZapLogger(&Options{CallerSkip: 1, Development: true})
+	if err != nil {
 		panic(fmt.Errorf("init global logger error [%v]", err))
 	}
+	ReplaceGlobal(zapLogger)
 }
 
 // ReplaceGlobal Register a logger instance as global
