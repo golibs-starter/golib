@@ -3,6 +3,7 @@ package example
 import (
 	"context"
 	"gitlab.com/golibs-starter/golib/log"
+	"gitlab.com/golibs-starter/golib/log/field"
 	"gitlab.com/golibs-starter/golib/pubsub"
 	"gitlab.com/golibs-starter/golib/web/client"
 )
@@ -32,6 +33,9 @@ func (s SampleService) DoSomething(ctx context.Context) error {
 		log.WithCtx(ctx).WithErrors(err).Error("Http client call failed")
 		return err
 	}
+
+	log.WithCtx(ctx).WithField(field.String("field1", "value1")).
+		Infof("This is a log with extra fields and message format: %s", "example-value")
 
 	// Even pass the context to an event
 	pubsub.Publish(NewSampleEvent(ctx, &SampleEventMessage{
