@@ -33,7 +33,10 @@ func NewZapLogger(in ZapLoggerIn) (log.Logger, error) {
 	// Create new logger instance
 	logger, err := log.NewZapLogger(&log.Options{
 		Development:       in.Props.Development,
+		LogLevel:          in.Props.LogLevel,
 		JsonOutputMode:    in.Props.JsonOutputMode,
+		DisableCaller:     in.Props.DisableCaller,
+		DisableStacktrace: in.Props.DisableStacktrace,
 		CallerSkip:        in.Props.CallerSkip,
 		ContextExtractors: in.ContextExtractors,
 	})
