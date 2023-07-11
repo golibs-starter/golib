@@ -38,6 +38,10 @@ func WithField(fields ...field.Field) Logger {
 	return _global.Clone(-1).WithField(fields...)
 }
 
+func WithError(err error) Logger {
+	return _global.Clone(-1).WithError(err)
+}
+
 func WithErrors(errs ...error) Logger {
 	return _global.Clone(-1).WithErrors(errs...)
 }

@@ -10,20 +10,32 @@ import (
 func LoggingOpt() fx.Option {
 	return fx.Options(
 		ProvideProps(log.NewProperties),
+		RegisterLogContextExtractor(webLog.ContextExtractor),
 		fx.Provide(NewZapLogger),
 		fx.Invoke(RegisterLogger),
 	)
 }
 
-func NewZapLogger(props *log.Properties) (log.Logger, error) {
+func RegisterLogContextExtractor(extractor log.ContextExtractor) fx.Option {
+	return fx.Provide(fx.Annotated{
+		Group:  "log_context_extractor",
+		Target: func() log.ContextExtractor { return extractor },
+	})
+}
+
+type ZapLoggerIn struct {
+	fx.In
+	Props             *log.Properties
+	ContextExtractors []log.ContextExtractor `group:"log_context_extractor"`
+}
+
+func NewZapLogger(in ZapLoggerIn) (log.Logger, error) {
 	// Create new logger instance
 	logger, err := log.NewZapLogger(&log.Options{
-		Development:    props.Development,
-		JsonOutputMode: props.JsonOutputMode,
-		CallerSkip:     props.CallerSkip,
-		ContextExtractors: log.ContextExtractors{
-			webLog.ContextExtractor,
-		},
+		Development:       in.Props.Development,
+		JsonOutputMode:    in.Props.JsonOutputMode,
+		CallerSkip:        in.Props.CallerSkip,
+		ContextExtractors: in.ContextExtractors,
 	})
 	if err != nil {
 		return nil, errors.WithMessage(err, "init logger failed")

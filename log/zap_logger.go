@@ -48,6 +48,10 @@ func (l *ZapLogger) WithField(fields ...field.Field) Logger {
 	return l.Clone(0, fields...)
 }
 
+func (l *ZapLogger) WithError(err error) Logger {
+	return l.Clone(0, field.NamedError(l.opts.FieldKeyMap[FieldKeyErr], err))
+}
+
 func (l *ZapLogger) WithErrors(errs ...error) Logger {
 	return l.Clone(0, field.Errors(l.opts.FieldKeyMap[FieldKeyErr], errs))
 }
