@@ -35,7 +35,15 @@ func (s SampleService) DoSomething(ctx context.Context) error {
 	}
 
 	log.WithCtx(ctx).WithField(field.String("field1", "value1")).
-		Infof("This is a log with extra fields and message format: %s", "example-value")
+		Infof("This is a log with single field and message format: %s", "example-value")
+
+	log.WithCtx(ctx).WithField(
+		field.String("field1", "value1"),
+		field.Any("field2", []string{"value1", "value2"}),
+	).Info("This is log with multiple fields")
+
+	log.WithCtx(ctx).WithAny("field1", "value1").
+		Info("This is log with simple key value field")
 
 	// Even pass the context to an event
 	pubsub.Publish(NewSampleEvent(ctx, &SampleEventMessage{

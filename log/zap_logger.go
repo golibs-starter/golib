@@ -45,13 +45,15 @@ func (l *ZapLogger) WithCtx(ctx context.Context, additionalFields ...field.Field
 }
 
 func (l *ZapLogger) WithField(fields ...field.Field) Logger {
-	cp := l.Clone(0, fields...)
-	return cp
+	return l.Clone(0, fields...)
 }
 
 func (l *ZapLogger) WithErrors(errs ...error) Logger {
-	cp := l.Clone(0, field.Errors(l.opts.FieldKeyMap[FieldKeyErr], errs))
-	return cp
+	return l.Clone(0, field.Errors(l.opts.FieldKeyMap[FieldKeyErr], errs))
+}
+
+func (l *ZapLogger) WithAny(key string, value interface{}) Logger {
+	return l.Clone(0, field.Any(key, value))
 }
 
 func (l *ZapLogger) prepareArgs(args ...interface{}) (StdLogger, []interface{}) {

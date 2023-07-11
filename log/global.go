@@ -42,6 +42,10 @@ func WithErrors(errs ...error) Logger {
 	return _global.Clone(-1).WithErrors(errs...)
 }
 
+func WithAny(key string, value interface{}) Logger {
+	return _global.Clone(-1).WithAny(key, value)
+}
+
 // Info uses fmt.Sprint to construct and log a message.
 func Info(args ...interface{}) {
 	_global.Info(args...)
