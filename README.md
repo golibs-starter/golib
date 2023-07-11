@@ -66,6 +66,7 @@ app:
     logging:
         development: false # Enable or disable development mode. Default `false`
         jsonOutputMode: true # Enable or disable json output. Default `true`
+        logLevel: INFO # LogLevel is the minimum enabled logging level.
 
     # Configuration available for EventOpt()
     event:
