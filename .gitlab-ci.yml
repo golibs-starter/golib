@@ -3,7 +3,7 @@ stages:
 
 test:
   stage: verify
-  image: golang:1.14-alpine
+  image: golang:1.18-alpine
   except:
     refs:
       - tags
