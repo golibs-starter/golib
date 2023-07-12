@@ -1,6 +1,7 @@
 package response
 
 import (
+	"github.com/pkg/errors"
 	"gitlab.com/golibs-starter/golib/exception"
 	"net/http"
 )
@@ -31,7 +32,8 @@ func Created(data interface{}) Response {
 func Error(err error) Response {
 	code := http.StatusInternalServerError
 	message := "Internal Server Error"
-	if e, ok := err.(exception.Exception); ok {
+	switch e := errors.Cause(err).(type) {
+	case exception.Exception:
 		code = int(e.Code())
 		message = e.Message()
 	}
