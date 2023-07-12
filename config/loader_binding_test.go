@@ -92,12 +92,12 @@ func TestLoaderBinding_GivenInlineParent_ShouldReturnWithCorrectValue(t *testing
 	assert.Equal(t, "red", props.Products[0].Variants[0].Color)
 	assert.Equal(t, "64gb", props.Products[0].Variants[0].Storage)
 	assert.Len(t, props.Products[0].Variants[0].Images, 2)
-	assert.Equal(t, "120", props.Products[0].Variants[0].Images["Sm"].Size)
-	assert.Equal(t, int64(120), props.Products[0].Variants[0].Images["Sm"].Width)
-	assert.Equal(t, int64(80), props.Products[0].Variants[0].Images["Sm"].Height)
-	assert.Equal(t, "800", props.Products[0].Variants[0].Images["Xl"].Size)
-	assert.Equal(t, int64(800), props.Products[0].Variants[0].Images["Xl"].Width)
-	assert.Equal(t, int64(600), props.Products[0].Variants[0].Images["Xl"].Height)
+	assert.Equal(t, "120", props.Products[0].Variants[0].Images["sm"].Size)
+	assert.Equal(t, int64(120), props.Products[0].Variants[0].Images["sm"].Width)
+	assert.Equal(t, int64(80), props.Products[0].Variants[0].Images["sm"].Height)
+	assert.Equal(t, "800", props.Products[0].Variants[0].Images["xl"].Size)
+	assert.Equal(t, int64(800), props.Products[0].Variants[0].Images["xl"].Width)
+	assert.Equal(t, int64(600), props.Products[0].Variants[0].Images["xl"].Height)
 }
 
 func TestLoaderBinding_GivenInlineKeyOverrideNestedKey_ShouldReturnWithCorrectValue(t *testing.T) {
@@ -144,12 +144,12 @@ func TestLoaderBinding_GivenNestedKeyOverrideInlineKey_ShouldReturnWithCorrectVa
 	assert.Equal(t, "red", props.Products[0].Variants[0].Color)
 	assert.Equal(t, "64gb", props.Products[0].Variants[0].Storage)
 	assert.Len(t, props.Products[0].Variants[0].Images, 2)
-	assert.Equal(t, "120", props.Products[0].Variants[0].Images["Sm"].Size)
-	assert.Equal(t, int64(120), props.Products[0].Variants[0].Images["Sm"].Width)
-	assert.Equal(t, int64(80), props.Products[0].Variants[0].Images["Sm"].Height)
-	assert.Equal(t, "800", props.Products[0].Variants[0].Images["Xl"].Size)
-	assert.Equal(t, int64(800), props.Products[0].Variants[0].Images["Xl"].Width)
-	assert.Equal(t, int64(600), props.Products[0].Variants[0].Images["Xl"].Height)
+	assert.Equal(t, "120", props.Products[0].Variants[0].Images["sm"].Size)
+	assert.Equal(t, int64(120), props.Products[0].Variants[0].Images["sm"].Width)
+	assert.Equal(t, int64(80), props.Products[0].Variants[0].Images["sm"].Height)
+	assert.Equal(t, "800", props.Products[0].Variants[0].Images["xl"].Size)
+	assert.Equal(t, int64(800), props.Products[0].Variants[0].Images["xl"].Width)
+	assert.Equal(t, int64(600), props.Products[0].Variants[0].Images["xl"].Height)
 }
 
 func TestLoaderBinding_WhenEnvHasBeenSet_ShouldReturnWithCorrectValue(t *testing.T) {
@@ -241,14 +241,14 @@ func TestLoaderBinding_WhenDefaultHasBeenSet_ShouldReturnWithCorrectDefaultValue
 	assert.Equal(t, "red", props.Products[0].Variants[0].Color)
 	assert.Equal(t, "64gb", props.Products[0].Variants[0].Storage)
 	assert.Len(t, props.Products[0].Variants[0].Images, 2)
-	assert.EqualValues(t, 120, props.Products[0].Variants[0].Images["Normal"].Width)
-	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["Normal"].Height)
-	assert.Equal(t, "", props.Products[0].Variants[0].Images["Normal"].Size)
-	assert.True(t, props.Products[0].Variants[0].Images["Normal"].IsDefault)
-	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["Thumb"].Width)
-	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["Thumb"].Height)
-	assert.Equal(t, "thumb", props.Products[0].Variants[0].Images["Thumb"].Size)
-	assert.False(t, props.Products[0].Variants[0].Images["Thumb"].IsDefault)
+	assert.EqualValues(t, 120, props.Products[0].Variants[0].Images["normal"].Width)
+	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["normal"].Height)
+	assert.Equal(t, "", props.Products[0].Variants[0].Images["normal"].Size)
+	assert.True(t, props.Products[0].Variants[0].Images["normal"].IsDefault)
+	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["thumb"].Width)
+	assert.EqualValues(t, 80, props.Products[0].Variants[0].Images["thumb"].Height)
+	assert.Equal(t, "thumb", props.Products[0].Variants[0].Images["thumb"].Size)
+	assert.False(t, props.Products[0].Variants[0].Images["thumb"].IsDefault)
 }
 
 func TestLoaderBinding_WhenConfigWithPlaceholderValue_AndEnvHasBeenSet_ShouldReturnWithValueInEnv(t *testing.T) {
