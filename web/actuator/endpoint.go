@@ -28,7 +28,7 @@ func (c Endpoint) InfoService() actuator.InfoService {
 
 func (c Endpoint) Health(w http.ResponseWriter, r *http.Request) {
 	health := c.healthService.Check(r.Context())
-	var res response.Response
+	var res response.Response[actuator.Health]
 	if health.Status == actuator.StatusDown {
 		res = response.New(http.StatusServiceUnavailable, "Server is down", health)
 	} else {

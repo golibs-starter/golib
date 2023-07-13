@@ -1,9 +1,8 @@
 package event
 
 import (
-	"encoding/json"
 	"github.com/google/uuid"
-	"gitlab.com/golibs-starter/golib/utils"
+	"github.com/json-iterator/go"
 	"time"
 )
 
@@ -23,7 +22,7 @@ func NewApplicationEvent(name string, options ...AppEventOpt) *ApplicationEvent 
 		e.Source = DefaultEventSource
 	}
 	e.Event = name
-	e.Timestamp = utils.Time2Ms(time.Now())
+	e.Timestamp = time.Now().UnixMilli()
 	return &e
 }
 
@@ -37,15 +36,15 @@ type ApplicationEvent struct {
 	Timestamp      int64                  `json:"timestamp"`
 }
 
-func (a ApplicationEvent) Identifier() string {
+func (a *ApplicationEvent) Identifier() string {
 	return a.Id
 }
 
-func (a ApplicationEvent) Name() string {
+func (a *ApplicationEvent) Name() string {
 	return a.Event
 }
 
-func (a ApplicationEvent) Payload() interface{} {
+func (a *ApplicationEvent) Payload() interface{} {
 	return a.PayloadData
 }
 
@@ -60,11 +59,11 @@ func (a *ApplicationEvent) DeleteAdditionData(key string) {
 	delete(a.AdditionalData, key)
 }
 
-func (a ApplicationEvent) String() string {
+func (a *ApplicationEvent) String() string {
 	return a.ToString(a)
 }
 
-func (a ApplicationEvent) ToString(obj interface{}) string {
-	data, _ := json.Marshal(obj)
+func (a *ApplicationEvent) ToString(obj interface{}) string {
+	data, _ := jsoniter.Marshal(obj)
 	return string(data)
 }

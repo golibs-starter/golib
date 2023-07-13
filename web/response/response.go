@@ -6,13 +6,13 @@ import (
 	"net/http"
 )
 
-type Response struct {
+type Response[T any] struct {
 	Meta Meta        `json:"meta,omitempty"`
 	Data interface{} `json:"data,omitempty"`
 }
 
-func New(code int, message string, data interface{}) Response {
-	return Response{
+func New[T any](code int, message string, data T) Response[T] {
+	return Response[T]{
 		Meta: Meta{
 			Code:    code,
 			Message: message,
@@ -21,15 +21,15 @@ func New(code int, message string, data interface{}) Response {
 	}
 }
 
-func Ok(data interface{}) Response {
+func Ok[T any](data T) Response[T] {
 	return New(http.StatusOK, "Successful", data)
 }
 
-func Created(data interface{}) Response {
+func Created[T any](data T) Response[T] {
 	return New(http.StatusCreated, "Resource created", data)
 }
 
-func Error(err error) Response {
+func Error(err error) Response[error] {
 	code := http.StatusInternalServerError
 	message := "Internal Server Error"
 	switch e := errors.Cause(err).(type) {
@@ -37,7 +37,7 @@ func Error(err error) Response {
 		code = int(e.Code())
 		message = e.Message()
 	}
-	return Response{
+	return Response[error]{
 		Meta: Meta{
 			Code:    code,
 			Message: message,

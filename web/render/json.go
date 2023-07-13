@@ -1,7 +1,7 @@
 package render
 
 import (
-	"encoding/json"
+	"github.com/json-iterator/go"
 	"net/http"
 )
 
@@ -26,9 +26,9 @@ func (r JSON) WriteContentType(w http.ResponseWriter) {
 }
 
 // WriteJSON marshals the given interface object and writes it with custom ContentType.
-func WriteJSON(w http.ResponseWriter, obj interface{}) error {
+func WriteJSON[T any](w http.ResponseWriter, obj T) error {
 	writeContentType(w, jsonContentType)
-	jsonBytes, err := json.Marshal(obj)
+	jsonBytes, err := jsoniter.Marshal(obj)
 	if err != nil {
 		return err
 	}

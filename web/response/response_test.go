@@ -12,12 +12,12 @@ func TestNew(t *testing.T) {
 	type args struct {
 		code    int
 		message string
-		data    interface{}
+		data    string
 	}
 	tests := []struct {
 		name string
 		args args
-		want Response
+		want Response[string]
 	}{
 		{
 			name: "Happy case",
@@ -26,7 +26,7 @@ func TestNew(t *testing.T) {
 				message: "Test message",
 				data:    "Test data",
 			},
-			want: Response{
+			want: Response[string]{
 				Meta: Meta{
 					Code:    100,
 					Message: "Test message",
@@ -52,12 +52,12 @@ func TestError(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want Response
+		want Response[error]
 	}{
 		{
 			name: "When error is native error should return 500",
 			args: args{err: errors.New("a native error")},
-			want: Response{
+			want: Response[error]{
 				Meta: Meta{
 					Code:    http.StatusInternalServerError,
 					Message: "Internal Server Error",
@@ -68,7 +68,7 @@ func TestError(t *testing.T) {
 		{
 			name: "When error is a exception should return with exception code",
 			args: args{err: resourceIdInvalid},
-			want: Response{
+			want: Response[error]{
 				Meta: Meta{
 					Code:    int(resourceIdInvalid.Code()),
 					Message: resourceIdInvalid.Error(),
@@ -79,7 +79,7 @@ func TestError(t *testing.T) {
 		{
 			name: "When error is a wrapped exception should return with exception code",
 			args: args{err: errors.Wrap(resourceIdInvalid, "failed to get resource")},
-			want: Response{
+			want: Response[error]{
 				Meta: Meta{
 					Code:    int(resourceIdInvalid.Code()),
 					Message: resourceIdInvalid.Error(),
@@ -90,7 +90,7 @@ func TestError(t *testing.T) {
 		{
 			name: "When error is a message-wrapped exception should return with exception code",
 			args: args{err: errors.WithMessage(resourceIdInvalid, "failed to get resource")},
-			want: Response{
+			want: Response[error]{
 				Meta: Meta{
 					Code:    int(resourceIdInvalid.Code()),
 					Message: resourceIdInvalid.Error(),

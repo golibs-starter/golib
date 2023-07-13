@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func Write(w http.ResponseWriter, res Response) {
+func Write[T any](w http.ResponseWriter, res Response[T]) {
 	render.Render(w, res.Meta.HttpStatus(), render.JSON{Data: res})
 }
 

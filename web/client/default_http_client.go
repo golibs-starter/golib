@@ -2,10 +2,9 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
+	"github.com/json-iterator/go"
 	"gitlab.com/golibs-starter/golib/log"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -63,13 +62,13 @@ func (d *DefaultHttpClient) Request(method string, url string, body interface{},
 	if NewHttpSeries(res.StatusCode).IsError() {
 		var buf bytes.Buffer
 		tee := io.TeeReader(response.Body, &buf)
-		str, _ := ioutil.ReadAll(tee)
+		str, _ := io.ReadAll(tee)
 		bodyWhenError = string(str)
-		response.Body = ioutil.NopCloser(bytes.NewBuffer(str))
+		response.Body = io.NopCloser(bytes.NewBuffer(str))
 	}
 
 	if result != nil {
-		if err := json.NewDecoder(response.Body).Decode(result); err != nil {
+		if err := jsoniter.NewDecoder(response.Body).Decode(result); err != nil {
 			log.Warnf("[HttpRequestDebug] Decode fail, detail: [%s]", bodyWhenError)
 			return res, err
 		}
@@ -111,7 +110,7 @@ func (d *DefaultHttpClient) makeRequest(method string, reqUrl string, body inter
 			break
 		default:
 			var buf = new(bytes.Buffer)
-			if err = json.NewEncoder(buf).Encode(body); err != nil {
+			if err = jsoniter.NewEncoder(buf).Encode(body); err != nil {
 				return nil, err
 			}
 			if request, err = http.NewRequest(method, reqUrl, buf); err != nil {
