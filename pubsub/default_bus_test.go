@@ -5,6 +5,7 @@ import (
 	assert "github.com/stretchr/testify/require"
 	"gitlab.com/golibs-starter/golib/pubsub/executor"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 )
@@ -45,23 +46,48 @@ func TestNewDefaultEventBus_WhenUseOpts_ShouldSetOptCorrectly(t *testing.T) {
 }
 
 type DummySubscriber1 struct {
-	eventRun        map[string]bool
-	orderedEventRun []string
+	eventRun          map[string]bool
+	eventRunMu        sync.RWMutex
+	orderedEventRun   []string
+	orderedEventRunMu sync.RWMutex
 }
 
-func (d DummySubscriber1) Supports(event Event) bool {
+func (d *DummySubscriber1) Supports(event Event) bool {
 	return true
 }
 
 func (d *DummySubscriber1) Handle(event Event) {
+	d.eventRunMu.Lock()
 	if d.eventRun == nil {
 		d.eventRun = make(map[string]bool)
 	}
+	d.eventRun[event.Name()] = true
+	d.eventRunMu.Unlock()
+
+	d.orderedEventRunMu.Lock()
 	if d.orderedEventRun == nil {
 		d.orderedEventRun = make([]string, 0)
 	}
-	d.eventRun[event.Name()] = true
 	d.orderedEventRun = append(d.orderedEventRun, event.Name())
+	d.orderedEventRunMu.Unlock()
+}
+
+func (d *DummySubscriber1) eventRan(eventName string) bool {
+	d.eventRunMu.RLock()
+	defer d.eventRunMu.RUnlock()
+	return d.eventRun[eventName]
+}
+
+func (d *DummySubscriber1) numberOfEventRan() int {
+	d.eventRunMu.RLock()
+	defer d.eventRunMu.RUnlock()
+	return len(d.eventRun)
+}
+
+func (d *DummySubscriber1) numberOfOrderedEventRun() int {
+	d.orderedEventRunMu.RLock()
+	defer d.orderedEventRunMu.RUnlock()
+	return len(d.orderedEventRun)
 }
 
 type DummySubscriber2 struct {
@@ -127,12 +153,12 @@ func TestDefaultEventBus_GivenAsyncExecutor_WhenDeliverEvent_ShouldRunCorrectly(
 	bus.Deliver(&DummyEvent{name: "event-3"})
 	bus.Deliver(&DummyEvent{name: "event-4"})
 	time.Sleep(100 * time.Millisecond)
-	assert.Len(t, s1.eventRun, 4)
-	assert.True(t, s1.eventRun["event-1"])
-	assert.True(t, s1.eventRun["event-2"])
-	assert.True(t, s1.eventRun["event-3"])
-	assert.True(t, s1.eventRun["event-4"])
-	assert.Len(t, s1.orderedEventRun, 4)
+	assert.Equal(t, 4, s1.numberOfEventRan())
+	assert.True(t, s1.eventRan("event-1"))
+	assert.True(t, s1.eventRan("event-2"))
+	assert.True(t, s1.eventRan("event-3"))
+	assert.True(t, s1.eventRan("event-4"))
+	assert.Equal(t, 4, s1.numberOfOrderedEventRun())
 	assert.Contains(t, s1.orderedEventRun, "event-1")
 	assert.Contains(t, s1.orderedEventRun, "event-2")
 	assert.Contains(t, s1.orderedEventRun, "event-3")
@@ -149,12 +175,12 @@ func TestDefaultEventBus_GivenSyncExecutor_WhenDeliverEvent_ShouldRunCorrectly(t
 	bus.Deliver(&DummyEvent{name: "event-3"})
 	bus.Deliver(&DummyEvent{name: "event-4"})
 	time.Sleep(100 * time.Millisecond)
-	assert.Len(t, s1.eventRun, 4)
-	assert.True(t, s1.eventRun["event-1"])
-	assert.True(t, s1.eventRun["event-2"])
-	assert.True(t, s1.eventRun["event-3"])
-	assert.True(t, s1.eventRun["event-4"])
-	assert.Len(t, s1.orderedEventRun, 4)
+	assert.Equal(t, 4, s1.numberOfEventRan())
+	assert.True(t, s1.eventRan("event-1"))
+	assert.True(t, s1.eventRan("event-2"))
+	assert.True(t, s1.eventRan("event-3"))
+	assert.True(t, s1.eventRan("event-4"))
+	assert.Equal(t, 4, s1.numberOfOrderedEventRun())
 	assert.Equal(t, "event-1", s1.orderedEventRun[0])
 	assert.Equal(t, "event-2", s1.orderedEventRun[1])
 	assert.Equal(t, "event-3", s1.orderedEventRun[2])

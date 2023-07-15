@@ -53,11 +53,11 @@ func TestDefaultPublisher_WhenPublishEvent_ShouldPublishCorrectly(t *testing.T) 
 
 	time.Sleep(100 * time.Millisecond)
 
-	assert.Len(t, s1.eventRun, 2)
-	assert.True(t, s1.eventRun["event-1"])
-	assert.True(t, s1.eventRun["event-2"])
+	assert.Equal(t, 2, s1.numberOfEventRan())
+	assert.True(t, s1.eventRan("event-1"))
+	assert.True(t, s1.eventRan("event-2"))
 
-	assert.Len(t, s1.orderedEventRun, 2)
+	assert.Equal(t, 2, s1.numberOfOrderedEventRun())
 	assert.Contains(t, s1.orderedEventRun, "event-1")
 	assert.Contains(t, s1.orderedEventRun, "event-2")
 
