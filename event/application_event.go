@@ -1,6 +1,7 @@
 package event
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/google/uuid"
 	"gitlab.com/golibs-starter/golib/utils"
@@ -9,8 +10,10 @@ import (
 
 const DefaultEventSource = "not_used"
 
-func NewApplicationEvent(name string, options ...AppEventOpt) *ApplicationEvent {
-	e := ApplicationEvent{}
+func NewApplicationEvent(ctx context.Context, name string, options ...AppEventOpt) *ApplicationEvent {
+	e := ApplicationEvent{
+		Ctx: ctx,
+	}
 	for _, opt := range options {
 		opt(&e)
 	}
@@ -28,6 +31,7 @@ func NewApplicationEvent(name string, options ...AppEventOpt) *ApplicationEvent 
 }
 
 type ApplicationEvent struct {
+	Ctx            context.Context        `json:"-"`
 	Id             string                 `json:"id"`
 	Event          string                 `json:"event"`
 	Source         string                 `json:"source"`
@@ -37,15 +41,19 @@ type ApplicationEvent struct {
 	Timestamp      int64                  `json:"timestamp"`
 }
 
-func (a ApplicationEvent) Identifier() string {
+func (a *ApplicationEvent) Context() context.Context {
+	return a.Ctx
+}
+
+func (a *ApplicationEvent) Identifier() string {
 	return a.Id
 }
 
-func (a ApplicationEvent) Name() string {
+func (a *ApplicationEvent) Name() string {
 	return a.Event
 }
 
-func (a ApplicationEvent) Payload() interface{} {
+func (a *ApplicationEvent) Payload() interface{} {
 	return a.PayloadData
 }
 
@@ -60,11 +68,11 @@ func (a *ApplicationEvent) DeleteAdditionData(key string) {
 	delete(a.AdditionalData, key)
 }
 
-func (a ApplicationEvent) String() string {
+func (a *ApplicationEvent) String() string {
 	return a.ToString(a)
 }
 
-func (a ApplicationEvent) ToString(obj interface{}) string {
+func (a *ApplicationEvent) ToString(obj interface{}) string {
 	data, _ := json.Marshal(obj)
 	return string(data)
 }

@@ -118,3 +118,21 @@ func TestNewAbstractEvent_GivenANameAndCustomAdditionalData_ShouldMergeAdditiona
 		"key1":                         "val1",
 	}, e.AdditionalData)
 }
+
+func TestAbstractEvent_ToString(t *testing.T) {
+	e1 := AbstractEvent{
+		ApplicationEvent: &event.ApplicationEvent{
+			Id:             "1",
+			Event:          "TEST",
+			Source:         "NOT_USED",
+			ServiceCode:    "service-test",
+			AdditionalData: map[string]interface{}{"a": "b"},
+			PayloadData:    map[string]string{"x": "y"},
+			Timestamp:      10,
+		},
+		RequestId:         "test-request-id-1",
+		UserId:            "test-user-id-1",
+		TechnicalUsername: "test-technical-username-1",
+	}
+	assert.Equal(t, `{"id":"1","event":"TEST","source":"NOT_USED","service_code":"service-test","additional_data":{"a":"b"},"payload":{"x":"y"},"timestamp":10,"request_id":"test-request-id-1","user_id":"test-user-id-1","technical_username":"test-technical-username-1"}`, e1.String())
+}

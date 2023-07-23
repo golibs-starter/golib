@@ -19,11 +19,11 @@ type HttpRequestLogProperties struct {
 	allDisabledUrls        []*UrlMatching
 }
 
-func (h HttpRequestLogProperties) AllDisabledUrls() []*UrlMatching {
+func (h *HttpRequestLogProperties) AllDisabledUrls() []*UrlMatching {
 	return h.allDisabledUrls
 }
 
-func (h HttpRequestLogProperties) Prefix() string {
+func (h *HttpRequestLogProperties) Prefix() string {
 	return "app.httpRequest.logging"
 }
 

@@ -1,6 +1,7 @@
 package pubsub
 
 import (
+	"context"
 	"gitlab.com/golibs-starter/golib/pubsub/executor"
 	"gitlab.com/golibs-starter/golib/utils"
 	"sync"
@@ -43,11 +44,11 @@ func (b *DefaultEventBus) Register(subscribers ...Subscriber) {
 	for _, subscriber := range subscribers {
 		subscriberId := utils.GetStructFullname(subscriber)
 		if _, exists := b.subscribers[subscriberId]; exists {
-			b.debugLog(nil, "Subscriber [%s] already registered", subscriberId)
+			b.debugLog(context.Background(), "Subscriber [%s] already registered", subscriberId)
 			continue
 		}
 		b.subscribers[subscriberId] = subscriber
-		b.debugLog(nil, "Register subscriber [%s] successful", subscriberId)
+		b.debugLog(context.Background(), "Register subscriber [%s] successful", subscriberId)
 	}
 }
 
@@ -56,7 +57,7 @@ func (b *DefaultEventBus) Deliver(event Event) {
 }
 
 func (b *DefaultEventBus) Run() {
-	b.debugLog(nil, "Default event bus is starting")
+	b.debugLog(context.Background(), "Default event bus is starting")
 	b.wg.Add(1)
 	go func() {
 		defer b.wg.Done()
@@ -80,11 +81,11 @@ func (b *DefaultEventBus) Run() {
 			}
 		}
 	}()
-	b.debugLog(nil, "Default event bus is started")
+	b.debugLog(context.Background(), "Default event bus is started")
 }
 
 func (b *DefaultEventBus) Stop() {
-	b.debugLog(nil, "Default event bus is stopping")
+	b.debugLog(context.Background(), "Default event bus is stopping")
 	b.wg.Add(1)
 	go func() {
 		defer b.wg.Done()
@@ -96,5 +97,5 @@ func (b *DefaultEventBus) Stop() {
 		}
 	}()
 	b.wg.Wait()
-	b.debugLog(nil, "Default event bus is stopped")
+	b.debugLog(context.Background(), "Default event bus is stopped")
 }

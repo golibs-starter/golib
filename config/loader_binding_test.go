@@ -430,20 +430,3 @@ func TestLoaderBinding_WhenConfigWithMapAndOverrideByEnv_ShouldReturnCorrect(t *
 	assert.Equal(t, "jam@example.com", props.Staffs["support"].Email)
 	assert.Equal(t, false, props.Staffs["support"].Enabled)
 }
-
-// TODO Should improve it, currently we make lowercase for all map keys.
-//func TestLoaderBinding_WhenConfigWithMap_ShouldReturnCorrect(t *testing.T) {
-//	loader, err := NewLoader(Option{
-//		ActiveProfiles: []string{"test_map_key"},
-//		ConfigPaths:    []string{"./test_assets"},
-//		ConfigFormat:   "yml",
-//	}, []Properties{new(testStore)})
-//	assert.NoError(t, err)
-//
-//	props := testStore{}
-//	err = loader.Bind(&props)
-//	assert.NoError(t, err)
-//	assert.Equal(t, "Apple", props.Name)
-//	assert.Len(t, props.Staffs, 2)
-//	assert.Equal(t, "Sam", props.Staffs["Manager"].Name)
-//}
