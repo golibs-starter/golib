@@ -1,6 +1,7 @@
 package response
 
 import (
+	coreErrors "errors"
 	"github.com/pkg/errors"
 	"gitlab.com/golibs-starter/golib/exception"
 	"net/http"
@@ -90,6 +91,17 @@ func TestError(t *testing.T) {
 		{
 			name: "When error is a message-wrapped exception should return with exception code",
 			args: args{err: errors.WithMessage(resourceIdInvalid, "failed to get resource")},
+			want: Response{
+				Meta: Meta{
+					Code:    int(resourceIdInvalid.Code()),
+					Message: resourceIdInvalid.Error(),
+				},
+				Data: nil,
+			},
+		},
+		{
+			name: "When error is a joined error should return with exception code",
+			args: args{err: coreErrors.Join(resourceIdInvalid, errors.New("failed to get resource"))},
 			want: Response{
 				Meta: Meta{
 					Code:    int(resourceIdInvalid.Code()),
