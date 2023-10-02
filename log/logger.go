@@ -7,6 +7,7 @@ import (
 
 type Logger interface {
 	StdLogger
+	ContextualLogger
 
 	WithCtx(ctx context.Context, additionalFields ...field.Field) Logger
 	WithField(fields ...field.Field) Logger

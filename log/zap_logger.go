@@ -69,13 +69,8 @@ func (l *ZapLogger) prepareArgs(args ...interface{}) (StdLogger, []interface{}) 
 	return l.sugar, args
 }
 
-func (l *ZapLogger) Info(args ...interface{}) {
-	stdLogger, args := l.prepareArgs(args...)
-	stdLogger.Info(args...)
-}
-
-func (l *ZapLogger) Infof(template string, args ...interface{}) {
-	l.sugar.Infof(template, args...)
+func (l *ZapLogger) prepareCtx(ctx context.Context) StdLogger {
+	return l.Clone(1).WithCtx(ctx)
 }
 
 func (l *ZapLogger) Debug(args ...interface{}) {
@@ -87,6 +82,23 @@ func (l *ZapLogger) Debugf(template string, args ...interface{}) {
 	l.sugar.Debugf(template, args...)
 }
 
+func (l *ZapLogger) Debugc(ctx context.Context, template string, args ...interface{}) {
+	l.prepareCtx(ctx).Debugf(template, args...)
+}
+
+func (l *ZapLogger) Info(args ...interface{}) {
+	stdLogger, args := l.prepareArgs(args...)
+	stdLogger.Info(args...)
+}
+
+func (l *ZapLogger) Infof(template string, args ...interface{}) {
+	l.sugar.Infof(template, args...)
+}
+
+func (l *ZapLogger) Infoc(ctx context.Context, template string, args ...interface{}) {
+	l.prepareCtx(ctx).Infof(template, args...)
+}
+
 func (l *ZapLogger) Warn(args ...interface{}) {
 	stdLogger, args := l.prepareArgs(args...)
 	stdLogger.Warn(args...)
@@ -94,6 +106,10 @@ func (l *ZapLogger) Warn(args ...interface{}) {
 
 func (l *ZapLogger) Warnf(template string, args ...interface{}) {
 	l.sugar.Warnf(template, args...)
+}
+
+func (l *ZapLogger) Warnc(ctx context.Context, template string, args ...interface{}) {
+	l.prepareCtx(ctx).Warnf(template, args...)
 }
 
 func (l *ZapLogger) Error(args ...interface{}) {
@@ -105,6 +121,10 @@ func (l *ZapLogger) Errorf(template string, args ...interface{}) {
 	l.sugar.Errorf(template, args...)
 }
 
+func (l *ZapLogger) Errorc(ctx context.Context, template string, args ...interface{}) {
+	l.prepareCtx(ctx).Errorf(template, args...)
+}
+
 func (l *ZapLogger) Fatal(args ...interface{}) {
 	stdLogger, args := l.prepareArgs(args...)
 	stdLogger.Fatal(args...)
@@ -114,6 +134,10 @@ func (l *ZapLogger) Fatalf(template string, args ...interface{}) {
 	l.sugar.Fatalf(template, args...)
 }
 
+func (l *ZapLogger) Fatalc(ctx context.Context, template string, args ...interface{}) {
+	l.prepareCtx(ctx).Fatalf(template, args...)
+}
+
 func (l *ZapLogger) Panic(args ...interface{}) {
 	stdLogger, args := l.prepareArgs(args...)
 	stdLogger.Panic(args...)
@@ -121,4 +145,8 @@ func (l *ZapLogger) Panic(args ...interface{}) {
 
 func (l *ZapLogger) Panicf(template string, args ...interface{}) {
 	l.sugar.Panicf(template, args...)
+}
+
+func (l *ZapLogger) Panicc(ctx context.Context, template string, args ...interface{}) {
+	l.prepareCtx(ctx).Panicf(template, args...)
 }

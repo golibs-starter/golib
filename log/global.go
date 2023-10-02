@@ -50,6 +50,21 @@ func WithAny(key string, value interface{}) Logger {
 	return _global.Clone(-1).WithAny(key, value)
 }
 
+// Debug uses fmt.Sprint to construct and log a message.
+func Debug(args ...interface{}) {
+	_global.Debug(args...)
+}
+
+// Debugf uses fmt.Sprintf to log a template message.
+func Debugf(format string, args ...interface{}) {
+	_global.Debugf(format, args...)
+}
+
+// Debugc use WithCtx and fmt.Sprintf to log a template message.
+func Debugc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Debugc(ctx, msgFormat, args...)
+}
+
 // Info uses fmt.Sprint to construct and log a message.
 func Info(args ...interface{}) {
 	_global.Info(args...)
@@ -60,14 +75,9 @@ func Infof(msgFormat string, args ...interface{}) {
 	_global.Infof(msgFormat, args...)
 }
 
-// Debug uses fmt.Sprint to construct and log a message.
-func Debug(args ...interface{}) {
-	_global.Debug(args...)
-}
-
-// Debugf uses fmt.Sprintf to log a template message.
-func Debugf(msgFormat string, args ...interface{}) {
-	_global.Debugf(msgFormat, args...)
+// Infoc use WithCtx and fmt.Sprintf to log a template message.
+func Infoc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Infoc(ctx, msgFormat, args...)
 }
 
 // Warn uses fmt.Sprint to construct and log a message.
@@ -80,6 +90,11 @@ func Warnf(msgFormat string, args ...interface{}) {
 	_global.Warnf(msgFormat, args...)
 }
 
+// Warnc use WithCtx and fmt.Sprintf to log a template message.
+func Warnc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Warnc(ctx, msgFormat, args...)
+}
+
 // Error uses fmt.Sprint to construct and log a message.
 func Error(args ...interface{}) {
 	_global.Error(args...)
@@ -88,6 +103,11 @@ func Error(args ...interface{}) {
 // Errorf uses fmt.Sprintf to log a template message.
 func Errorf(msgFormat string, args ...interface{}) {
 	_global.Errorf(msgFormat, args...)
+}
+
+// Errorc use WithCtx and fmt.Sprintf to log a template message.
+func Errorc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Errorc(ctx, msgFormat, args...)
 }
 
 // Fatal uses fmt.Sprint to construct and log a message, then calls os.Exit.
@@ -100,6 +120,11 @@ func Fatalf(msgFormat string, args ...interface{}) {
 	_global.Fatalf(msgFormat, args...)
 }
 
+// Fatalc use WithCtx and fmt.Sprintf to log a template message.
+func Fatalc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Fatalc(ctx, msgFormat, args...)
+}
+
 // Panic uses fmt.Sprint to construct and log a message, then panics.
 func Panic(args ...interface{}) {
 	_global.Panic(args...)
@@ -108,4 +133,9 @@ func Panic(args ...interface{}) {
 // Panicf uses fmt.Sprintf to log a templated message, then panics.
 func Panicf(msgFormat string, args ...interface{}) {
 	_global.Panicf(msgFormat, args...)
+}
+
+// Panicc use WithCtx and fmt.Sprintf to log a template message.
+func Panicc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Panicc(ctx, msgFormat, args...)
 }
