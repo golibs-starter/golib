@@ -292,6 +292,12 @@ func Object(key string, val ObjectMarshaler) Field {
 	return zap.Object(key, val)
 }
 
+// Dict constructs a field containing the provided key-value pairs.
+// It acts similar to [Object], but with the fields specified as arguments.
+func Dict(key string, val ...Field) Field {
+	return zap.Dict(key, val...)
+}
+
 // Inline constructs a Field that is similar to Object, but it
 // will add the elements of the provided ObjectMarshaler to the
 // current namespace.
