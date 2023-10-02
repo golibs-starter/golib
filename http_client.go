@@ -1,9 +1,9 @@
 package golib
 
 import (
+	"github.com/golibs-starter/golib/config"
+	"github.com/golibs-starter/golib/web/client"
 	"github.com/pkg/errors"
-	"gitlab.com/golibs-starter/golib/config"
-	"gitlab.com/golibs-starter/golib/web/client"
 	"go.uber.org/fx"
 )
 
@@ -30,7 +30,7 @@ type ContextualHttpClientIn struct {
 // Alternatively you can wrap the default client.ContextualHttpClient with
 // one or more other client.ContextualHttpClient to customize the behavior.
 // To do that, your provider have to return ContextualHttpClientWrapper.
-// For example https://gitlab.com/golibs-starter/golib-security/-/blob/develop/httpclient.go
+// For example https://github.com/golibs-starter/golib-security/-/blob/develop/httpclient.go
 func NewContextualHttpClient(in ContextualHttpClientIn) (client.ContextualHttpClient, error) {
 	// Wrap around by TraceableHttpClient by default
 	var httpClient = client.NewTraceableHttpClient(in.HttpClient, in.AppProperties)

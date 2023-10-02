@@ -1,6 +1,7 @@
 package pubsub
 
 import (
+	"context"
 	assert "github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
@@ -16,7 +17,7 @@ func TestNewDefaultPublisher_WhenNoOpts_ShouldUseDefaultValue(t *testing.T) {
 }
 
 func TestNewDefaultPublisher_WhenUseOpts_ShouldSetOptCorrectly(t *testing.T) {
-	var logger DebugLog = func(e Event, msgFormat string, args ...interface{}) {
+	var logger DebugLog = func(ctx context.Context, msgFormat string, args ...interface{}) {
 	}
 	var eventNotLogPayloads = []string{"event-test"}
 	bus := NewDefaultEventBus()
@@ -32,8 +33,9 @@ func TestNewDefaultPublisher_WhenUseOpts_ShouldSetOptCorrectly(t *testing.T) {
 
 func TestDefaultPublisher_WhenPublishEvent_ShouldPublishCorrectly(t *testing.T) {
 	logMsgs := make(map[string]string)
-	var logger DebugLog = func(e Event, msgFormat string, args ...interface{}) {
-		logMsgs[e.Name()] = msgFormat
+	var logger DebugLog = func(ctx context.Context, msgFormat string, args ...interface{}) {
+		event := ctx.Value("event").(string)
+		logMsgs[event] = msgFormat
 	}
 
 	bus := NewDefaultEventBus()
@@ -41,20 +43,21 @@ func TestDefaultPublisher_WhenPublishEvent_ShouldPublishCorrectly(t *testing.T) 
 	bus.Register(&s1)
 	bus.Run()
 
-	pub := NewDefaultPublisher(bus,
+	pub := NewDefaultPublisher(
+		bus,
 		WithPublisherDebugLog(logger),
 		WithPublisherNotLogPayload([]string{"event-2"}),
 	)
-	pub.Publish(&DummyEvent{name: "event-1"})
-	pub.Publish(&DummyEvent{name: "event-2"})
+	pub.Publish(&DummyEvent{name: "event-1", ctx: context.WithValue(context.Background(), "event", "event-1")})
+	pub.Publish(&DummyEvent{name: "event-2", ctx: context.WithValue(context.Background(), "event", "event-2")})
 
 	time.Sleep(100 * time.Millisecond)
 
-	assert.Len(t, s1.eventRun, 2)
-	assert.True(t, s1.eventRun["event-1"])
-	assert.True(t, s1.eventRun["event-2"])
+	assert.Equal(t, 2, s1.numberOfEventRan())
+	assert.True(t, s1.eventRan("event-1"))
+	assert.True(t, s1.eventRan("event-2"))
 
-	assert.Len(t, s1.orderedEventRun, 2)
+	assert.Equal(t, 2, s1.numberOfOrderedEventRun())
 	assert.Contains(t, s1.orderedEventRun, "event-1")
 	assert.Contains(t, s1.orderedEventRun, "event-2")
 

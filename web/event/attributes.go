@@ -2,8 +2,7 @@ package event
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/web/constant"
+	"github.com/golibs-starter/golib/web/constant"
 )
 
 type Attributes struct {
@@ -14,20 +13,16 @@ type Attributes struct {
 	TechnicalUsername string `json:"technical_username,omitempty"`
 }
 
-func MakeAttributes(e pubsub.Event) *Attributes {
-	if we, ok := e.(AbstractEventWrapper); ok {
-		absEvent := we.GetAbstractEvent()
-		deviceId, _ := absEvent.AdditionalData[constant.HeaderDeviceId].(string)
-		deviceSessionId, _ := absEvent.AdditionalData[constant.HeaderDeviceSessionId].(string)
-		return &Attributes{
-			CorrelationId:     absEvent.RequestId,
-			UserId:            absEvent.UserId,
-			DeviceId:          deviceId,
-			DeviceSessionId:   deviceSessionId,
-			TechnicalUsername: absEvent.TechnicalUsername,
-		}
+func MakeAttributes(e *AbstractEvent) *Attributes {
+	deviceId, _ := e.AdditionalData[constant.HeaderDeviceId].(string)
+	deviceSessionId, _ := e.AdditionalData[constant.HeaderDeviceSessionId].(string)
+	return &Attributes{
+		CorrelationId:     e.RequestId,
+		UserId:            e.UserId,
+		DeviceId:          deviceId,
+		DeviceSessionId:   deviceSessionId,
+		TechnicalUsername: e.TechnicalUsername,
 	}
-	return nil
 }
 
 func GetAttributes(ctx context.Context) *Attributes {

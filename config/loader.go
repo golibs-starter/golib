@@ -3,11 +3,11 @@ package config
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/golibs-starter/golib/utils"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"github.com/zenthangplus/defaults"
-	"gitlab.com/golibs-starter/golib/utils"
 	"gopkg.in/yaml.v2"
 	"reflect"
 	"strings"

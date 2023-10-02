@@ -6,8 +6,8 @@ package example
 
 import (
 	"context"
-	baseEvent "gitlab.com/golibs-starter/golib/event"
-	"gitlab.com/golibs-starter/golib/web/event"
+	baseEvent "github.com/golibs-starter/golib/event"
+	"github.com/golibs-starter/golib/web/event"
 )
 
 // NewSampleEvent In order to get more tracing content,

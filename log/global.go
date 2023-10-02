@@ -1,97 +1,141 @@
 package log
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+	"github.com/golibs-starter/golib/log/field"
+	"sync"
+)
 
-var global Logger
+var _global *ZapLogger
+var _globalLoggerLock = &sync.RWMutex{}
 
 func init() {
-	var err error
-	if global, err = NewDefaultLogger(&Options{CallerSkip: 2}); err != nil {
+	zapLogger, err := NewZapLogger(&Options{CallerSkip: 1, Development: true})
+	if err != nil {
 		panic(fmt.Errorf("init global logger error [%v]", err))
 	}
+	ReplaceGlobal(zapLogger)
 }
 
 // ReplaceGlobal Register a logger instance as global
-func ReplaceGlobal(logger Logger) {
-	global = logger
+func ReplaceGlobal(logger *ZapLogger) {
+	_globalLoggerLock.Lock()
+	defer _globalLoggerLock.Unlock()
+	_global = logger.Clone(1)
 }
 
 // GetGlobal Get global logger instance
 func GetGlobal() Logger {
-	return global
+	return _global
 }
 
-// Info uses fmt.Sprint to construct and log a message.
-func Info(args ...interface{}) {
-	global.Info(args...)
+func WithCtx(ctx context.Context, additionalFields ...field.Field) Logger {
+	return _global.Clone(-1).WithCtx(ctx, additionalFields...)
 }
 
-// Infof uses fmt.Sprintf to log a template message.
-func Infof(msgFormat string, args ...interface{}) {
-	global.Infof(msgFormat, args...)
+func WithField(fields ...field.Field) Logger {
+	return _global.Clone(-1).WithField(fields...)
 }
 
-// Infow uses fmt.Sprintf to log a template message with extra context value.
-func Infow(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	global.Infow(keysAndValues, msgFormat, args...)
+func WithError(err error) Logger {
+	return _global.Clone(-1).WithError(err)
+}
+
+func WithErrors(errs ...error) Logger {
+	return _global.Clone(-1).WithErrors(errs...)
+}
+
+func WithAny(key string, value interface{}) Logger {
+	return _global.Clone(-1).WithAny(key, value)
 }
 
 // Debug uses fmt.Sprint to construct and log a message.
 func Debug(args ...interface{}) {
-	global.Debug(args...)
+	_global.Debug(args...)
 }
 
 // Debugf uses fmt.Sprintf to log a template message.
-func Debugf(msgFormat string, args ...interface{}) {
-	global.Debugf(msgFormat, args...)
+func Debugf(format string, args ...interface{}) {
+	_global.Debugf(format, args...)
 }
 
-// Debugw uses fmt.Sprintf to log a template message with extra context value.
-func Debugw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	global.Debugw(keysAndValues, msgFormat, args...)
+// Debugc use WithCtx and fmt.Sprintf to log a template message.
+func Debugc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Debugc(ctx, msgFormat, args...)
+}
+
+// Info uses fmt.Sprint to construct and log a message.
+func Info(args ...interface{}) {
+	_global.Info(args...)
+}
+
+// Infof uses fmt.Sprintf to log a template message.
+func Infof(msgFormat string, args ...interface{}) {
+	_global.Infof(msgFormat, args...)
+}
+
+// Infoc use WithCtx and fmt.Sprintf to log a template message.
+func Infoc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Infoc(ctx, msgFormat, args...)
 }
 
 // Warn uses fmt.Sprint to construct and log a message.
 func Warn(args ...interface{}) {
-	global.Warn(args...)
+	_global.Warn(args...)
 }
 
 // Warnf uses fmt.Sprintf to log a template message.
 func Warnf(msgFormat string, args ...interface{}) {
-	global.Warnf(msgFormat, args...)
+	_global.Warnf(msgFormat, args...)
 }
 
-// Warnw uses fmt.Sprintf to log a template message with extra context value.
-func Warnw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	global.Warnw(keysAndValues, msgFormat, args...)
+// Warnc use WithCtx and fmt.Sprintf to log a template message.
+func Warnc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Warnc(ctx, msgFormat, args...)
 }
 
 // Error uses fmt.Sprint to construct and log a message.
 func Error(args ...interface{}) {
-	global.Error(args...)
+	_global.Error(args...)
 }
 
 // Errorf uses fmt.Sprintf to log a template message.
 func Errorf(msgFormat string, args ...interface{}) {
-	global.Errorf(msgFormat, args...)
+	_global.Errorf(msgFormat, args...)
 }
 
-// Errorw uses fmt.Sprintf to log a template message with extra context value.
-func Errorw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	global.Errorw(keysAndValues, msgFormat, args...)
+// Errorc use WithCtx and fmt.Sprintf to log a template message.
+func Errorc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Errorc(ctx, msgFormat, args...)
 }
 
 // Fatal uses fmt.Sprint to construct and log a message, then calls os.Exit.
 func Fatal(args ...interface{}) {
-	global.Fatal(args...)
+	_global.Fatal(args...)
 }
 
 // Fatalf uses fmt.Sprintf to log a template message, then calls os.Exit.
 func Fatalf(msgFormat string, args ...interface{}) {
-	global.Fatalf(msgFormat, args...)
+	_global.Fatalf(msgFormat, args...)
 }
 
-// Fatalw uses fmt.Sprintf to log a template message with extra context value, then calls os.Exit.
-func Fatalw(keysAndValues []interface{}, msgFormat string, args ...interface{}) {
-	global.Fatalw(keysAndValues, msgFormat, args...)
+// Fatalc use WithCtx and fmt.Sprintf to log a template message.
+func Fatalc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Fatalc(ctx, msgFormat, args...)
+}
+
+// Panic uses fmt.Sprint to construct and log a message, then panics.
+func Panic(args ...interface{}) {
+	_global.Panic(args...)
+}
+
+// Panicf uses fmt.Sprintf to log a templated message, then panics.
+func Panicf(msgFormat string, args ...interface{}) {
+	_global.Panicf(msgFormat, args...)
+}
+
+// Panicc use WithCtx and fmt.Sprintf to log a template message.
+func Panicc(ctx context.Context, msgFormat string, args ...interface{}) {
+	_global.Panicc(ctx, msgFormat, args...)
 }

@@ -1,12 +1,14 @@
 package listener
 
 import (
-	"gitlab.com/golibs-starter/golib/config"
-	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/web/constant"
-	"gitlab.com/golibs-starter/golib/web/event"
-	"gitlab.com/golibs-starter/golib/web/log"
-	"gitlab.com/golibs-starter/golib/web/properties"
+	"github.com/golibs-starter/golib/config"
+	"github.com/golibs-starter/golib/log"
+	"github.com/golibs-starter/golib/log/field"
+	"github.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/web/constant"
+	"github.com/golibs-starter/golib/web/event"
+	webLog "github.com/golibs-starter/golib/web/log"
+	"github.com/golibs-starter/golib/web/properties"
 	"strings"
 )
 
@@ -40,7 +42,7 @@ func (r RequestCompletedLogListener) Handle(e pubsub.Event) {
 		if r.isDisabled(payload.Method, r.removeContextPath(payload.Uri, r.appProps.Path)) {
 			return
 		}
-		log.Infow([]interface{}{constant.ContextReqMeta, r.makeHttpRequestLog(payload)}, "finish router")
+		log.WithField(field.Object(constant.ContextReqMeta, r.makeHttpRequestLog(payload))).Infof("finish router")
 	}
 }
 
@@ -61,9 +63,9 @@ func (r RequestCompletedLogListener) removeContextPath(uri string, contextPath s
 	return "/" + strings.TrimLeft(uri, "/")
 }
 
-func (r RequestCompletedLogListener) makeHttpRequestLog(message *event.RequestCompletedMessage) *log.HttpRequestLog {
-	return &log.HttpRequestLog{
-		LoggingContext: log.LoggingContext{
+func (r RequestCompletedLogListener) makeHttpRequestLog(message *event.RequestCompletedMessage) *HttpRequestLog {
+	return &HttpRequestLog{
+		ContextAttributes: webLog.ContextAttributes{
 			UserId:            message.UserId,
 			DeviceId:          message.DeviceId,
 			DeviceSessionId:   message.DeviceSessionId,

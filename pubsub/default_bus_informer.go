@@ -2,7 +2,7 @@ package pubsub
 
 import (
 	"errors"
-	"gitlab.com/golibs-starter/golib/actuator"
+	"github.com/golibs-starter/golib/actuator"
 )
 
 type DefaultBusInformer struct {

@@ -2,9 +2,9 @@ package client
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/config"
-	"gitlab.com/golibs-starter/golib/web/constant"
-	webContext "gitlab.com/golibs-starter/golib/web/context"
+	"github.com/golibs-starter/golib/config"
+	"github.com/golibs-starter/golib/web/constant"
+	webContext "github.com/golibs-starter/golib/web/context"
 	"net/http"
 )
 

@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"gitlab.com/golibs-starter/golib/utils"
+	"github.com/golibs-starter/golib/utils"
 )
 
 const (

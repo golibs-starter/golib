@@ -2,10 +2,10 @@ package golib
 
 import (
 	"fmt"
-	"gitlab.com/golibs-starter/golib/config"
-	"gitlab.com/golibs-starter/golib/log"
-	"gitlab.com/golibs-starter/golib/utils"
+	"github.com/golibs-starter/golib/config"
+	"github.com/golibs-starter/golib/utils"
 	"go.uber.org/fx"
+	"log"
 	"os"
 	"reflect"
 	"runtime"
@@ -58,7 +58,7 @@ func NewPropertiesLoader(in PropertiesLoaderIn) (config.Loader, error) {
 	option.ActiveProfiles = utils.SliceFromCommaString(profiles)
 	option.ConfigPaths = utils.SliceFromCommaString(os.Getenv("APP_CONFIG_PATHS"))
 	option.ConfigFormat = os.Getenv("APP_CONFIG_FORMAT")
-	option.DebugFunc = log.Debugf
+	option.DebugFunc = log.Printf
 
 	// Apply user option
 	for _, optFunc := range in.Options {

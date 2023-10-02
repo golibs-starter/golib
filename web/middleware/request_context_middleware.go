@@ -3,11 +3,11 @@ package middleware
 import (
 	mainContext "context"
 	"errors"
-	"gitlab.com/golibs-starter/golib/config"
-	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/web/context"
-	"gitlab.com/golibs-starter/golib/web/event"
-	"gitlab.com/golibs-starter/golib/web/log"
+	"github.com/golibs-starter/golib/config"
+	"github.com/golibs-starter/golib/log"
+	"github.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/web/context"
+	"github.com/golibs-starter/golib/web/event"
 	"net/http"
 	"time"
 )
@@ -23,7 +23,7 @@ func RequestContext(props *config.AppProperties) func(next http.Handler) http.Ha
 			requestAttributes.ServiceCode = props.Name
 			next.ServeHTTP(w, r)
 			if advancedResponseWriter, err := getAdvancedResponseWriter(w); err != nil {
-				log.Warn(r.Context(), "Cannot detect AdvancedResponseWriter with error [%s]", err.Error())
+				log.WithCtx(r.Context()).WithErrors(err).Warn("Cannot detect AdvancedResponseWriter")
 			} else {
 				requestAttributes.StatusCode = advancedResponseWriter.Status()
 			}

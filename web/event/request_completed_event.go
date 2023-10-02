@@ -2,7 +2,7 @@ package event
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/event"
+	"github.com/golibs-starter/golib/event"
 	"time"
 )
 

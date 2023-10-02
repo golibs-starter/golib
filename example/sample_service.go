@@ -2,9 +2,10 @@ package example
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/web/client"
-	"gitlab.com/golibs-starter/golib/web/log"
+	"github.com/golibs-starter/golib/log"
+	"github.com/golibs-starter/golib/log/field"
+	"github.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/web/client"
 )
 
 // ==================================================
@@ -23,15 +24,26 @@ type SampleService struct {
 
 func (s SampleService) DoSomething(ctx context.Context) error {
 	// You can write log with current context
-	log.Info(ctx, "Write something to log with context")
+	log.WithCtx(ctx).Info("Write something to log with context")
 
 	// Then pass the context to ContextualHttpClient's call
 	var result struct{}
 	_, err := s.httpClient.Get(ctx, "https://example", &result)
 	if err != nil {
-		log.Error(ctx, "Http client call with error [%s]", err)
+		log.WithCtx(ctx).WithErrors(err).Error("Http client call failed")
 		return err
 	}
+
+	log.WithCtx(ctx).WithField(field.String("field1", "value1")).
+		Infof("This is a log with single field and message format: %s", "example-value")
+
+	log.WithCtx(ctx).WithField(
+		field.String("field1", "value1"),
+		field.Any("field2", []string{"value1", "value2"}),
+	).Info("This is log with multiple fields")
+
+	log.WithCtx(ctx).WithAny("field1", "value1").
+		Info("This is log with simple key value field")
 
 	// Even pass the context to an event
 	pubsub.Publish(NewSampleEvent(ctx, &SampleEventMessage{

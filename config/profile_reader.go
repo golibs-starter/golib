@@ -1,8 +1,8 @@
 package config
 
 import (
+	"github.com/golibs-starter/golib/utils"
 	"github.com/pkg/errors"
-	"gitlab.com/golibs-starter/golib/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"

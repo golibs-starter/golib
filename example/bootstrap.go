@@ -5,9 +5,9 @@ package example
 // ==================================================
 
 import (
-	"gitlab.com/golibs-starter/golib"
-	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/pubsub/executor"
+	"github.com/golibs-starter/golib"
+	"github.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/pubsub/executor"
 	"go.uber.org/fx"
 )
 
@@ -16,6 +16,9 @@ func All() fx.Option {
 		// Required
 		golib.AppOpt(),
 		golib.PropertiesOpt(),
+
+		// When you want to use default logging strategy.
+		golib.LoggingOpt(),
 
 		// When you want to enable event publisher
 		golib.EventOpt(),
@@ -27,8 +30,6 @@ func All() fx.Option {
 			return pubsub.WithEventExecutor(executor)
 		}),
 
-		// When you want to use default logging strategy.
-		golib.LoggingOpt(),
 		// When you want to enable http request log
 		golib.HttpRequestLogOpt(),
 

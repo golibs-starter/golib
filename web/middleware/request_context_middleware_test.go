@@ -1,12 +1,12 @@
 package middleware
 
 import (
+	"github.com/golibs-starter/golib/config"
+	"github.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/web/constant"
+	"github.com/golibs-starter/golib/web/context"
+	"github.com/golibs-starter/golib/web/event"
 	assert "github.com/stretchr/testify/require"
-	"gitlab.com/golibs-starter/golib/config"
-	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/web/constant"
-	"gitlab.com/golibs-starter/golib/web/context"
-	"gitlab.com/golibs-starter/golib/web/event"
 	"net/http"
 	"testing"
 )

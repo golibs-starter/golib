@@ -1,48 +1,28 @@
 package log
 
+import (
+	"context"
+	"github.com/golibs-starter/golib/log/field"
+)
+
 type Logger interface {
-	// Info uses fmt.Sprint to construct and log a message.
-	Info(args ...interface{})
+	StdLogger
+	ContextualLogger
 
-	// Infof uses fmt.Sprintf to log a template message.
-	Infof(msgFormat string, args ...interface{})
+	// WithCtx adds additional info in the context and
+	// additional fields to the logging context.
+	WithCtx(ctx context.Context, additionalFields ...field.Field) Logger
 
-	// Infow uses fmt.Sprintf to log a template message with extra context value.
-	Infow(keysAndValues []interface{}, msgFormat string, args ...interface{})
+	// WithField adds a variadic number of fields to the logging context.
+	WithField(fields ...field.Field) Logger
 
-	// Debug uses fmt.Sprint to construct and log a message.
-	Debug(args ...interface{})
+	// WithError adds an error with FieldKeyErr field to the logging context.
+	WithError(err error) Logger
 
-	// Debugf uses fmt.Sprintf to log a template message.
-	Debugf(msgFormat string, args ...interface{})
+	// WithErrors adds a field with FieldKeyErr field that carries a slice of errors.
+	WithErrors(errs ...error) Logger
 
-	// Debugw uses fmt.Sprintf to log a template message with extra context value.
-	Debugw(keysAndValues []interface{}, msgFormat string, args ...interface{})
-
-	// Warn uses fmt.Sprint to construct and log a message.
-	Warn(args ...interface{})
-
-	// Warnf uses fmt.Sprintf to log a template message.
-	Warnf(msgFormat string, args ...interface{})
-
-	// Warnw uses fmt.Sprintf to log a template message with extra context value.
-	Warnw(keysAndValues []interface{}, msgFormat string, args ...interface{})
-
-	// Error uses fmt.Sprint to construct and log a message.
-	Error(args ...interface{})
-
-	// Errorf uses fmt.Sprintf to log a template message.
-	Errorf(msgFormat string, args ...interface{})
-
-	// Errorw uses fmt.Sprintf to log a template message with extra context value.
-	Errorw(keysAndValues []interface{}, msgFormat string, args ...interface{})
-
-	// Fatal uses fmt.Sprint to construct and log a message, then calls os.Exit.
-	Fatal(args ...interface{})
-
-	// Fatalf uses fmt.Sprintf to log a template message, then calls os.Exit.
-	Fatalf(msgFormat string, args ...interface{})
-
-	// Fatalw uses fmt.Sprintf to log a template message with extra context value, then calls os.Exit.
-	Fatalw(keysAndValues []interface{}, msgFormat string, args ...interface{})
+	// WithAny adds a key and an arbitrary value and chooses the best way to represent
+	// them as a field.
+	WithAny(key string, value interface{}) Logger
 }

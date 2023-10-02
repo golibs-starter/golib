@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"github.com/golibs-starter/golib/web/constant"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/golibs-starter/golib/web/constant"
 	"net/http"
 	"testing"
 )

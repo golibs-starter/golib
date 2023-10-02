@@ -1,8 +1,8 @@
 package golib
 
 import (
-	"gitlab.com/golibs-starter/golib/web/listener"
-	"gitlab.com/golibs-starter/golib/web/properties"
+	"github.com/golibs-starter/golib/web/listener"
+	"github.com/golibs-starter/golib/web/properties"
 	"go.uber.org/fx"
 )
 

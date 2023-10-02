@@ -2,9 +2,9 @@ package event
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/event"
-	"gitlab.com/golibs-starter/golib/web/constant"
-	webContext "gitlab.com/golibs-starter/golib/web/context"
+	"github.com/golibs-starter/golib/event"
+	"github.com/golibs-starter/golib/web/constant"
+	webContext "github.com/golibs-starter/golib/web/context"
 )
 
 type AbstractEventWrapper interface {
@@ -13,7 +13,6 @@ type AbstractEventWrapper interface {
 
 type AbstractEvent struct {
 	*event.ApplicationEvent
-	ctx               context.Context
 	RequestId         string `json:"request_id,omitempty"`
 	UserId            string `json:"user_id,omitempty"`
 	TechnicalUsername string `json:"technical_username,omitempty"`
@@ -21,42 +20,30 @@ type AbstractEvent struct {
 
 func NewAbstractEvent(ctx context.Context, name string, options ...event.AppEventOpt) *AbstractEvent {
 	evt := AbstractEvent{}
-	evt.ApplicationEvent = event.NewApplicationEvent(name, options...)
-	requestAttributes := webContext.GetRequestAttributes(ctx)
-	if requestAttributes != nil {
-		evt.ServiceCode = requestAttributes.ServiceCode
-		evt.RequestId = requestAttributes.CorrelationId
-		evt.UserId = requestAttributes.SecurityAttributes.UserId
-		evt.TechnicalUsername = requestAttributes.SecurityAttributes.TechnicalUsername
-		if len(requestAttributes.ClientIpAddress) > 0 {
-			evt.AddAdditionData(constant.HeaderClientIpAddress, requestAttributes.ClientIpAddress)
+	evt.ApplicationEvent = event.NewApplicationEvent(ctx, name, options...)
+	reqAttrs := webContext.GetRequestAttributes(ctx)
+	if reqAttrs != nil {
+		evt.ServiceCode = reqAttrs.ServiceCode
+		evt.RequestId = reqAttrs.CorrelationId
+		evt.UserId = reqAttrs.SecurityAttributes.UserId
+		evt.TechnicalUsername = reqAttrs.SecurityAttributes.TechnicalUsername
+		if len(reqAttrs.ClientIpAddress) > 0 {
+			evt.AddAdditionData(constant.HeaderClientIpAddress, reqAttrs.ClientIpAddress)
 		}
-		if len(requestAttributes.DeviceId) > 0 {
-			evt.AddAdditionData(constant.HeaderDeviceId, requestAttributes.DeviceId)
+		if len(reqAttrs.DeviceId) > 0 {
+			evt.AddAdditionData(constant.HeaderDeviceId, reqAttrs.DeviceId)
 		}
-		if len(requestAttributes.DeviceSessionId) > 0 {
-			evt.AddAdditionData(constant.HeaderDeviceSessionId, requestAttributes.DeviceSessionId)
+		if len(reqAttrs.DeviceSessionId) > 0 {
+			evt.AddAdditionData(constant.HeaderDeviceSessionId, reqAttrs.DeviceSessionId)
 		}
 	}
-	evt.generateContext(ctx)
+	if attrs := MakeAttributes(&evt); attrs != nil {
+		evt.Ctx = context.WithValue(ctx, constant.ContextEventAttributes, MakeAttributes(&evt))
+	}
 	return &evt
 }
 
-func (a *AbstractEvent) generateContext(parent context.Context) {
-	if parent == nil {
-		parent = context.Background()
-	}
-	a.ctx = context.WithValue(parent, constant.ContextEventAttributes, MakeAttributes(a))
-}
-
-func (a *AbstractEvent) Context() context.Context {
-	if a.ctx == nil {
-		a.generateContext(nil)
-	}
-	return a.ctx
-}
-
-func (a AbstractEvent) String() string {
+func (a *AbstractEvent) String() string {
 	return a.ToString(a)
 }
 

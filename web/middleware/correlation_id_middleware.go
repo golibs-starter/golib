@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	"github.com/golibs-starter/golib/web/constant"
+	"github.com/golibs-starter/golib/web/context"
 	"github.com/google/uuid"
-	"gitlab.com/golibs-starter/golib/web/constant"
-	"gitlab.com/golibs-starter/golib/web/context"
 	"net/http"
 )
 
