@@ -3,11 +3,11 @@ package middleware
 import (
 	mainContext "context"
 	"errors"
-	"gitlab.com/golibs-starter/golib/config"
-	"gitlab.com/golibs-starter/golib/log"
-	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/web/context"
-	"gitlab.com/golibs-starter/golib/web/event"
+	"github.com/golibs-starter/golib/config"
+	"github.com/golibs-starter/golib/log"
+	"github.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/web/context"
+	"github.com/golibs-starter/golib/web/event"
 	"net/http"
 	"time"
 )

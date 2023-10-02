@@ -5,9 +5,9 @@ package example
 // ==================================================
 
 import (
-	"gitlab.com/golibs-starter/golib"
-	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/pubsub/executor"
+	"github.com/golibs-starter/golib"
+	"github.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/pubsub/executor"
 	"go.uber.org/fx"
 )
 

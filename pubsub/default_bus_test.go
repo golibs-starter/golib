@@ -2,8 +2,8 @@ package pubsub
 
 import (
 	"context"
+	"github.com/golibs-starter/golib/pubsub/executor"
 	assert "github.com/stretchr/testify/require"
-	"gitlab.com/golibs-starter/golib/pubsub/executor"
 	"reflect"
 	"sync"
 	"testing"

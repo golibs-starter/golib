@@ -2,8 +2,8 @@ package event
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/event"
-	"gitlab.com/golibs-starter/golib/web/constant"
+	"github.com/golibs-starter/golib/event"
+	"github.com/golibs-starter/golib/web/constant"
 	"reflect"
 	"testing"
 )

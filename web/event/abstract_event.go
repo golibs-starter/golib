@@ -2,9 +2,9 @@ package event
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/event"
-	"gitlab.com/golibs-starter/golib/web/constant"
-	webContext "gitlab.com/golibs-starter/golib/web/context"
+	"github.com/golibs-starter/golib/event"
+	"github.com/golibs-starter/golib/web/constant"
+	webContext "github.com/golibs-starter/golib/web/context"
 )
 
 type AbstractEventWrapper interface {

@@ -1,8 +1,8 @@
 package config
 
 import (
+	"github.com/golibs-starter/golib/utils"
 	"github.com/mitchellh/mapstructure"
-	"gitlab.com/golibs-starter/golib/utils"
 	"reflect"
 )
 

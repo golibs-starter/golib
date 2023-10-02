@@ -1,9 +1,9 @@
 package golib
 
 import (
-	"gitlab.com/golibs-starter/golib/actuator"
-	"gitlab.com/golibs-starter/golib/config"
-	webActuator "gitlab.com/golibs-starter/golib/web/actuator"
+	"github.com/golibs-starter/golib/actuator"
+	"github.com/golibs-starter/golib/config"
+	webActuator "github.com/golibs-starter/golib/web/actuator"
 	"go.uber.org/fx"
 )
 
@@ -33,35 +33,37 @@ type ActuatorOut struct {
 // produce an actuator.HealthChecker with group `actuator_health_checker`
 // in the result of provider function.
 // For example, a redis provider produce the following result:
-//   type RedisOut struct {
-//      fx.Out
-//      Client        *redis.Client
-//      HealthChecker actuator.HealthChecker `group:"actuator_health_checker"`
-//   }
-//   func NewRedis() (RedisOut, error) {}
+//
+//	type RedisOut struct {
+//	   fx.Out
+//	   Client        *redis.Client
+//	   HealthChecker actuator.HealthChecker `group:"actuator_health_checker"`
+//	}
+//	func NewRedis() (RedisOut, error) {}
 //
 // or using ProvideHealthChecker
-//   func NewSampleHealthChecker() actuator.HealthChecker {
-//   	return &SampleHealthChecker{}
-//   }
-//   ProvideHealthChecker(NewSampleHealthChecker)
 //
+//	func NewSampleHealthChecker() actuator.HealthChecker {
+//		return &SampleHealthChecker{}
+//	}
+//	ProvideHealthChecker(NewSampleHealthChecker)
 //
 // =================== Informer =========================
 // Similar to Health Checker, an Informer also registered by produce an actuator.Informer.
 // For example, a GitRevision provider produce the following result:
-//   type GitRevisionOut struct {
-//      fx.Out
-//      Informer actuator.Informer `group:"actuator_informer"`
-//   }
-//   func NewGitRevision() (GitRevisionOut, error) {}
+//
+//	type GitRevisionOut struct {
+//	   fx.Out
+//	   Informer actuator.Informer `group:"actuator_informer"`
+//	}
+//	func NewGitRevision() (GitRevisionOut, error) {}
 //
 // or using ProvideInformer
-//   func NewSampleInformer() actuator.Informer {
-//   	return &SampleInformer{}
-//   }
-//   ProvideInformer(NewSampleInformer)
 //
+//	func NewSampleInformer() actuator.Informer {
+//		return &SampleInformer{}
+//	}
+//	ProvideInformer(NewSampleInformer)
 func NewActuatorEndpoint(in ActuatorIn) ActuatorOut {
 	healthService := actuator.NewDefaultHealthService(in.Checkers)
 	infoService := actuator.NewDefaultInfoService(in.Props, in.Informers)

@@ -1,8 +1,8 @@
 package actuator
 
 import (
-	"gitlab.com/golibs-starter/golib/actuator"
-	"gitlab.com/golibs-starter/golib/web/response"
+	"github.com/golibs-starter/golib/actuator"
+	"github.com/golibs-starter/golib/web/response"
 	"net/http"
 )
 

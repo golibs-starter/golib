@@ -3,7 +3,7 @@ package log
 import (
 	"context"
 	"fmt"
-	"gitlab.com/golibs-starter/golib/log/field"
+	"github.com/golibs-starter/golib/log/field"
 	"sync"
 )
 

@@ -2,7 +2,7 @@ package log
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/log/field"
+	"github.com/golibs-starter/golib/log/field"
 )
 
 type Logger interface {

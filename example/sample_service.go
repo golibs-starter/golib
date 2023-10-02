@@ -2,10 +2,10 @@ package example
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/log"
-	"gitlab.com/golibs-starter/golib/log/field"
-	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/web/client"
+	"github.com/golibs-starter/golib/log"
+	"github.com/golibs-starter/golib/log/field"
+	"github.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/web/client"
 )
 
 // ==================================================

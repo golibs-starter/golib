@@ -2,8 +2,8 @@ package pubsub
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/pubsub/executor"
-	"gitlab.com/golibs-starter/golib/utils"
+	"github.com/golibs-starter/golib/pubsub/executor"
+	"github.com/golibs-starter/golib/utils"
 	"sync"
 )
 

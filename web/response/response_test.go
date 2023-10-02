@@ -1,8 +1,8 @@
 package response
 
 import (
+	"github.com/golibs-starter/golib/exception"
 	"github.com/pkg/errors"
-	"gitlab.com/golibs-starter/golib/exception"
 	"net/http"
 	"reflect"
 	"testing"

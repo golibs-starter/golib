@@ -1,9 +1,9 @@
 package golib
 
 import (
+	"github.com/golibs-starter/golib/log"
+	webLog "github.com/golibs-starter/golib/web/log"
 	"github.com/pkg/errors"
-	"gitlab.com/golibs-starter/golib/log"
-	webLog "gitlab.com/golibs-starter/golib/web/log"
 	"go.uber.org/fx"
 )
 

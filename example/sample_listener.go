@@ -1,8 +1,8 @@
 package example
 
 import (
-	"gitlab.com/golibs-starter/golib/log"
-	"gitlab.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/log"
+	"github.com/golibs-starter/golib/pubsub"
 )
 
 // ==================================================

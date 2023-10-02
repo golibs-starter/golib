@@ -2,8 +2,8 @@ package golib
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/config"
-	"gitlab.com/golibs-starter/golib/web/middleware"
+	"github.com/golibs-starter/golib/config"
+	"github.com/golibs-starter/golib/web/middleware"
 	"go.uber.org/fx"
 	"net/http"
 )

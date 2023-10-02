@@ -1,7 +1,7 @@
 package response
 
 import (
-	"gitlab.com/golibs-starter/golib/web/render"
+	"github.com/golibs-starter/golib/web/render"
 	"net/http"
 )
 

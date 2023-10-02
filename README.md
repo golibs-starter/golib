@@ -7,7 +7,7 @@ Common core for Golang project.
 Both `go get` and `go mod` are supported.
 
 ```shell
-go get gitlab.com/golibs-starter/golib
+go get github.com/golibs-starter/golib
 ```
 
 ### Usage
@@ -25,11 +25,11 @@ See some simple examples:
 - [Register an informer](./example/sample_informer.go)
 - [Register a health checker](./example/sample_health_checker.go)
 
-> Full working examples in [golib-sample](https://gitlab.com/golibs-starter/golib-sample):
-> - [Public API Service (JWT Auth)](https://gitlab.com/golibs-starter/golib-sample/-/tree/develop/src/public)
-> - [Internal API Service (Basic Auth)](https://gitlab.com/golibs-starter/golib-sample/-/tree/develop/src/internal)
-> - [Worker Service](https://gitlab.com/golibs-starter/golib-sample/-/tree/develop/src/worker)
-> - [Migration Job](https://gitlab.com/golibs-starter/golib-sample/-/tree/develop/src/migration)
+> Full working examples in [golib-sample](https://github.com/golibs-starter/golib-sample):
+> - [Public API Service (JWT Auth)](https://github.com/golibs-starter/golib-sample/-/tree/develop/src/public)
+> - [Internal API Service (Basic Auth)](https://github.com/golibs-starter/golib-sample/-/tree/develop/src/internal)
+> - [Worker Service](https://github.com/golibs-starter/golib-sample/-/tree/develop/src/worker)
+> - [Migration Job](https://github.com/golibs-starter/golib-sample/-/tree/develop/src/migration)
 
 ### Configuration
 

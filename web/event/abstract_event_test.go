@@ -2,10 +2,10 @@ package event
 
 import (
 	"context"
+	"github.com/golibs-starter/golib/event"
+	"github.com/golibs-starter/golib/web/constant"
+	context2 "github.com/golibs-starter/golib/web/context"
 	assert "github.com/stretchr/testify/require"
-	"gitlab.com/golibs-starter/golib/event"
-	"gitlab.com/golibs-starter/golib/web/constant"
-	context2 "gitlab.com/golibs-starter/golib/web/context"
 	"testing"
 )
 

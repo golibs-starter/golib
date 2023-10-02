@@ -6,26 +6,27 @@ package example
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/actuator"
+	"github.com/golibs-starter/golib/actuator"
 )
 
 // NewSampleHealthChecker
 // Use golib.ProvideHealthChecker(NewSampleHealthChecker) to register a health checker.
 // In this example, the `/actuator/health` endpoint with return:
-//{
-//  "meta": {
-//    "code": 200,
-//    "message": "Server is up"
-//  },
-//  "data": {
-//    "status": "UP",
-//    "components": {
-//      "sample": {
-//        "status": "UP"
-//      }
-//    }
-//  }
-//}
+//
+//	{
+//	 "meta": {
+//	   "code": 200,
+//	   "message": "Server is up"
+//	 },
+//	 "data": {
+//	   "status": "UP",
+//	   "components": {
+//	     "sample": {
+//	       "status": "UP"
+//	     }
+//	   }
+//	 }
+//	}
 func NewSampleHealthChecker() actuator.HealthChecker {
 	return &SampleHealthChecker{}
 }

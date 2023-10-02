@@ -1,8 +1,8 @@
 package listener
 
 import (
-	"gitlab.com/golibs-starter/golib/log/field"
-	webLog "gitlab.com/golibs-starter/golib/web/log"
+	"github.com/golibs-starter/golib/log/field"
+	webLog "github.com/golibs-starter/golib/web/log"
 )
 
 type HttpRequestLog struct {

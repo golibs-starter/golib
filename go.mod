@@ -1,4 +1,4 @@
-module gitlab.com/golibs-starter/golib
+module github.com/golibs-starter/golib
 
 go 1.19
 

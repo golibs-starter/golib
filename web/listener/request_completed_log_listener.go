@@ -1,14 +1,14 @@
 package listener
 
 import (
-	"gitlab.com/golibs-starter/golib/config"
-	"gitlab.com/golibs-starter/golib/log"
-	"gitlab.com/golibs-starter/golib/log/field"
-	"gitlab.com/golibs-starter/golib/pubsub"
-	"gitlab.com/golibs-starter/golib/web/constant"
-	"gitlab.com/golibs-starter/golib/web/event"
-	webLog "gitlab.com/golibs-starter/golib/web/log"
-	"gitlab.com/golibs-starter/golib/web/properties"
+	"github.com/golibs-starter/golib/config"
+	"github.com/golibs-starter/golib/log"
+	"github.com/golibs-starter/golib/log/field"
+	"github.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/web/constant"
+	"github.com/golibs-starter/golib/web/event"
+	webLog "github.com/golibs-starter/golib/web/log"
+	"github.com/golibs-starter/golib/web/properties"
 	"strings"
 )
 

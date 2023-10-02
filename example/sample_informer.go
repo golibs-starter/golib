@@ -4,26 +4,26 @@ package example
 // ========= Example for register a informer ========
 // ==================================================
 
-import "gitlab.com/golibs-starter/golib/actuator"
+import "github.com/golibs-starter/golib/actuator"
 
 // NewSampleInformer
 // Use golib.ProvideInformer(NewSampleInformer) to register an informer.
 // In this example, the /actuator/info endpoint with return:
 //
-//{
-//  "meta": {
-//    "code": 200,
-//    "message": "Successful"
-//  },
-//  "data": {
-//    "service_name": "Sample Service",
-//    "info": {
-//      "sample": {
-//        "key1": "val1"
-//      }
-//    }
-//  }
-//}
+//	{
+//	 "meta": {
+//	   "code": 200,
+//	   "message": "Successful"
+//	 },
+//	 "data": {
+//	   "service_name": "Sample Service",
+//	   "info": {
+//	     "sample": {
+//	       "key1": "val1"
+//	     }
+//	   }
+//	 }
+//	}
 func NewSampleInformer() actuator.Informer {
 	return &SampleInformer{}
 }

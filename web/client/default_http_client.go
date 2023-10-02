@@ -3,7 +3,7 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"gitlab.com/golibs-starter/golib/log"
+	"github.com/golibs-starter/golib/log"
 	"io"
 	"io/ioutil"
 	"net/http"

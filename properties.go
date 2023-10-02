@@ -2,8 +2,8 @@ package golib
 
 import (
 	"fmt"
-	"gitlab.com/golibs-starter/golib/config"
-	"gitlab.com/golibs-starter/golib/utils"
+	"github.com/golibs-starter/golib/config"
+	"github.com/golibs-starter/golib/utils"
 	"go.uber.org/fx"
 	"log"
 	"os"

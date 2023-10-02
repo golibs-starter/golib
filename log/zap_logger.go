@@ -2,8 +2,8 @@ package log
 
 import (
 	"context"
+	"github.com/golibs-starter/golib/log/field"
 	"github.com/pkg/errors"
-	"gitlab.com/golibs-starter/golib/log/field"
 	"go.uber.org/zap"
 )
 

@@ -2,7 +2,7 @@ package event
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/web/constant"
+	"github.com/golibs-starter/golib/web/constant"
 )
 
 type Attributes struct {

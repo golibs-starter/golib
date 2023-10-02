@@ -1,9 +1,9 @@
 package log
 
 import (
-	"gitlab.com/golibs-starter/golib/log/field"
-	webContext "gitlab.com/golibs-starter/golib/web/context"
-	"gitlab.com/golibs-starter/golib/web/event"
+	"github.com/golibs-starter/golib/log/field"
+	webContext "github.com/golibs-starter/golib/web/context"
+	"github.com/golibs-starter/golib/web/event"
 )
 
 type ContextAttributes struct {

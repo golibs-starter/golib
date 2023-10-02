@@ -2,9 +2,9 @@ package golib
 
 import (
 	"context"
-	"gitlab.com/golibs-starter/golib/event"
-	"gitlab.com/golibs-starter/golib/log"
-	"gitlab.com/golibs-starter/golib/pubsub"
+	"github.com/golibs-starter/golib/event"
+	"github.com/golibs-starter/golib/log"
+	"github.com/golibs-starter/golib/pubsub"
 	"go.uber.org/fx"
 )
 

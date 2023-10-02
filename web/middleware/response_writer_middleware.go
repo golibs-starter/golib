@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"gitlab.com/golibs-starter/golib/web/context"
+	"github.com/golibs-starter/golib/web/context"
 	"net/http"
 )
 

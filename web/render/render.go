@@ -2,7 +2,7 @@ package render
 
 import (
 	"errors"
-	"gitlab.com/golibs-starter/golib/log"
+	"github.com/golibs-starter/golib/log"
 	"net/http"
 	"syscall"
 )
