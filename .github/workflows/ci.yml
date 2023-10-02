@@ -3,8 +3,7 @@ name: CI Workflow
 on: [ push ]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -17,4 +16,8 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Test Go
-        run: go test ./...
+        run: go test ./... -race -coverprofile=coverage.out -covermode=atomic
+      - name: Upload Coverage Report
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
