@@ -1,5 +1,7 @@
 # Golib
 
+> We are moving out from [Gitlab](https://gitlab.com/golibs-starter). All packages are now migrated to `github.com/golibs-starter/*`. Please consider updating.
+
 [![run tests](https://github.com/golibs-starter/golib/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/golibs-starter/golib/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/golibs-starter/golib/graph/badge.svg?token=0CJ3MKCSVP)](https://codecov.io/gh/golibs-starter/golib)
 [![goreportcard](https://goreportcard.com/badge/github.com/golibs-starter/golib)](https://goreportcard.com/report/github.com/golibs-starter/golib)
