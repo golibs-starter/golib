@@ -14,6 +14,7 @@ func AppOpt() fx.Option {
 			return context.Background()
 		}),
 		ProvideProps(config.NewAppProperties),
+		fx.WithLogger(NewFxLogger),
 		fx.Provide(New),
 	)
 }
