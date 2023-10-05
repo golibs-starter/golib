@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/golibs-starter/golib/log/field"
+	"os"
+	"strconv"
 	"sync"
 )
 
@@ -11,7 +13,19 @@ var _global *ZapLogger
 var _globalLoggerLock = &sync.RWMutex{}
 
 func init() {
-	zapLogger, err := NewZapLogger(&Options{CallerSkip: 1, Development: true})
+	// We want the default global Logger will
+	// in the same config with default in the log.Properties
+	devMode, _ := strconv.ParseBool(os.Getenv("APP_LOGGING_DEVELOPMENT"))
+	jsonMode := true
+	jsonModeStr := os.Getenv("APP_LOGGING_JSONOUTPUTMODE")
+	if jsonModeStr != "" {
+		jsonMode, _ = strconv.ParseBool(jsonModeStr)
+	}
+	zapLogger, err := NewZapLogger(&Options{
+		CallerSkip:     1,
+		Development:    devMode,
+		JsonOutputMode: jsonMode,
+	})
 	if err != nil {
 		panic(fmt.Errorf("init global logger error [%v]", err))
 	}
