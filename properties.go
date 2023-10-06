@@ -3,6 +3,7 @@ package golib
 import (
 	"fmt"
 	"github.com/golibs-starter/golib/config"
+	coreLog "github.com/golibs-starter/golib/log"
 	"github.com/golibs-starter/golib/utils"
 	"go.uber.org/fx"
 	"log"
@@ -38,7 +39,10 @@ func ProvidePropsOption(option Option) fx.Option {
 }
 
 func PropertiesOpt() fx.Option {
-	return fx.Provide(NewPropertiesLoader)
+	return fx.Options(
+		ProvidePropsOption(WithDebugLog(coreLog.Debugf)),
+		fx.Provide(NewPropertiesLoader),
+	)
 }
 
 type PropertiesLoaderIn struct {
