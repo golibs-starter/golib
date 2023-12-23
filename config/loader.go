@@ -29,11 +29,11 @@ func NewLoader(option Option, properties []Properties) (Loader, error) {
 	setDefaultOption(&option)
 	reader, err := NewDefaultProfileReader(option.ConfigPaths, option.ConfigFormat, option.KeyDelimiter)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "[GoLib-error] Failed to initiate default profile reader")
 	}
 	vi, err := loadViper(reader, option, properties)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "[GoLib-error] Failed to load viper")
 	}
 	return &ViperLoader{
 		viper:         vi,
@@ -83,7 +83,7 @@ func (l *ViperLoader) validateProps(props Properties) error {
 	return l.validate.Struct(props)
 }
 
-func (l ViperLoader) decodeWithDefaults(props Properties) error {
+func (l *ViperLoader) decodeWithDefaults(props Properties) error {
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		DecodeHook:       l.decodeHookFunc,
 		WeaklyTypedInput: true,
@@ -143,11 +143,11 @@ func loadViper(reader ProfileReader, option Option, propertiesList []Properties)
 	vi.AutomaticEnv()
 
 	if err := discoverActiveProfiles(vi, reader, option); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("discover active profiles error: %s", err)
 	}
 
 	if err := discoverEnvKeys(vi, option, propertiesList); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("discover env keys error: %s", err)
 	}
 	return vi, nil
 }
@@ -158,7 +158,7 @@ func discoverEnvKeys(vi *viper.Viper, option Option, propertiesList []Properties
 		propsName := reflect.TypeOf(props).String()
 		propsMap := make(map[string]interface{})
 		if err := mapstructure.Decode(props, &propsMap); err != nil {
-			return errors.WithMessage(err, "cannot decode props to map")
+			return fmt.Errorf("cannot decode properties [%s] to map: %s", propsName, err)
 		}
 
 		// set default values in viper.
@@ -167,7 +167,7 @@ func discoverEnvKeys(vi *viper.Viper, option Option, propertiesList []Properties
 		defaultMap := convertSliceToNestedMap(strings.Split(normalizeKey(props.Prefix()), option.KeyDelimiter), propsMap, nil)
 		for key, env := range buildEnvKeys(defaultMap, option.KeyDelimiter, "_", "", "") {
 			if err := vi.BindEnv(key, env); err != nil {
-				return fmt.Errorf("[GoLib-error] Error when build env keys properties [%s]: %v", propsName, err)
+				return fmt.Errorf("error when build env keys properties [%s]: %s", propsName, err)
 			}
 		}
 		option.DebugFunc("[GoLib-debug] Default value was discovered for properties [%s]", propsName)
@@ -181,10 +181,11 @@ func discoverActiveProfiles(vi *viper.Viper, reader ProfileReader, option Option
 	for _, activeProfile := range option.ActiveProfiles {
 		cfMap, err := reader.Read(activeProfile)
 		if err != nil {
-			return err
+			return fmt.Errorf("error when read active profile [%s] in paths [%s]: %s",
+				activeProfile, debugPaths, err)
 		}
 		if err := vi.MergeConfigMap(cfMap); err != nil {
-			return fmt.Errorf("[GoLib-error] Error when read active profile [%s] in paths [%s]: %v",
+			return fmt.Errorf("error when merge config for profile [%s] in paths [%s]: %s",
 				activeProfile, debugPaths, err)
 		}
 		option.DebugFunc("[GoLib-debug] Active profile [%s] was loaded", activeProfile)
