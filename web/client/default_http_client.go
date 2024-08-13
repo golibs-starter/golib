@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/golibs-starter/golib/log"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -63,9 +62,9 @@ func (d *DefaultHttpClient) Request(method string, url string, body interface{},
 	if NewHttpSeries(res.StatusCode).IsError() {
 		var buf bytes.Buffer
 		tee := io.TeeReader(response.Body, &buf)
-		str, _ := ioutil.ReadAll(tee)
+		str, _ := io.ReadAll(tee)
 		bodyWhenError = string(str)
-		response.Body = ioutil.NopCloser(bytes.NewBuffer(str))
+		response.Body = io.NopCloser(bytes.NewBuffer(str))
 	}
 
 	if result != nil {
