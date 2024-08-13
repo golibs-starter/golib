@@ -24,6 +24,6 @@ func (h *AdvancedResponseWriter) WriteHeader(code int) {
 	h.ResponseWriter.WriteHeader(code)
 }
 
-func (h AdvancedResponseWriter) Status() int {
+func (h *AdvancedResponseWriter) Status() int {
 	return h.statusCode
 }
